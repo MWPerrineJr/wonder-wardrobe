@@ -13,7 +13,9 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as BarberRouteImport } from './routes/barber'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
 
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
@@ -35,11 +37,21 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedOnboardingOwnerRoute =
+  AuthenticatedOnboardingOwnerRouteImport.update({
+    id: '/onboarding/owner',
+    path: '/onboarding/owner',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/barber': typeof BarberRoute
   '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
+  '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,25 +67,43 @@ export interface FileRoutesByTo {
   '/barber': typeof BarberRoute
   '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
+  '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/barber': typeof BarberRoute
   '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
+  '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/barber' | '/owner' | '/shop'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/barber'
+    | '/owner'
+    | '/shop'
+    | '/onboarding/owner'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/barber' | '/owner' | '/shop'
-  id: '__root__' | '/' | '/auth' | '/barber' | '/owner' | '/shop'
+  to: '/' | '/auth' | '/barber' | '/owner' | '/shop' | '/onboarding/owner'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/barber'
+    | '/owner'
+    | '/shop'
+    | '/_authenticated/onboarding/owner'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BarberRoute: typeof BarberRoute
   OwnerRoute: typeof OwnerRoute
@@ -109,6 +140,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -116,11 +154,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/onboarding/owner': {
+      id: '/_authenticated/onboarding/owner'
+      path: '/onboarding/owner'
+      fullPath: '/onboarding/owner'
+      preLoaderRoute: typeof AuthenticatedOnboardingOwnerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BarberRoute: BarberRoute,
   OwnerRoute: OwnerRoute,
