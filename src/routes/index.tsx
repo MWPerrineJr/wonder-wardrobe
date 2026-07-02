@@ -185,7 +185,7 @@ function MarketplacePage() {
             </p>
             <form
               onSubmit={handleSearch}
-              className="w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm"
+              className="relative z-20 w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm"
             >
               <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
                 <Icon name="search" className="text-text-muted mr-3" />
