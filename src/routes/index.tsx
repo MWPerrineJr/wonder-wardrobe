@@ -1,8 +1,22 @@
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { AccountNav } from "@/components/account-nav";
+import { listPublicShops } from "@/lib/shops.functions";
+
+const shopsQuery = queryOptions({
+  queryKey: ["public", "shops"],
+  queryFn: () => listPublicShops(),
+});
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(shopsQuery),
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-on-surface bg-background min-h-screen">
+      Couldn't load shops: {error.message}
+    </div>
+  ),
+  notFoundComponent: () => <div className="p-8">Not found.</div>,
   component: MarketplacePage,
 });
 
@@ -31,15 +45,11 @@ const CATEGORIES = [
   },
 ];
 
-const SHOPS = [
-  {
-    name: "The Sharp Edge",
-    area: "Downtown",
-    price: "$$$",
-    rating: "4.9",
-    tags: ["Fades", "Hot Towel"],
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCGuKuKoUkaNsFqKp3Zjp0Sj0XtbFYL1y3qe1fynBBGO0jzvYr0Wt4LdowxOrSnGETsNuTDc1Dvf9NsWpGU11DEU1bUa6lIypidQCuVCGQ6ZDGj4BlRHgza9bTBML87SeW8jpnRmYyCSP4d7XBhjFYyQItmAdWJc7NoLFPMXA4TP0jCTVmqWPehX198QFQzZSrqS_MNWs4R6lP9KS7Tl54pcN_yEF10uqu4HiiVuUNzESaQoysPGFzc",
-  },
+const FALLBACK_SHOP_IMG =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuCGuKuKoUkaNsFqKp3Zjp0Sj0XtbFYL1y3qe1fynBBGO0jzvYr0Wt4LdowxOrSnGETsNuTDc1Dvf9NsWpGU11DEU1bUa6lIypidQCuVCGQ6ZDGj4BlRHgza9bTBML87SeW8jpnRmYyCSP4d7XBhjFYyQItmAdWJc7NoLFPMXA4TP0jCTVmqWPehX198QFQzZSrqS_MNWs4R6lP9KS7Tl54pcN_yEF10uqu4HiiVuUNzESaQoysPGFzc";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _UNUSED_SHOPS = [
   {
     name: "Apex Grooming",
     area: "Westside",
