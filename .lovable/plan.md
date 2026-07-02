@@ -1,26 +1,25 @@
-## Verify `/onboarding/owner` end-to-end
+## Wire `/owner` and `/` to real shop data
 
-### What exists today
-- `createOwnerShop` server fn: grants `owner` role (idempotent), checks slug uniqueness, inserts a `shops` row. **Does not create any services.**
-- `/onboarding/owner` form: collects name, slug, address, description; on success toasts and navigates to `/owner`.
-- Route sits under `_authenticated/`, so unauthenticated users get redirected to `/auth`.
+### 1. Owner dashboard (`/owner`)
+Move under `_authenticated/` so it requires sign-in, then:
+- New server fn `getMyShops` (uses `requireSupabaseAuth`) → returns each shop owned by the user with counts of services, barbers, and today's bookings.
+- New server fn `getShopDetail({ shopId })` → returns shop + its services list (verifies ownership via RLS).
+- UI:
+  - If the user owns zero shops → empty state with a link to `/onboarding/owner`.
+  - Otherwise render a shop switcher at the top (or a single-shop header). Selected shop shows the KPI cards (bookings today, services count, barbers count) and a "Services" list with name / duration / price.
+  - Keep the existing dashboard visual style; just swap the mocked numbers/list for real data via TanStack Query (`ensureQueryData` + `useSuspenseQuery`).
+- Redirect `/owner` old path → new `_authenticated/owner` route so existing links keep working.
 
-### Gap vs. your ask
-You mentioned "creates my first shop **and services**". The current flow does not create services — only the shop + owner role. Two options:
+### 2. Marketplace (`/`) — Featured shops
+- New public server fn `listPublicShops` using the server-side publishable client (respects the existing `Shops are viewable by everyone` policy), returning `id, slug, name, description, address, cover_image_url` for up to ~12 shops.
+- Replace the mocked "Featured shops" grid in `src/routes/index.tsx` with real data via loader + `useSuspenseQuery`. Each card links to `/shop/$slug` (the existing `/shop` page becomes the shop detail — we'll adapt it in a follow-up; for now the link just points to `/shop` with the slug in the URL).
+- Empty state: friendly message + CTA to become a shop owner if none exist.
 
-- **A. Verify as-built** (shop + role + redirect only). Services get added later from the owner dashboard.
-- **B. Extend onboarding** to also capture 1–3 starter services (name, duration, price) and insert them into `services` in the same server fn, then verify the full flow.
+### Out of scope (next phase)
+- Turning `/shop` into a real per-shop page (`/shop/$slug` reading services/barbers from DB) and wiring the booking form to insert into `bookings`.
+- Editing services/barbers from the owner dashboard.
 
-### Verification steps (same for A or B)
-1. Drive Playwright headless against `http://localhost:8080`, restoring the injected Supabase session.
-2. Navigate to `/onboarding/owner`, screenshot the form.
-3. Fill name / slug / address / description (option B: also fill service rows), submit.
-4. Assert redirect to `/owner` and screenshot.
-5. Query the DB via `psql` to confirm:
-   - `shops` row exists with the expected `owner_id` and `slug`
-   - `user_roles` has `(user_id, 'owner')`
-   - (option B) `services` rows exist for the new shop
-6. Report results + screenshots; clean up the test rows.
-
-### Which option should I take?
-Default is **B** (extend to also seed services), since that matches what you asked to verify. Reply "A" to just verify the current shop-only flow instead.
+### Verification
+- Typecheck.
+- Playwright: sign in with the injected session, visit `/owner`, confirm "Mike's Dudes" and "Mikes Cuts" appear with their real service counts.
+- Visit `/` and confirm both shops render in the Featured grid. Screenshot both.
