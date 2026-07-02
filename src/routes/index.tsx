@@ -193,29 +193,47 @@ function MarketplacePage() {
           </section>
 
           {/* Featured shops */}
-          <section className="flex flex-col gap-8">
+          <section id="featured-shops" className="flex flex-col gap-8 scroll-mt-24">
             <div className="flex justify-between items-end">
-              <h2 className="font-headline-md text-headline-md text-on-surface">Featured Shops</h2>
-              <a className="font-label-md text-label-md text-primary hover:underline" href="#">
-                View All
-              </a>
-            </div>
-            {shops.length === 0 ? (
-              <div className="bg-surface border border-border-subtle rounded-xl p-8 text-center flex flex-col gap-3">
-                <p className="text-on-surface font-headline-md text-[20px]">No shops yet</p>
-                <p className="text-on-surface-variant text-body-md">
-                  Be the first to list your shop on Crown &amp; Cut.
-                </p>
-                <Link
-                  to="/onboarding/owner"
-                  className="mx-auto mt-2 bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity"
+              <h2 className="font-headline-md text-headline-md text-on-surface">
+                {query.name || query.location ? "Search Results" : "Featured Shops"}
+              </h2>
+              {(query.name || query.location) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNameInput("");
+                    setLocationInput("");
+                    setQuery({ name: "", location: "" });
+                  }}
+                  className="font-label-md text-label-md text-primary hover:underline"
                 >
-                  Become a shop owner
-                </Link>
+                  Clear
+                </button>
+              )}
+            </div>
+            {filteredShops.length === 0 ? (
+              <div className="bg-surface border border-border-subtle rounded-xl p-8 text-center flex flex-col gap-3">
+                <p className="text-on-surface font-headline-md text-[20px]">
+                  {shops.length === 0 ? "No shops yet" : "No shops match your search"}
+                </p>
+                <p className="text-on-surface-variant text-body-md">
+                  {shops.length === 0
+                    ? "Be the first to list your shop on Crown & Cut."
+                    : "Try a different name or location."}
+                </p>
+                {shops.length === 0 && (
+                  <Link
+                    to="/onboarding/owner"
+                    className="mx-auto mt-2 bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity"
+                  >
+                    Become a shop owner
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {shops.map((s) => (
+                {filteredShops.map((s) => (
                   <Link
                     key={s.id}
                     to="/shop"
