@@ -134,6 +134,77 @@ export type Database = {
           },
         ]
       }
+      customer_feedback: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          emotion: string | null
+          explanation: string | null
+          id: string
+          key_phrases: string[]
+          message: string | null
+          rating: number | null
+          recommended_response: string | null
+          sentiment_label: string | null
+          sentiment_score: number | null
+          shop_id: string
+          source: string | null
+          status: string
+          summary: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          emotion?: string | null
+          explanation?: string | null
+          id?: string
+          key_phrases?: string[]
+          message?: string | null
+          rating?: number | null
+          recommended_response?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          shop_id: string
+          source?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          emotion?: string | null
+          explanation?: string | null
+          id?: string
+          key_phrases?: string[]
+          message?: string | null
+          rating?: number | null
+          recommended_response?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          shop_id?: string
+          source?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_feedback_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
