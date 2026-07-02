@@ -133,13 +133,18 @@ function MarketplacePage() {
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
               Discover premium barbers, view their portfolios, and book your next appointment seamlessly.
             </p>
-            <div className="w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm">
+            <form
+              onSubmit={handleSearch}
+              className="w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm"
+            >
               <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
                 <Icon name="search" className="text-text-muted mr-3" />
                 <input
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Shop name or style..."
                   type="text"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
                 />
               </div>
               <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
@@ -148,12 +153,17 @@ function MarketplacePage() {
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Location..."
                   type="text"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
                 />
               </div>
-              <button className="bg-primary text-on-primary px-8 py-3 rounded-lg font-label-md text-label-md font-bold hover:opacity-90 transition-opacity whitespace-nowrap">
+              <button
+                type="submit"
+                className="bg-primary text-on-primary px-8 py-3 rounded-lg font-label-md text-label-md font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
                 Search
               </button>
-            </div>
+            </form>
           </div>
         </section>
 
