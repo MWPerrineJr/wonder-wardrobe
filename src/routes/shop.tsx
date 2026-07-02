@@ -193,28 +193,35 @@ function ShopContent({ slug }: { slug: string }) {
                 Choose Services
               </h2>
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container border border-primary relative overflow-hidden group cursor-pointer">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-label-md text-label-md text-on-surface">Signature Haircut</span>
-                    <span className="font-body-md text-body-md text-on-surface-variant text-sm">45 mins • Classic cut, wash, and style</span>
+                {services.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface-container border border-border-subtle text-on-surface-variant text-body-md">
+                    This shop hasn't added any services yet.
                   </div>
-                  <div className="font-headline-md text-headline-md text-primary">$45</div>
-                  <div className="absolute inset-y-0 right-0 w-1 bg-primary" />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container border border-border-subtle hover:border-primary/50 group cursor-pointer transition-all">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-label-md text-label-md text-on-surface">Precision Beard Trim</span>
-                    <span className="font-body-md text-body-md text-on-surface-variant text-sm">30 mins • Shaping, straight razor line-up, hot towel</span>
-                  </div>
-                  <div className="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">$30</div>
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container border border-border-subtle hover:border-primary/50 group cursor-pointer transition-all">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-label-md text-label-md text-on-surface">The Executive Package</span>
-                    <span className="font-body-md text-body-md text-on-surface-variant text-sm">75 mins • Haircut, beard trim, facial massage</span>
-                  </div>
-                  <div className="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">$70</div>
-                </div>
+                ) : (
+                  services.map((svc, idx) => (
+                    <div
+                      key={svc.id}
+                      className={`flex items-center justify-between p-4 rounded-lg bg-surface-container border ${
+                        idx === 0 ? "border-primary relative overflow-hidden" : "border-border-subtle hover:border-primary/50"
+                      } group cursor-pointer transition-all`}
+                    >
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-md text-label-md text-on-surface">{svc.name}</span>
+                        <span className="font-body-md text-body-md text-on-surface-variant text-sm">
+                          {svc.duration_minutes} mins{svc.description ? ` • ${svc.description}` : ""}
+                        </span>
+                      </div>
+                      <div
+                        className={`font-headline-md text-headline-md ${
+                          idx === 0 ? "text-primary" : "text-on-surface group-hover:text-primary transition-colors"
+                        }`}
+                      >
+                        {formatPrice(svc.price_cents)}
+                      </div>
+                      {idx === 0 && <div className="absolute inset-y-0 right-0 w-1 bg-primary" />}
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
