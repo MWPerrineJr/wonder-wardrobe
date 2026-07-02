@@ -48,19 +48,8 @@ const CATEGORIES = [
 const FALLBACK_SHOP_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCGuKuKoUkaNsFqKp3Zjp0Sj0XtbFYL1y3qe1fynBBGO0jzvYr0Wt4LdowxOrSnGETsNuTDc1Dvf9NsWpGU11DEU1bUa6lIypidQCuVCGQ6ZDGj4BlRHgza9bTBML87SeW8jpnRmYyCSP4d7XBhjFYyQItmAdWJc7NoLFPMXA4TP0jCTVmqWPehX198QFQzZSrqS_MNWs4R6lP9KS7Tl54pcN_yEF10uqu4HiiVuUNzESaQoysPGFzc";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _UNUSED_SHOPS = [
-  {
-    name: "Apex Grooming",
-    area: "Westside",
-    price: "$$",
-    rating: "4.8",
-    tags: ["Classic", "Beard"],
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDnI4vCQdhMt1Nm_2VW42IcYNud83dAazJP8k040PRWAa_nKmJe0D0ikORWhyu-cHpg9TmFPjlH-BURHm-ZB9qS8WMDxE8ZnC4itKsiT71HWWQdHiotSLwiNfaEOE17H3zkKHznzuq07jG8ZChcuf18NGoJOgH3VUhOb2d81KfSG35474XgMsV7oTcVSSIx6JemoH0apiS6AOs24Lyfupr7H2I7DVEH66-onDiVrk5_kAqnU4jyMVTf",
-  },
-];
-
 function MarketplacePage() {
+  const { data: shops } = useSuspenseQuery(shopsQuery);
   return (
     <div className="bg-background min-h-screen flex flex-col text-on-background">
       {/* Top nav — desktop */}
