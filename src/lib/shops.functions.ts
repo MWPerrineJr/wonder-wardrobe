@@ -24,6 +24,29 @@ export const listPublicShops = createServerFn({ method: "GET" }).handler(async (
   return data ?? [];
 });
 
+export const getPublicShopBySlug = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => z.object({ slug: z.string().min(1) }).parse(input))
+  .handler(async ({ data }) => {
+    const supabase = publicClient();
+    const { data: shop, error } = await supabase
+      .from("shops")
+      .select("id, slug, name, description, address, cover_image_url")
+      .eq("slug", data.slug)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!shop) return null;
+
+    const { data: services, error: sErr } = await supabase
+      .from("services")
+      .select("id, name, description, duration_minutes, price_cents")
+      .eq("shop_id", shop.id)
+      .eq("is_active", true)
+      .order("price_cents", { ascending: true });
+    if (sErr) throw new Error(sErr.message);
+
+    return { shop, services: services ?? [] };
+  });
+
 export const getMyShops = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
