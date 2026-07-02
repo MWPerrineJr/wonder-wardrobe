@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
@@ -50,6 +51,32 @@ const FALLBACK_SHOP_IMG =
 
 function MarketplacePage() {
   const { data: shops } = useSuspenseQuery(shopsQuery);
+  const [nameInput, setNameInput] = useState("");
+  const [locationInput, setLocationInput] = useState("");
+  const [query, setQuery] = useState({ name: "", location: "" });
+
+  const filteredShops = useMemo(() => {
+    const n = query.name.trim().toLowerCase();
+    const l = query.location.trim().toLowerCase();
+    if (!n && !l) return shops;
+    return shops.filter((s) => {
+      const nameHit =
+        !n ||
+        s.name.toLowerCase().includes(n) ||
+        (s.description ?? "").toLowerCase().includes(n);
+      const locHit = !l || (s.address ?? "").toLowerCase().includes(l);
+      return nameHit && locHit;
+    });
+  }, [shops, query]);
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setQuery({ name: nameInput, location: locationInput });
+    if (typeof document !== "undefined") {
+      document.getElementById("featured-shops")?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen flex flex-col text-on-background">
       {/* Top nav — desktop */}
@@ -106,13 +133,18 @@ function MarketplacePage() {
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
               Discover premium barbers, view their portfolios, and book your next appointment seamlessly.
             </p>
-            <div className="w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm">
+            <form
+              onSubmit={handleSearch}
+              className="w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm"
+            >
               <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
                 <Icon name="search" className="text-text-muted mr-3" />
                 <input
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Shop name or style..."
                   type="text"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
                 />
               </div>
               <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
@@ -121,12 +153,17 @@ function MarketplacePage() {
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Location..."
                   type="text"
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
                 />
               </div>
-              <button className="bg-primary text-on-primary px-8 py-3 rounded-lg font-label-md text-label-md font-bold hover:opacity-90 transition-opacity whitespace-nowrap">
+              <button
+                type="submit"
+                className="bg-primary text-on-primary px-8 py-3 rounded-lg font-label-md text-label-md font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
                 Search
               </button>
-            </div>
+            </form>
           </div>
         </section>
 
@@ -156,29 +193,47 @@ function MarketplacePage() {
           </section>
 
           {/* Featured shops */}
-          <section className="flex flex-col gap-8">
+          <section id="featured-shops" className="flex flex-col gap-8 scroll-mt-24">
             <div className="flex justify-between items-end">
-              <h2 className="font-headline-md text-headline-md text-on-surface">Featured Shops</h2>
-              <a className="font-label-md text-label-md text-primary hover:underline" href="#">
-                View All
-              </a>
-            </div>
-            {shops.length === 0 ? (
-              <div className="bg-surface border border-border-subtle rounded-xl p-8 text-center flex flex-col gap-3">
-                <p className="text-on-surface font-headline-md text-[20px]">No shops yet</p>
-                <p className="text-on-surface-variant text-body-md">
-                  Be the first to list your shop on Crown &amp; Cut.
-                </p>
-                <Link
-                  to="/onboarding/owner"
-                  className="mx-auto mt-2 bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity"
+              <h2 className="font-headline-md text-headline-md text-on-surface">
+                {query.name || query.location ? "Search Results" : "Featured Shops"}
+              </h2>
+              {(query.name || query.location) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNameInput("");
+                    setLocationInput("");
+                    setQuery({ name: "", location: "" });
+                  }}
+                  className="font-label-md text-label-md text-primary hover:underline"
                 >
-                  Become a shop owner
-                </Link>
+                  Clear
+                </button>
+              )}
+            </div>
+            {filteredShops.length === 0 ? (
+              <div className="bg-surface border border-border-subtle rounded-xl p-8 text-center flex flex-col gap-3">
+                <p className="text-on-surface font-headline-md text-[20px]">
+                  {shops.length === 0 ? "No shops yet" : "No shops match your search"}
+                </p>
+                <p className="text-on-surface-variant text-body-md">
+                  {shops.length === 0
+                    ? "Be the first to list your shop on Crown & Cut."
+                    : "Try a different name or location."}
+                </p>
+                {shops.length === 0 && (
+                  <Link
+                    to="/onboarding/owner"
+                    className="mx-auto mt-2 bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity"
+                  >
+                    Become a shop owner
+                  </Link>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {shops.map((s) => (
+                {filteredShops.map((s) => (
                   <Link
                     key={s.id}
                     to="/shop"
