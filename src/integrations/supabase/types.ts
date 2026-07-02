@@ -205,6 +205,47 @@ export type Database = {
           },
         ]
       }
+      shop_hours: {
+        Row: {
+          close_time: string
+          created_at: string
+          id: string
+          is_closed: boolean
+          open_time: string
+          shop_id: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          close_time?: string
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          open_time?: string
+          shop_id: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          close_time?: string
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          open_time?: string
+          shop_id?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_hours_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           address: string | null
