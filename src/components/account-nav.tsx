@@ -60,7 +60,7 @@ export function AccountNav() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/_authenticated/onboarding/owner" className="cursor-pointer">
+          <Link to="/onboarding/owner" className="cursor-pointer">
             <Icon name="storefront" className="text-[18px] mr-2" /> Become a shop owner
           </Link>
         </DropdownMenuItem>
