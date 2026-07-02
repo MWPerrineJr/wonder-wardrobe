@@ -1,21 +1,45 @@
-## Problem
+## Diagnosis
 
-`/auth` immediately redirects to `/` whenever a Supabase session already exists (see `src/routes/auth.tsx` lines 29-33). The auth logs confirm `/user` is returning 200 — you're still signed in from previous testing, so every visit to `/auth` flashes back home before you can interact with the form.
+The owner dashboard IS loading (session replay shows "Mikes Cuts" + KPI cards rendered). The real gap is that it's read-only — no way to edit anything. This plan adds the management surface you asked for.
 
-## Fix
+## Scope
 
-Replace the blind auto-redirect with an "already signed in" state on the auth page, and make sign-out easily reachable so you can switch accounts.
+Turn `/owner` into a working management dashboard with three editable sections:
 
-### 1. `src/routes/auth.tsx`
-- Remove the `useEffect` that navigates away when `session` is present.
-- If `session` exists on render, show a small panel instead of the sign-in form:
-  - "You're already signed in as {email}"
-  - Buttons: **Continue to home** (`navigate({ to: "/" })`) and **Sign out** (`supabase.auth.signOut()` — stays on `/auth` so the form appears).
-- After a successful `signInWithPassword` / `signUp`, explicitly `navigate({ to: "/" })` (so the redirect still happens on real login, just not on mount).
+1. **Shop details** — name, address, description, cover image URL
+2. **Services** — add, edit (name/price/duration/description), toggle active, delete
+3. **Weekly hours** — per-shop schedule (open/close time per weekday, or closed)
 
-### 2. `src/components/account-nav.tsx`
-- Confirm the dropdown's Sign out item calls the proper teardown (cancel queries, clear cache, `supabase.auth.signOut()`, `navigate({ to: "/auth", replace: true })`) so users can cleanly sign out from the marketplace header. Patch if missing.
+Barbers (which require linking real user accounts) come in a follow-up; noting this because the `barbers.user_id` column is `NOT NULL` and we haven't built the "invite barber" flow yet.
+
+## Implementation
+
+### Database (one migration)
+- New table `public.shop_hours` — `shop_id`, `weekday` (0-6), `open_time`, `close_time`, `is_closed`, standard timestamps, unique `(shop_id, weekday)`.
+- GRANTs + RLS: owners of the parent shop can select/insert/update/delete their rows; anon can select (so the public shop page can show hours later).
+
+### Server functions (`src/lib/owner.functions.ts`, extend existing file)
+All use `requireSupabaseAuth`; RLS already scopes writes to the shop owner.
+- `updateShop({ shopId, patch })` — updates name/address/description/cover_image_url with zod validation.
+- `createService`, `updateService`, `deleteService`, `toggleServiceActive` — services CRUD.
+- `getShopHours({ shopId })` and `upsertShopHours({ shopId, hours[] })` — read + bulk-write weekly hours.
+
+### UI (`src/routes/_authenticated/owner.tsx`)
+Refactor page into tabs (shadcn `Tabs`): **Overview** (existing KPIs), **Details**, **Services**, **Hours**.
+- **Details tab** — form for name/address/description/cover URL with Save button (`useMutation` → invalidate `["owner","shops"]` + `["public","shops"]`).
+- **Services tab** — table of services with inline "Edit" (dialog with price in dollars converted to cents, duration in minutes, description, active toggle), "Delete" (confirm dialog), and an "Add service" button. Uses `useMutation` + query invalidation.
+- **Hours tab** — 7-row grid (Mon-Sun) with "Closed" checkbox + time pickers, single "Save schedule" button that upserts all seven.
+
+All forms validated with zod; all mutations show toast success/error via `sonner`.
+
+### Public surface
+- Extend `getPublicShopBySlug` to also return hours so `/shop` can display them (small addition — not the primary goal but keeps public page in sync).
 
 ## Verification
 
-Drive Playwright: restore the injected session, load `/auth`, screenshot the "already signed in" panel, click **Sign out**, confirm the form appears and accepts a submission without redirecting away.
+Drive Playwright with the injected session: navigate `/owner`, edit a service price, save, reload, screenshot to confirm the new price persists. Repeat for adding hours.
+
+## Out of scope (call out to user)
+
+- Managing barbers / staff (needs a separate invite-by-email flow because `barbers.user_id` requires a real auth user).
+- Booking list & calendar management for the owner (can be next phase).
