@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -17,20 +18,15 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { session, loading } = useAuth();
+  const { session, user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [mode, setMode] = useState<"sign_in" | "sign_up">("sign_in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!loading && session) {
-      navigate({ to: "/" });
-    }
-  }, [loading, session, navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,11 +44,13 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Account created. You're signed in.");
         router.invalidate();
+        navigate({ to: "/" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back.");
         router.invalidate();
+        navigate({ to: "/" });
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong";
@@ -89,13 +87,45 @@ function AuthPage() {
             Crown &amp; Cut
           </Link>
           <h1 className="mt-6 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
-            {mode === "sign_in" ? "Welcome back" : "Create your account"}
+            {session ? "You're already signed in" : mode === "sign_in" ? "Welcome back" : "Create your account"}
           </h1>
           <p className="mt-2 text-on-surface-variant text-body-md">
-            {mode === "sign_in" ? "Sign in to book your next cut." : "Sign up to start booking appointments."}
+            {session
+              ? "Continue where you left off, or sign out to use a different account."
+              : mode === "sign_in"
+                ? "Sign in to book your next cut."
+                : "Sign up to start booking appointments."}
           </p>
         </div>
 
+        {loading ? (
+          <div className="glass-panel rounded-xl p-8 text-center text-on-surface-variant">Loading…</div>
+        ) : session ? (
+          <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
+            <div className="text-body-md text-on-surface">
+              Signed in as <span className="font-bold">{user?.email}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/" })}
+              className="w-full bg-primary text-on-primary font-label-md text-label-md py-3 rounded-lg font-bold hover:bg-primary/90 transition-all"
+            >
+              Continue to home
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                await queryClient.cancelQueries();
+                queryClient.clear();
+                await signOut();
+                toast.success("Signed out.");
+              }}
+              className="w-full border border-border-subtle rounded-lg bg-surface hover:border-primary transition-colors py-3 text-on-surface font-label-md text-label-md"
+            >
+              Sign out
+            </button>
+          </div>
+        ) : (
         <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             <button
@@ -190,6 +220,7 @@ function AuthPage() {
             </button>
           </p>
         </div>
+        )}
       </div>
     </div>
   );
