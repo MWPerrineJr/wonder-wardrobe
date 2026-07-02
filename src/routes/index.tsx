@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import { AccountNav } from "@/components/account-nav";
+
 export const Route = createFileRoute("/")({
   component: MarketplacePage,
 });
@@ -76,10 +78,8 @@ function MarketplacePage() {
               <button className="hover:bg-surface-container p-2 rounded transition-all">
                 <Icon name="notifications" />
               </button>
-              <button className="hover:bg-surface-container p-2 rounded transition-all">
-                <Icon name="account_circle" />
-              </button>
             </div>
+            <AccountNav />
             <Link
               to="/shop"
               className="bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity"
