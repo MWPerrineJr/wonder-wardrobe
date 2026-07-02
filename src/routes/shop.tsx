@@ -1,16 +1,48 @@
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
+import { getPublicShopBySlug } from "@/lib/shops.functions";
+
+const shopSearchSchema = z.object({
+  slug: fallback(z.string(), "").default(""),
+});
+
+const shopBySlugQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["public", "shop", slug],
+    queryFn: () => getPublicShopBySlug({ data: { slug } }),
+    enabled: !!slug,
+  });
 
 export const Route = createFileRoute("/shop")({
+  validateSearch: zodValidator(shopSearchSchema),
+  loaderDeps: ({ search: { slug } }) => ({ slug }),
+  loader: ({ deps, context }) => {
+    if (deps.slug) context.queryClient.ensureQueryData(shopBySlugQuery(deps.slug));
+  },
   head: () => ({
     meta: [
-      { title: "The Sharp Edge — Book an appointment" },
-      { name: "description", content: "Book your next cut at The Sharp Edge. Pick your barber, service, date and time." },
-      { property: "og:title", content: "The Sharp Edge — Book an appointment" },
-      { property: "og:description", content: "Select a barber, choose a service, and lock in a time." },
+      { title: "Book an appointment — Crown & Cut" },
+      { name: "description", content: "Pick your barber, service, date and time." },
     ],
   }),
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-on-surface bg-background min-h-screen">
+      Couldn't load shop: {error.message}
+    </div>
+  ),
+  notFoundComponent: () => <div className="p-8">Shop not found.</div>,
   component: ShopPage,
 });
+
+const FALLBACK_HERO =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuC15Egl3FSRAl6spm53f0jNFHFvfm6gzWI869VRI42pcJfcsd-p1Jd8XgAOYNUXzxtQZvWezIvhwgWIGg9eimf3wql8CXkOgvnb20M_Ry8bUJyECeE6i7sLI27L4O6-AM8bQsnotKz6BzDLQEYzmXKL_iHeqoJxneXmxqwRprP4EEqrG_uh_MmEIBI7b_gYk-yUtKYxb3zpEDnRlqp9CQcK3NQBf9jrpFXFWzFVyMicYzyXbO5Q4JiK";
+
+function formatPrice(cents: number) {
+  return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
+}
 
 const Icon = ({ name, className = "", filled = false }: { name: string; className?: string; filled?: boolean }) => (
   <span
