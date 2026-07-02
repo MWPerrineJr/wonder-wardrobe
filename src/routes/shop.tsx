@@ -4,6 +4,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 
 import { getPublicShopBySlug } from "@/lib/shops.functions";
+import { ShopMap } from "@/components/shop-map";
 
 const shopSearchSchema = z.object({
   slug: fallback(z.string(), "").default(""),
@@ -139,6 +140,16 @@ function ShopContent({ slug }: { slug: string }) {
             </div>
           </div>
         </section>
+
+        {shop.address && (
+          <section className="flex flex-col gap-3">
+            <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+              <Icon name="map" />
+              Find us
+            </h2>
+            <ShopMap address={shop.address} />
+          </section>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
           {/* Left column */}
