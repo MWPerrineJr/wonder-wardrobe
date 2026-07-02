@@ -55,12 +55,6 @@ const Icon = ({ name, className = "", filled = false }: { name: string; classNam
 
 function ShopPage() {
   const { slug } = Route.useSearch();
-  const query = useSuspenseQuery({
-    ...shopBySlugQuery(slug),
-    enabled: !!slug,
-  });
-  const data = slug ? query.data : null;
-
   if (!slug) {
     return (
       <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
@@ -72,7 +66,11 @@ function ShopPage() {
       </div>
     );
   }
+  return <ShopContent slug={slug} />;
+}
 
+function ShopContent({ slug }: { slug: string }) {
+  const { data } = useSuspenseQuery(shopBySlugQuery(slug));
   if (!data) {
     return (
       <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
