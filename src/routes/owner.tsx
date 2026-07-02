@@ -20,9 +20,9 @@ const Icon = ({ name, className = "", filled = false }: { name: string; classNam
 
 function OwnerPage() {
   return (
-    <div className="bg-surface-deep text-white font-body-md min-h-screen flex">
+    <div className="bg-background text-on-background font-body-md min-h-screen flex">
       {/* Side nav */}
-      <nav className="hidden md:flex h-screen w-64 fixed left-0 top-0 border-r border-border-subtle bg-[#0b0b0b] z-50 flex-col p-4 gap-baseline">
+      <nav className="hidden md:flex h-screen w-64 fixed left-0 top-0 border-r border-border-subtle bg-surface z-50 flex-col p-4 gap-baseline">
         <div className="mb-8 px-2 flex flex-col gap-2">
           <div className="w-12 h-12 rounded-full overflow-hidden mb-2 ring-1 ring-border-subtle">
             <img
@@ -38,27 +38,27 @@ function OwnerPage() {
           <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-primary-fixed bg-primary-container rounded-lg font-bold">
             <Icon name="dashboard" filled /> <span className="font-label-md text-label-md">Dashboard</span>
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-elevated rounded-lg transition-colors">
+          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
             <Icon name="calendar_today" /> <span className="font-label-md text-label-md">Schedule</span>
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-elevated rounded-lg transition-colors">
+          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
             <Icon name="groups" /> <span className="font-label-md text-label-md">Clients</span>
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-elevated rounded-lg transition-colors">
+          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
             <Icon name="content_cut" /> <span className="font-label-md text-label-md">Services</span>
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-elevated rounded-lg transition-colors">
+          <a href="#" className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
             <Icon name="bar_chart" /> <span className="font-label-md text-label-md">Analytics</span>
           </a>
         </div>
         <div className="mt-auto flex flex-col gap-2 border-t border-border-subtle pt-4">
-          <a href="#" className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-elevated rounded-lg transition-colors">
+          <a href="#" className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
             <Icon name="settings" /> <span className="font-label-sm text-label-sm">Settings</span>
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-elevated rounded-lg transition-colors">
+          <a href="#" className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
             <Icon name="help_outline" /> <span className="font-label-sm text-label-sm">Support</span>
           </a>
-          <Link to="/" className="mt-4 w-full py-2 px-4 bg-transparent border border-border-subtle text-white font-label-md text-label-md rounded-lg hover:bg-surface-elevated transition-colors text-center">
+          <Link to="/" className="mt-4 w-full py-2 px-4 bg-transparent border border-border-subtle text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors text-center">
             View Shop Page
           </Link>
         </div>
@@ -67,12 +67,12 @@ function OwnerPage() {
       <main className="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop w-full max-w-container-max mx-auto min-h-screen flex flex-col gap-8 pb-24 md:pb-margin-desktop">
         <header className="flex justify-between items-center w-full mb-4">
           <div>
-            <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white">Overview</h2>
+            <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Overview</h2>
             <p className="font-body-md text-body-md text-text-muted mt-1">Today's shop performance at a glance.</p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-surface-elevated px-4 py-2 rounded-full border border-border-subtle">
-              <span className="font-label-sm text-label-sm text-white">Accepting Walk-ins</span>
+            <div className="flex items-center gap-3 bg-surface px-4 py-2 rounded-full border border-border-subtle">
+              <span className="font-label-sm text-label-sm text-on-surface">Accepting Walk-ins</span>
               <button className="w-10 h-5 bg-primary-container rounded-full relative">
                 <span className="absolute right-1 top-1 w-3 h-3 bg-on-primary-fixed rounded-full" />
               </button>
@@ -87,9 +87,9 @@ function OwnerPage() {
             { icon: "calendar_month", label: "Weekly Bookings", value: "128", delta: "0%", deltaClass: "text-text-muted", deltaIcon: "trending_flat" },
             { icon: "person_add", label: "New Clients", value: "24", delta: "+8.2%", deltaClass: "text-electric-blue", deltaIcon: "trending_up" },
           ].map((s) => (
-            <div key={s.label} className="bg-surface-elevated border border-border-subtle rounded-xl p-6 flex flex-col justify-between hover:border-primary transition-colors group">
+            <div key={s.label} className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col justify-between hover:border-primary transition-colors group shadow-sm">
               <div className="flex justify-between items-start mb-4">
-                <div className="p-2 bg-[#0b0b0b] rounded-lg border border-border-subtle group-hover:border-primary transition-colors">
+                <div className="p-2 bg-surface-container rounded-lg border border-border-subtle group-hover:border-primary transition-colors">
                   <Icon name={s.icon} className="text-primary" />
                 </div>
                 <span className={`font-label-sm text-label-sm ${s.deltaClass} flex items-center gap-1`}>
@@ -98,7 +98,7 @@ function OwnerPage() {
               </div>
               <div>
                 <p className="font-label-md text-label-md text-text-muted mb-1">{s.label}</p>
-                <h3 className="font-headline-md text-headline-md text-white">{s.value}</h3>
+                <h3 className="font-headline-md text-headline-md text-on-surface">{s.value}</h3>
                 <p className="font-label-sm text-label-sm text-text-muted mt-2">Past 7 days</p>
               </div>
             </div>
@@ -107,9 +107,9 @@ function OwnerPage() {
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-gutter flex-1">
           {/* Upcoming */}
-          <div className="lg:col-span-1 flex flex-col gap-4 bg-surface-elevated border border-border-subtle rounded-xl p-6">
+          <div className="lg:col-span-1 flex flex-col gap-4 bg-surface border border-border-subtle rounded-xl p-6 shadow-sm">
             <div className="flex justify-between items-center mb-2 border-b border-border-subtle pb-4">
-              <h3 className="font-headline-md text-[20px] font-semibold text-white">Upcoming Appointments</h3>
+              <h3 className="font-headline-md text-[20px] font-semibold text-on-surface">Upcoming Appointments</h3>
               <button className="font-label-sm text-label-sm text-primary hover:underline">View All</button>
             </div>
             <div className="flex flex-col gap-4 overflow-y-auto pr-2" style={{ maxHeight: 400 }}>
@@ -124,11 +124,11 @@ function OwnerPage() {
 
           {/* Chart + Staff */}
           <div className="lg:col-span-2 flex flex-col gap-gutter">
-            <div className="bg-surface-elevated border border-border-subtle rounded-xl p-6 flex flex-col h-64 relative overflow-hidden group">
+            <div className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col h-64 relative overflow-hidden group shadow-sm">
               <div className="flex justify-between items-start mb-4 z-10 relative">
-                <h3 className="font-headline-md text-[20px] font-semibold text-white">Revenue Trend</h3>
+                <h3 className="font-headline-md text-[20px] font-semibold text-on-surface">Revenue Trend</h3>
                 <div className="flex gap-2">
-                  <span className="inline-block px-2 py-1 rounded border border-border-subtle font-label-sm text-label-sm text-text-muted bg-surface-deep">This Week</span>
+                  <span className="inline-block px-2 py-1 rounded border border-border-subtle font-label-sm text-label-sm text-text-muted bg-surface-container">This Week</span>
                 </div>
               </div>
               <div className="flex-1 w-full flex items-end justify-between gap-2 z-10 relative px-4 pb-2 border-b border-border-subtle">
@@ -147,7 +147,7 @@ function OwnerPage() {
                       className={
                         b.active
                           ? "flex-1 bg-primary rounded-t-sm shadow-[0_0_15px_rgba(212,175,55,0.2)]"
-                          : "flex-1 bg-surface-container-highest hover:bg-primary transition-colors cursor-pointer rounded-t-sm"
+                          : "flex-1 bg-surface-container-high hover:bg-primary transition-colors cursor-pointer rounded-t-sm"
                       }
                       style={{ height: `${b.h}%` }}
                     />
@@ -161,8 +161,8 @@ function OwnerPage() {
               </div>
             </div>
 
-            <div className="bg-surface-elevated border border-border-subtle rounded-xl p-6 flex flex-col flex-1">
-              <h3 className="font-headline-md text-[20px] font-semibold text-white mb-6 border-b border-border-subtle pb-4">Barber Performance</h3>
+            <div className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col flex-1 shadow-sm">
+              <h3 className="font-headline-md text-[20px] font-semibold text-on-surface mb-6 border-b border-border-subtle pb-4">Barber Performance</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <BarberCard
                   name="Marcus T."
@@ -187,17 +187,17 @@ function OwnerPage() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface-elevated border-t border-border-subtle shadow-lg">
+      <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-border-subtle shadow-lg">
         <div className="flex justify-around items-center h-16 px-margin-mobile">
-          <Link to="/" className="flex flex-col items-center justify-center text-secondary-fixed-dim w-full h-full">
+          <Link to="/" className="flex flex-col items-center justify-center text-on-surface-variant w-full h-full">
             <Icon name="search" className="text-[24px]" />
             <span className="font-label-sm text-[10px] mt-1">Explore</span>
           </Link>
-          <Link to="/shop" className="flex flex-col items-center justify-center text-secondary-fixed-dim w-full h-full">
+          <Link to="/shop" className="flex flex-col items-center justify-center text-on-surface-variant w-full h-full">
             <Icon name="event_note" className="text-[24px]" />
             <span className="font-label-sm text-[10px] mt-1">Bookings</span>
           </Link>
-          <Link to="/barber" className="flex flex-col items-center justify-center text-secondary-fixed-dim w-full h-full">
+          <Link to="/barber" className="flex flex-col items-center justify-center text-on-surface-variant w-full h-full">
             <Icon name="calendar_today" className="text-[24px]" />
             <span className="font-label-sm text-[10px] mt-1">Barber</span>
           </Link>
@@ -229,18 +229,18 @@ function AppointmentRow({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex justify-between items-center p-3 rounded-lg hover:bg-surface-elevated transition-colors border border-transparent hover:border-border-subtle cursor-pointer">
+    <div className="flex justify-between items-center p-3 rounded-lg hover:bg-surface-container transition-colors border border-transparent hover:border-border-subtle cursor-pointer">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-surface-container-highest text-black flex items-center justify-center font-label-md overflow-hidden">
+        <div className="w-10 h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-label-md overflow-hidden">
           {imgSrc ? <img className="w-full h-full object-cover" src={imgSrc} alt={name} /> : initials}
         </div>
         <div>
-          <p className="font-label-md text-label-md text-white">{name}</p>
+          <p className="font-label-md text-label-md text-on-surface">{name}</p>
           <p className="font-label-sm text-label-sm text-text-muted">{service}</p>
         </div>
       </div>
       <div className="text-right">
-        <p className={`font-label-md text-label-md ${highlight ? "text-primary" : "text-white"}`}>{time}</p>
+        <p className={`font-label-md text-label-md ${highlight ? "text-primary" : "text-on-surface"}`}>{time}</p>
         {hint && <p className="font-label-sm text-label-sm text-text-muted">{hint}</p>}
       </div>
     </div>
@@ -269,16 +269,16 @@ function BarberCard({
           <img className="w-full h-full object-cover" src={img} alt={name} />
         </div>
         <div>
-          <p className="font-label-md text-label-md text-white">{name}</p>
+          <p className="font-label-md text-label-md text-on-surface">{name}</p>
           <p className="font-label-sm text-label-sm text-text-muted">{role}</p>
         </div>
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex justify-between font-label-sm text-label-sm">
           <span className="text-text-muted">Daily Target</span>
-          <span className="text-white">{detail}</span>
+          <span className="text-on-surface">{detail}</span>
         </div>
-        <div className="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+        <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
           <div className="bg-primary h-full rounded-full" style={{ width: `${pct}%` }} />
         </div>
       </div>
