@@ -237,6 +237,7 @@ function MarketplacePage() {
                   <Link
                     key={s.id}
                     to="/shop"
+                    search={{ slug: s.slug }}
                     className="bg-surface border border-border-subtle rounded-xl p-4 flex flex-col gap-4 hover:border-primary transition-colors cursor-pointer group shadow-sm"
                   >
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-surface-container">
