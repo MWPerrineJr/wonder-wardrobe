@@ -10,21 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
-import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as BarberRouteImport } from './routes/barber'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
 
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OwnerRoute = OwnerRouteImport.update({
-  id: '/owner',
-  path: '/owner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BarberRoute = BarberRouteImport.update({
@@ -46,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
+  id: '/owner',
+  path: '/owner',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingOwnerRoute =
   AuthenticatedOnboardingOwnerRouteImport.update({
     id: '/onboarding/owner',
@@ -57,16 +57,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/barber': typeof BarberRoute
-  '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
+  '/owner': typeof AuthenticatedOwnerRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/barber': typeof BarberRoute
-  '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
+  '/owner': typeof AuthenticatedOwnerRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
 }
 export interface FileRoutesById {
@@ -75,8 +75,8 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/barber': typeof BarberRoute
-  '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
+  '/_authenticated/owner': typeof AuthenticatedOwnerRoute
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
 }
 export interface FileRouteTypes {
@@ -85,19 +85,19 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/barber'
-    | '/owner'
     | '/shop'
+    | '/owner'
     | '/onboarding/owner'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/barber' | '/owner' | '/shop' | '/onboarding/owner'
+  to: '/' | '/auth' | '/barber' | '/shop' | '/owner' | '/onboarding/owner'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/barber'
-    | '/owner'
     | '/shop'
+    | '/_authenticated/owner'
     | '/_authenticated/onboarding/owner'
   fileRoutesById: FileRoutesById
 }
@@ -106,7 +106,6 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BarberRoute: typeof BarberRoute
-  OwnerRoute: typeof OwnerRoute
   ShopRoute: typeof ShopRoute
 }
 
@@ -117,13 +116,6 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/owner': {
-      id: '/owner'
-      path: '/owner'
-      fullPath: '/owner'
-      preLoaderRoute: typeof OwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/barber': {
@@ -154,6 +146,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/owner': {
+      id: '/_authenticated/owner'
+      path: '/owner'
+      fullPath: '/owner'
+      preLoaderRoute: typeof AuthenticatedOwnerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding/owner': {
       id: '/_authenticated/onboarding/owner'
       path: '/onboarding/owner'
@@ -165,10 +164,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
   AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
   AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
 }
 
@@ -180,9 +181,18 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BarberRoute: BarberRoute,
-  OwnerRoute: OwnerRoute,
   ShopRoute: ShopRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
