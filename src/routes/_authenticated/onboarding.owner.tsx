@@ -34,17 +34,50 @@ function OnboardingOwnerPage() {
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [services, setServices] = useState<
+    Array<{ name: string; duration: string; price: string }>
+  >([
+    { name: "Classic Haircut", duration: "30", price: "35" },
+    { name: "Beard Trim", duration: "20", price: "20" },
+    { name: "Cut & Beard", duration: "45", price: "50" },
+  ]);
+
+  function updateService(i: number, patch: Partial<(typeof services)[number]>) {
+    setServices((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+  }
+  function addService() {
+    if (services.length >= 10) return;
+    setServices((prev) => [...prev, { name: "", duration: "30", price: "0" }]);
+  }
+  function removeService(i: number) {
+    setServices((prev) => prev.filter((_, idx) => idx !== i));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     try {
+      const cleanedServices = services
+        .map((s) => ({
+          name: s.name.trim(),
+          duration_minutes: parseInt(s.duration, 10),
+          price_cents: Math.round(parseFloat(s.price || "0") * 100),
+        }))
+        .filter(
+          (s) =>
+            s.name.length > 0 &&
+            Number.isFinite(s.duration_minutes) &&
+            s.duration_minutes > 0 &&
+            Number.isFinite(s.price_cents) &&
+            s.price_cents >= 0,
+        );
       const shop = await createOwnerShop({
         data: {
           name,
           slug: slug || slugify(name),
           description: description || null,
           address: address || null,
+          services: cleanedServices,
         },
       });
       toast.success(`${shop.name} is live. Welcome, owner.`);
@@ -139,6 +172,62 @@ function OnboardingOwnerPage() {
               className="w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md"
               placeholder="Premium barbershop in the heart of downtown…"
             />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="font-label-md text-label-md text-on-surface-variant">
+                Starter services
+              </label>
+              <button
+                type="button"
+                onClick={addService}
+                className="text-primary text-label-sm hover:underline"
+              >
+                + Add service
+              </button>
+            </div>
+            <p className="mb-3 text-label-sm text-on-surface-variant">
+              Add a few services now — you can edit them later from your dashboard.
+            </p>
+            <div className="flex flex-col gap-2">
+              {services.map((s, i) => (
+                <div key={i} className="grid grid-cols-12 gap-2">
+                  <input
+                    type="text"
+                    value={s.name}
+                    onChange={(e) => updateService(i, { name: e.target.value })}
+                    placeholder="Service name"
+                    className="col-span-6 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                  />
+                  <input
+                    type="number"
+                    min={1}
+                    value={s.duration}
+                    onChange={(e) => updateService(i, { duration: e.target.value })}
+                    placeholder="Min"
+                    className="col-span-2 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={s.price}
+                    onChange={(e) => updateService(i, { price: e.target.value })}
+                    placeholder="Price"
+                    className="col-span-3 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeService(i)}
+                    className="col-span-1 text-on-surface-variant hover:text-primary"
+                    aria-label="Remove service"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           <button

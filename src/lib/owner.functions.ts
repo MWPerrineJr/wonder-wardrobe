@@ -12,6 +12,17 @@ const CreateShopInput = z.object({
     .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and hyphens only"),
   description: z.string().max(500).optional().nullable(),
   address: z.string().max(200).optional().nullable(),
+  services: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(80),
+        duration_minutes: z.number().int().positive().max(600),
+        price_cents: z.number().int().nonnegative().max(1_000_000),
+      }),
+    )
+    .max(10)
+    .optional()
+    .default([]),
 });
 
 export const createOwnerShop = createServerFn({ method: "POST" })
@@ -50,6 +61,18 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       .select("id, slug, name")
       .single();
     if (shopError) throw new Error(shopError.message);
+
+    if (data.services && data.services.length > 0) {
+      const { error: servicesError } = await supabaseAdmin.from("services").insert(
+        data.services.map((s) => ({
+          shop_id: shop.id,
+          name: s.name,
+          duration_minutes: s.duration_minutes,
+          price_cents: s.price_cents,
+        })),
+      );
+      if (servicesError) throw new Error(`Shop created but services failed: ${servicesError.message}`);
+    }
 
     return shop;
   });
