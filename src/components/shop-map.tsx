@@ -1,103 +1,76 @@
-import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+
+import { getMapEmbedUrl } from "@/lib/maps.functions";
 
 type Props = {
   address: string | null | undefined;
   className?: string;
 };
 
-type ValidationResult =
-  | { ok: true; key: string }
-  | { ok: false; reason: "missing" | "invalid" };
-
-/**
- * Google API keys are typically 39 characters and contain only base64-url-safe
- * characters (A-Z, a-z, 0-9, '-', '_'). This is a lightweight client-side
- * format check; it does not make a network request to Google.
- */
-function validateGoogleMapsApiKey(key: string | undefined): ValidationResult {
-  if (!key || key.trim() === "") {
-    return { ok: false, reason: "missing" };
-  }
-  const trimmed = key.trim();
-  if (trimmed.length < 20 || !/^[A-Za-z0-9_-]+$/.test(trimmed)) {
-    return { ok: false, reason: "invalid" };
-  }
-  return { ok: true, key: trimmed };
-}
-
 /**
  * Embeds a Google Map centered on the given address using the Maps Embed API.
- *
- * Reads the API key from `import.meta.env.VITE_GOOGLE_MAPS_API_KEY`.
- * When no key is present (e.g. during local building), a clear error card is
- * rendered so the problem is obvious — add your key in `.env` and restart the
- * dev server.
+ * The API key is read server-side from the `GOOGLE_MAPS_API_KEY` secret; the
+ * server returns a ready-to-use embed URL so the key never reaches the browser.
  */
 export function ShopMap({ address, className = "" }: Props) {
-  const rawKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-  const validation = useMemo(() => validateGoogleMapsApiKey(rawKey), [rawKey]);
-
-  const src = useMemo(() => {
-    if (!validation.ok || !address) return null;
-    const q = encodeURIComponent(address);
-    return `https://www.google.com/maps/embed/v1/place?key=${validation.key}&q=${q}`;
-  }, [validation, address]);
+  const fetchEmbedUrl = useServerFn(getMapEmbedUrl);
+  const query = useQuery({
+    queryKey: ["map-embed-url", address],
+    queryFn: () => fetchEmbedUrl({ data: { address: address as string } }),
+    enabled: !!address,
+    staleTime: 5 * 60_000,
+  });
 
   if (!address) return null;
 
-  if (!validation.ok) {
-    const isMissing = validation.reason === "missing";
+  if (query.isLoading) {
+    return (
+      <div
+        className={`rounded-xl border border-border-subtle bg-surface-container h-[320px] animate-pulse ${className}`}
+        aria-label="Loading map"
+      />
+    );
+  }
+
+  if (query.isError) {
     return (
       <div
         className={`rounded-xl border border-error bg-error-container p-6 text-on-error-container text-body-md flex flex-col gap-2 ${className}`}
       >
         <span className="font-label-md text-label-md text-on-error-container">
-          {isMissing ? "Google Maps API key is missing" : "Google Maps API key looks invalid"}
+          Unable to load map
+        </span>
+        <span>Something went wrong while preparing the map. Please try again.</span>
+      </div>
+    );
+  }
+
+  const result = query.data;
+
+  if (result && !result.ok) {
+    return (
+      <div
+        className={`rounded-xl border border-error bg-error-container p-6 text-on-error-container text-body-md flex flex-col gap-2 ${className}`}
+      >
+        <span className="font-label-md text-label-md text-on-error-container">
+          Google Maps API key is missing
         </span>
         <span>
-          {isMissing
-            ? "Set your key as "
-            : "The key in "}
-          <code className="font-semibold">VITE_GOOGLE_MAPS_API_KEY</code>
-          {isMissing
-            ? " in "
-            : " does not look like a valid Google Maps API key. Update it in "}
-          <code className="font-semibold">.env</code>
-          {isMissing
-            ? " to display the map."
-            : " (Google API keys are usually 39 characters long)."}
-        </span>
-        <span className="text-body-sm opacity-90">
-          Save the file, then restart the dev server so the change is picked up.
+          Set the <code className="font-semibold">GOOGLE_MAPS_API_KEY</code> secret in your
+          backend to display the map.
         </span>
       </div>
     );
   }
 
-  if (!src) {
-    return (
-      <div
-        className={`rounded-xl border border-border-subtle bg-surface-container p-6 text-on-surface-variant text-body-md flex flex-col gap-2 ${className}`}
-      >
-        <span className="font-label-md text-label-md text-on-surface">Map preview</span>
-        <span>
-          Add a Google Maps API key as{" "}
-          <code className="text-primary">VITE_GOOGLE_MAPS_API_KEY</code> in{" "}
-          <code className="text-primary">.env</code> to display an interactive map for{" "}
-          <span className="text-on-surface">{address}</span>.
-        </span>
-        <span className="text-body-sm text-on-surface-variant">
-          Save the file, then restart the dev server so the change is picked up.
-        </span>
-      </div>
-    );
-  }
+  if (!result?.ok) return null;
 
   return (
     <div className={`rounded-xl overflow-hidden border border-border-subtle ${className}`}>
       <iframe
         title={`Map of ${address}`}
-        src={src}
+        src={result.url}
         width="100%"
         height="320"
         style={{ border: 0 }}
