@@ -76,3 +76,113 @@ export const createOwnerShop = createServerFn({ method: "POST" })
 
     return shop;
   });
+
+// ---------- Shop details ----------
+
+const UpdateShopInput = z.object({
+  shopId: z.string().uuid(),
+  patch: z.object({
+    name: z.string().min(2).max(80).optional(),
+    description: z.string().max(1000).nullable().optional(),
+    address: z.string().max(200).nullable().optional(),
+    cover_image_url: z.string().url().max(500).nullable().optional(),
+  }),
+});
+
+export const updateShop = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => UpdateShopInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase
+      .from("shops")
+      .update(data.patch)
+      .eq("id", data.shopId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------- Services CRUD ----------
+
+const ServiceFields = z.object({
+  name: z.string().min(1).max(80),
+  description: z.string().max(500).nullable().optional(),
+  duration_minutes: z.number().int().positive().max(600),
+  price_cents: z.number().int().nonnegative().max(1_000_000),
+  is_active: z.boolean().optional(),
+});
+
+export const createService = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ shopId: z.string().uuid(), fields: ServiceFields }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("services").insert({
+      shop_id: data.shopId,
+      ...data.fields,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateService = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ serviceId: z.string().uuid(), fields: ServiceFields.partial() }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("services")
+      .update(data.fields)
+      .eq("id", data.serviceId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteService = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ serviceId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("services")
+      .delete()
+      .eq("id", data.serviceId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------- Weekly hours ----------
+
+const HourRow = z.object({
+  weekday: z.number().int().min(0).max(6),
+  open_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  close_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  is_closed: z.boolean(),
+});
+
+export const getShopHours = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ shopId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("shop_hours")
+      .select("weekday, open_time, close_time, is_closed")
+      .eq("shop_id", data.shopId);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const upsertShopHours = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ shopId: z.string().uuid(), hours: z.array(HourRow).length(7) }).parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const payload = data.hours.map((h) => ({ shop_id: data.shopId, ...h }));
+    const { error } = await context.supabase
+      .from("shop_hours")
+      .upsert(payload, { onConflict: "shop_id,weekday" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
