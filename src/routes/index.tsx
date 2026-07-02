@@ -56,8 +56,8 @@ function MarketplacePage() {
   const [query, setQuery] = useState({ name: "", location: "" });
 
   const filteredShops = useMemo(() => {
-    // Normalize: lowercase, strip punctuation/accents, collapse whitespace.
-    // So "Mike's Cuts", "mikes cuts", and "Mikes-Cuts" all match the same shop.
+    // Normalize: lowercase, strip accents/punctuation, collapse whitespace.
+    // So "Mike's Cuts", "mikes cuts", and "Mikes-Cuts" all normalize the same.
     const norm = (v: string) =>
       v
         .toLowerCase()
@@ -65,15 +65,55 @@ function MarketplacePage() {
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, " ")
         .trim();
+
+    // Levenshtein distance for short tokens.
+    const editDistance = (a: string, b: string) => {
+      if (a === b) return 0;
+      const m = a.length;
+      const n2 = b.length;
+      if (!m) return n2;
+      if (!n2) return m;
+      const row = new Array<number>(n2 + 1);
+      for (let j = 0; j <= n2; j++) row[j] = j;
+      for (let i = 1; i <= m; i++) {
+        let prevDiag = row[0];
+        row[0] = i;
+        for (let j = 1; j <= n2; j++) {
+          const temp = row[j];
+          const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
+          row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prevDiag + cost);
+          prevDiag = temp;
+        }
+      }
+      return row[n2];
+    };
+
+    // Fuzzy: every query token must match some target token via substring
+    // or small edit distance (threshold scales with token length).
+    const fuzzyMatch = (queryText: string, target: string) => {
+      if (!queryText) return true;
+      if (!target) return false;
+      if (target.includes(queryText)) return true;
+      const qTokens = queryText.split(" ").filter(Boolean);
+      const tTokens = target.split(" ").filter(Boolean);
+      return qTokens.every((qt) =>
+        tTokens.some((tt) => {
+          if (tt.includes(qt) || qt.includes(tt)) return true;
+          const threshold = qt.length <= 4 ? 1 : qt.length <= 7 ? 2 : 3;
+          return editDistance(qt, tt) <= threshold;
+        }),
+      );
+    };
+
     const n = norm(query.name);
     const l = norm(query.location);
     if (!n && !l) return shops;
     return shops.filter((s) => {
       const nameHit =
         !n ||
-        norm(s.name).includes(n) ||
-        norm(s.description ?? "").includes(n);
-      const locHit = !l || norm(s.address ?? "").includes(l);
+        fuzzyMatch(n, norm(s.name)) ||
+        fuzzyMatch(n, norm(s.description ?? ""));
+      const locHit = !l || fuzzyMatch(l, norm(s.address ?? ""));
       return nameHit && locHit;
     });
   }, [shops, query]);
