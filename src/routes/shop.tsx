@@ -118,27 +118,24 @@ function ShopContent({ slug }: { slug: string }) {
           <div
             className="absolute inset-0 bg-cover bg-center opacity-60"
             style={{
-              backgroundImage:
-                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC15Egl3FSRAl6spm53f0jNFHFvfm6gzWI869VRI42pcJfcsd-p1Jd8XgAOYNUXzxtQZvWezIvhwgWIGg9eimf3wql8CXkOgvnb20M_Ry8bUJyECeE6i7sLI27L4O6-AM8bQsnotKz6BzDLQEYzmXKL_iHeqoJxneXmxqwRprP4EEqrG_uh_MmEIBI7b_gYk-yUtKYxb3zpEDnRlqp9CQcK3NQBf9jrpFXFWzFVyMicYzyXbO5Q4JiK')",
+              backgroundImage: `url('${shop.cover_image_url ?? FALLBACK_HERO}')`,
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/60 to-transparent" />
           <div className="absolute bottom-0 left-0 p-6 md:p-10 flex flex-col md:flex-row items-end gap-6 w-full">
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-primary overflow-hidden shrink-0 bg-surface flex items-center justify-center">
-              <img
-                className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9kEE6t2DnhhNB4XqobuldHyGmG87HWvbiNXU5jJJFTqMlesqTP0Vzh1EvzXFhyDfaG_6RJUwuhWO9tGjhBfRg4nJFOjcj-ZidnML6G8LRzURvpIj2uiErLr1r78FyJiTwtMj1ONKsoQIKcGpogiTRxNMLG0fdxbmTKKbs9-gUBkQ7CjO1vfKA5tMIiIjhHsPdAMn5Wtvp4UmXqLrlK7e0YsBx16ESygcFPf_56TPkpN6rpSa6MM6b"
-                alt="The Sharp Edge logo"
-              />
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-primary overflow-hidden shrink-0 bg-surface flex items-center justify-center text-primary font-headline-lg">
+              {shop.name.charAt(0)}
             </div>
             <div className="flex-grow">
               <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">
-                The Sharp Edge
+                {shop.name}
               </h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-2">
-                <Icon name="location_on" className="text-[18px]" />
-                124 Obsidian Ave, Urban District
-              </p>
+              {shop.address && (
+                <p className="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-2">
+                  <Icon name="location_on" className="text-[18px]" />
+                  {shop.address}
+                </p>
+              )}
             </div>
           </div>
         </section>
