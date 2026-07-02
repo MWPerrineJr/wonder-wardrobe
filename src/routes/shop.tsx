@@ -4,6 +4,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 
 import { getPublicShopBySlug } from "@/lib/shops.functions";
+import { ShopMap } from "@/components/shop-map";
 
 const shopSearchSchema = z.object({
   slug: fallback(z.string(), "").default(""),
