@@ -56,15 +56,24 @@ function MarketplacePage() {
   const [query, setQuery] = useState({ name: "", location: "" });
 
   const filteredShops = useMemo(() => {
-    const n = query.name.trim().toLowerCase();
-    const l = query.location.trim().toLowerCase();
+    // Normalize: lowercase, strip punctuation/accents, collapse whitespace.
+    // So "Mike's Cuts", "mikes cuts", and "Mikes-Cuts" all match the same shop.
+    const norm = (v: string) =>
+      v
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    const n = norm(query.name);
+    const l = norm(query.location);
     if (!n && !l) return shops;
     return shops.filter((s) => {
       const nameHit =
         !n ||
-        s.name.toLowerCase().includes(n) ||
-        (s.description ?? "").toLowerCase().includes(n);
-      const locHit = !l || (s.address ?? "").toLowerCase().includes(l);
+        norm(s.name).includes(n) ||
+        norm(s.description ?? "").includes(n);
+      const locHit = !l || norm(s.address ?? "").includes(l);
       return nameHit && locHit;
     });
   }, [shops, query]);
