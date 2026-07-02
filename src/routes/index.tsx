@@ -120,6 +120,7 @@ function MarketplacePage() {
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
+    console.log("[search] submit", { name: nameInput, location: locationInput });
     setQuery({ name: nameInput, location: locationInput });
     if (typeof document !== "undefined") {
       document.getElementById("featured-shops")?.scrollIntoView({ behavior: "smooth" });
@@ -184,7 +185,7 @@ function MarketplacePage() {
             </p>
             <form
               onSubmit={handleSearch}
-              className="w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm"
+              className="relative z-20 w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm"
             >
               <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
                 <Icon name="search" className="text-text-muted mr-3" />
@@ -192,8 +193,11 @@ function MarketplacePage() {
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Shop name or style..."
                   type="text"
+                  autoComplete="off"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
+                  onFocus={() => console.log("[search] name focused")}
+                  onClick={() => console.log("[search] name clicked")}
                 />
               </div>
               <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
@@ -202,8 +206,18 @@ function MarketplacePage() {
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Location..."
                   type="text"
+                  autoComplete="off"
                   value={locationInput}
                   onChange={(e) => setLocationInput(e.target.value)}
+                  onFocus={() => {
+                    console.log("[search] location focused");
+                    if (!import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY) {
+                      console.info(
+                        "[search] Google Places autocomplete not enabled: no browser-safe Maps key is configured (GOOGLE_MAPS_API_KEY is server-only and used for the map embed). Add VITE_GOOGLE_MAPS_BROWSER_KEY with an HTTP-referrer-restricted key to enable Places suggestions.",
+                      );
+                    }
+                  }}
+                  onClick={() => console.log("[search] location clicked")}
                 />
               </div>
               <button
