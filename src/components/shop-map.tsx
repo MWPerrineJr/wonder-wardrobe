@@ -31,8 +31,12 @@ export function ShopMap({ address, className = "" }: Props) {
         <span className="font-label-md text-label-md text-on-surface">Map preview</span>
         <span>
           Add a Google Maps API key as{" "}
-          <code className="text-primary">VITE_GOOGLE_MAPS_API_KEY</code> to display an
-          interactive map for <span className="text-on-surface">{address}</span>.
+          <code className="text-primary">VITE_GOOGLE_MAPS_API_KEY</code> in{" "}
+          <code className="text-primary">.env</code> to display an interactive map for{" "}
+          <span className="text-on-surface">{address}</span>.
+        </span>
+        <span className="text-body-sm text-on-surface-variant">
+          Save the file, then restart the dev server so the change is picked up.
         </span>
       </div>
     );
