@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as BarberRouteImport } from './routes/barber'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BarberRoute = BarberRouteImport.update({
+  id: '/barber',
+  path: '/barber',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +31,31 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/barber': typeof BarberRoute
   '/shop': typeof ShopRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/barber': typeof BarberRoute
   '/shop': typeof ShopRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/barber': typeof BarberRoute
   '/shop': typeof ShopRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/shop'
+  fullPaths: '/' | '/barber' | '/shop'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/shop'
-  id: '__root__' | '/' | '/shop'
+  to: '/' | '/barber' | '/shop'
+  id: '__root__' | '/' | '/barber' | '/shop'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BarberRoute: typeof BarberRoute
   ShopRoute: typeof ShopRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/barber': {
+      id: '/barber'
+      path: '/barber'
+      fullPath: '/barber'
+      preLoaderRoute: typeof BarberRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BarberRoute: BarberRoute,
   ShopRoute: ShopRoute,
 }
 export const routeTree = rootRouteImport
