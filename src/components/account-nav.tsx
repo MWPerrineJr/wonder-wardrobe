@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 export function AccountNav() {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   if (loading) {
     return <div className="h-9 w-24 rounded bg-surface-container animate-pulse" />;
@@ -67,8 +69,10 @@ export function AccountNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={async () => {
+            await queryClient.cancelQueries();
+            queryClient.clear();
             await signOut();
-            navigate({ to: "/" });
+            navigate({ to: "/auth", replace: true });
           }}
           className="cursor-pointer"
         >
