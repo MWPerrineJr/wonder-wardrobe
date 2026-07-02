@@ -25,7 +25,7 @@ const myShopsQuery = queryOptions({
   queryFn: () => getMyShops(),
 });
 
-export const Route = createFileRoute("/_authenticated/owner/feedback")({
+export const Route = createFileRoute("/_authenticated/owner_/feedback")({
   head: () => ({
     meta: [
       { title: "Feedback Intelligence — Crown & Cut" },

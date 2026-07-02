@@ -15,7 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
-import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner.feedback'
+import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
 
 const ShopRoute = ShopRouteImport.update({
@@ -49,9 +49,9 @@ const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
 } as any)
 const AuthenticatedOwnerFeedbackRoute =
   AuthenticatedOwnerFeedbackRouteImport.update({
-    id: '/feedback',
-    path: '/feedback',
-    getParentRoute: () => AuthenticatedOwnerRoute,
+    id: '/owner_/feedback',
+    path: '/owner/feedback',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOnboardingOwnerRoute =
   AuthenticatedOnboardingOwnerRouteImport.update({
@@ -65,7 +65,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/barber': typeof BarberRoute
   '/shop': typeof ShopRoute
-  '/owner': typeof AuthenticatedOwnerRouteWithChildren
+  '/owner': typeof AuthenticatedOwnerRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
 }
@@ -74,7 +74,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/barber': typeof BarberRoute
   '/shop': typeof ShopRoute
-  '/owner': typeof AuthenticatedOwnerRouteWithChildren
+  '/owner': typeof AuthenticatedOwnerRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
 }
@@ -85,9 +85,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/barber': typeof BarberRoute
   '/shop': typeof ShopRoute
-  '/_authenticated/owner': typeof AuthenticatedOwnerRouteWithChildren
+  '/_authenticated/owner': typeof AuthenticatedOwnerRoute
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
-  '/_authenticated/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
+  '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,7 +117,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/_authenticated/owner'
     | '/_authenticated/onboarding/owner'
-    | '/_authenticated/owner/feedback'
+    | '/_authenticated/owner_/feedback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -172,12 +172,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/owner/feedback': {
-      id: '/_authenticated/owner/feedback'
-      path: '/feedback'
+    '/_authenticated/owner_/feedback': {
+      id: '/_authenticated/owner_/feedback'
+      path: '/owner/feedback'
       fullPath: '/owner/feedback'
       preLoaderRoute: typeof AuthenticatedOwnerFeedbackRouteImport
-      parentRoute: typeof AuthenticatedOwnerRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding/owner': {
       id: '/_authenticated/onboarding/owner'
@@ -189,25 +189,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedOwnerRouteChildren {
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
+  AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
   AuthenticatedOwnerFeedbackRoute: typeof AuthenticatedOwnerFeedbackRoute
 }
 
-const AuthenticatedOwnerRouteChildren: AuthenticatedOwnerRouteChildren = {
-  AuthenticatedOwnerFeedbackRoute: AuthenticatedOwnerFeedbackRoute,
-}
-
-const AuthenticatedOwnerRouteWithChildren =
-  AuthenticatedOwnerRoute._addFileChildren(AuthenticatedOwnerRouteChildren)
-
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRouteWithChildren
-  AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
-}
-
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedOwnerRoute: AuthenticatedOwnerRouteWithChildren,
+  AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
   AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
+  AuthenticatedOwnerFeedbackRoute: AuthenticatedOwnerFeedbackRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
