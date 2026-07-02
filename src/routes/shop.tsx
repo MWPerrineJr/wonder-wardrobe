@@ -54,6 +54,38 @@ const Icon = ({ name, className = "", filled = false }: { name: string; classNam
 );
 
 function ShopPage() {
+  const { slug } = Route.useSearch();
+  const query = useSuspenseQuery({
+    ...shopBySlugQuery(slug),
+    enabled: !!slug,
+  });
+  const data = slug ? query.data : null;
+
+  if (!slug) {
+    return (
+      <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
+        <h1 className="font-headline-md text-headline-md text-on-surface">No shop selected</h1>
+        <p className="text-on-surface-variant">Pick a shop from the marketplace to book.</p>
+        <Link to="/" className="bg-primary text-on-primary px-6 py-2 rounded font-bold">
+          Browse shops
+        </Link>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
+        <h1 className="font-headline-md text-headline-md text-on-surface">Shop not found</h1>
+        <Link to="/" className="bg-primary text-on-primary px-6 py-2 rounded font-bold">
+          Back to marketplace
+        </Link>
+      </div>
+    );
+  }
+
+  const { shop, services } = data;
+
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md">
       {/* Top nav */}
