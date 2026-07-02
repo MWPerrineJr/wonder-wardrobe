@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as BarberRouteImport } from './routes/barber'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnerRoute = OwnerRouteImport.update({
+  id: '/owner',
+  path: '/owner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BarberRoute = BarberRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/barber': typeof BarberRoute
+  '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/barber': typeof BarberRoute
+  '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/barber': typeof BarberRoute
+  '/owner': typeof OwnerRoute
   '/shop': typeof ShopRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/barber' | '/shop'
+  fullPaths: '/' | '/barber' | '/owner' | '/shop'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/barber' | '/shop'
-  id: '__root__' | '/' | '/barber' | '/shop'
+  to: '/' | '/barber' | '/owner' | '/shop'
+  id: '__root__' | '/' | '/barber' | '/owner' | '/shop'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BarberRoute: typeof BarberRoute
+  OwnerRoute: typeof OwnerRoute
   ShopRoute: typeof ShopRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owner': {
+      id: '/owner'
+      path: '/owner'
+      fullPath: '/owner'
+      preLoaderRoute: typeof OwnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/barber': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BarberRoute: BarberRoute,
+  OwnerRoute: OwnerRoute,
   ShopRoute: ShopRoute,
 }
 export const routeTree = rootRouteImport
