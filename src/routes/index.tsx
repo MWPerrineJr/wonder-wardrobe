@@ -163,48 +163,53 @@ function MarketplacePage() {
                 View All
               </a>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {SHOPS.map((s) => (
+            {shops.length === 0 ? (
+              <div className="bg-surface border border-border-subtle rounded-xl p-8 text-center flex flex-col gap-3">
+                <p className="text-on-surface font-headline-md text-[20px]">No shops yet</p>
+                <p className="text-on-surface-variant text-body-md">
+                  Be the first to list your shop on Crown &amp; Cut.
+                </p>
                 <Link
-                  key={s.name}
-                  to="/shop"
-                  className="bg-surface border border-border-subtle rounded-xl p-4 flex flex-col gap-4 hover:border-primary transition-colors cursor-pointer group shadow-sm"
+                  to="/onboarding/owner"
+                  className="mx-auto mt-2 bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded font-bold hover:opacity-90 transition-opacity"
                 >
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-surface-container">
-                    <img
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                      src={s.img}
-                      alt={s.name}
-                    />
-                    <div className="absolute top-2 right-2 bg-surface/90 backdrop-blur-sm px-2 py-1 rounded border border-border-subtle flex items-center gap-1">
-                      <Icon name="star" className="text-primary text-[14px]" />
-                      <span className="font-label-sm text-label-sm text-on-surface">{s.rating}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col">
-                      <h3 className="font-headline-md text-[20px] text-on-surface">{s.name}</h3>
-                      <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
-                        <Icon name="location_on" className="text-[16px]" /> {s.area}
-                      </span>
-                    </div>
-                    <span className="font-label-md text-label-md text-on-surface bg-surface-container px-2 py-1 rounded border border-border-subtle">
-                      {s.price}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {s.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="px-2 py-1 rounded-full border border-border-subtle text-label-sm font-label-sm text-on-surface-variant"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
+                  Become a shop owner
                 </Link>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {shops.map((s) => (
+                  <Link
+                    key={s.id}
+                    to="/shop"
+                    className="bg-surface border border-border-subtle rounded-xl p-4 flex flex-col gap-4 hover:border-primary transition-colors cursor-pointer group shadow-sm"
+                  >
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden bg-surface-container">
+                      <img
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                        src={s.cover_image_url ?? FALLBACK_SHOP_IMG}
+                        alt={s.name}
+                      />
+                    </div>
+                    <div className="flex justify-between items-start">
+                      <div className="flex flex-col">
+                        <h3 className="font-headline-md text-[20px] text-on-surface">{s.name}</h3>
+                        {s.address && (
+                          <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+                            <Icon name="location_on" className="text-[16px]" /> {s.address}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {s.description && (
+                      <p className="text-on-surface-variant text-label-sm line-clamp-2">
+                        {s.description}
+                      </p>
+                    )}
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </main>
