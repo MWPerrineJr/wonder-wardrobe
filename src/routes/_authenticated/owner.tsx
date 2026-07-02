@@ -93,9 +93,14 @@ function OwnerPage() {
             <Link to="/" className="font-headline-md text-headline-md text-primary tracking-tight">
               Crown &amp; Cut
             </Link>
-            <span className="hidden md:inline font-label-md text-label-md text-on-surface-variant">
-              Owner Dashboard
-            </span>
+            <nav className="hidden md:flex items-center gap-4 text-label-md">
+              <Link to="/owner" className="text-primary font-semibold">
+                Dashboard
+              </Link>
+              <Link to="/owner/feedback" className="text-on-surface-variant hover:text-on-surface">
+                Feedback
+              </Link>
+            </nav>
           </div>
           <AccountNav />
         </div>
