@@ -1,16 +1,48 @@
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+
+import { getPublicShopBySlug } from "@/lib/shops.functions";
+
+const shopSearchSchema = z.object({
+  slug: fallback(z.string(), "").default(""),
+});
+
+const shopBySlugQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["public", "shop", slug],
+    queryFn: () => getPublicShopBySlug({ data: { slug } }),
+    enabled: !!slug,
+  });
 
 export const Route = createFileRoute("/shop")({
+  validateSearch: zodValidator(shopSearchSchema),
+  loaderDeps: ({ search: { slug } }) => ({ slug }),
+  loader: ({ deps, context }) => {
+    if (deps.slug) context.queryClient.ensureQueryData(shopBySlugQuery(deps.slug));
+  },
   head: () => ({
     meta: [
-      { title: "The Sharp Edge — Book an appointment" },
-      { name: "description", content: "Book your next cut at The Sharp Edge. Pick your barber, service, date and time." },
-      { property: "og:title", content: "The Sharp Edge — Book an appointment" },
-      { property: "og:description", content: "Select a barber, choose a service, and lock in a time." },
+      { title: "Book an appointment — Crown & Cut" },
+      { name: "description", content: "Pick your barber, service, date and time." },
     ],
   }),
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-on-surface bg-background min-h-screen">
+      Couldn't load shop: {error.message}
+    </div>
+  ),
+  notFoundComponent: () => <div className="p-8">Shop not found.</div>,
   component: ShopPage,
 });
+
+const FALLBACK_HERO =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuC15Egl3FSRAl6spm53f0jNFHFvfm6gzWI869VRI42pcJfcsd-p1Jd8XgAOYNUXzxtQZvWezIvhwgWIGg9eimf3wql8CXkOgvnb20M_Ry8bUJyECeE6i7sLI27L4O6-AM8bQsnotKz6BzDLQEYzmXKL_iHeqoJxneXmxqwRprP4EEqrG_uh_MmEIBI7b_gYk-yUtKYxb3zpEDnRlqp9CQcK3NQBf9jrpFXFWzFVyMicYzyXbO5Q4JiK";
+
+function formatPrice(cents: number) {
+  return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
+}
 
 const Icon = ({ name, className = "", filled = false }: { name: string; className?: string; filled?: boolean }) => (
   <span
@@ -22,6 +54,36 @@ const Icon = ({ name, className = "", filled = false }: { name: string; classNam
 );
 
 function ShopPage() {
+  const { slug } = Route.useSearch();
+  if (!slug) {
+    return (
+      <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
+        <h1 className="font-headline-md text-headline-md text-on-surface">No shop selected</h1>
+        <p className="text-on-surface-variant">Pick a shop from the marketplace to book.</p>
+        <Link to="/" className="bg-primary text-on-primary px-6 py-2 rounded font-bold">
+          Browse shops
+        </Link>
+      </div>
+    );
+  }
+  return <ShopContent slug={slug} />;
+}
+
+function ShopContent({ slug }: { slug: string }) {
+  const { data } = useSuspenseQuery(shopBySlugQuery(slug));
+  if (!data) {
+    return (
+      <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
+        <h1 className="font-headline-md text-headline-md text-on-surface">Shop not found</h1>
+        <Link to="/" className="bg-primary text-on-primary px-6 py-2 rounded font-bold">
+          Back to marketplace
+        </Link>
+      </div>
+    );
+  }
+
+  const { shop, services } = data;
+
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md">
       {/* Top nav */}
@@ -56,27 +118,24 @@ function ShopPage() {
           <div
             className="absolute inset-0 bg-cover bg-center opacity-60"
             style={{
-              backgroundImage:
-                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC15Egl3FSRAl6spm53f0jNFHFvfm6gzWI869VRI42pcJfcsd-p1Jd8XgAOYNUXzxtQZvWezIvhwgWIGg9eimf3wql8CXkOgvnb20M_Ry8bUJyECeE6i7sLI27L4O6-AM8bQsnotKz6BzDLQEYzmXKL_iHeqoJxneXmxqwRprP4EEqrG_uh_MmEIBI7b_gYk-yUtKYxb3zpEDnRlqp9CQcK3NQBf9jrpFXFWzFVyMicYzyXbO5Q4JiK')",
+              backgroundImage: `url('${shop.cover_image_url ?? FALLBACK_HERO}')`,
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/60 to-transparent" />
           <div className="absolute bottom-0 left-0 p-6 md:p-10 flex flex-col md:flex-row items-end gap-6 w-full">
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-primary overflow-hidden shrink-0 bg-surface flex items-center justify-center">
-              <img
-                className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9kEE6t2DnhhNB4XqobuldHyGmG87HWvbiNXU5jJJFTqMlesqTP0Vzh1EvzXFhyDfaG_6RJUwuhWO9tGjhBfRg4nJFOjcj-ZidnML6G8LRzURvpIj2uiErLr1r78FyJiTwtMj1ONKsoQIKcGpogiTRxNMLG0fdxbmTKKbs9-gUBkQ7CjO1vfKA5tMIiIjhHsPdAMn5Wtvp4UmXqLrlK7e0YsBx16ESygcFPf_56TPkpN6rpSa6MM6b"
-                alt="The Sharp Edge logo"
-              />
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-primary overflow-hidden shrink-0 bg-surface flex items-center justify-center text-primary font-headline-lg">
+              {shop.name.charAt(0)}
             </div>
             <div className="flex-grow">
               <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">
-                The Sharp Edge
+                {shop.name}
               </h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-2">
-                <Icon name="location_on" className="text-[18px]" />
-                124 Obsidian Ave, Urban District
-              </p>
+              {shop.address && (
+                <p className="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-2">
+                  <Icon name="location_on" className="text-[18px]" />
+                  {shop.address}
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -134,28 +193,35 @@ function ShopPage() {
                 Choose Services
               </h2>
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container border border-primary relative overflow-hidden group cursor-pointer">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-label-md text-label-md text-on-surface">Signature Haircut</span>
-                    <span className="font-body-md text-body-md text-on-surface-variant text-sm">45 mins • Classic cut, wash, and style</span>
+                {services.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-surface-container border border-border-subtle text-on-surface-variant text-body-md">
+                    This shop hasn't added any services yet.
                   </div>
-                  <div className="font-headline-md text-headline-md text-primary">$45</div>
-                  <div className="absolute inset-y-0 right-0 w-1 bg-primary" />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container border border-border-subtle hover:border-primary/50 group cursor-pointer transition-all">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-label-md text-label-md text-on-surface">Precision Beard Trim</span>
-                    <span className="font-body-md text-body-md text-on-surface-variant text-sm">30 mins • Shaping, straight razor line-up, hot towel</span>
-                  </div>
-                  <div className="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">$30</div>
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg bg-surface-container border border-border-subtle hover:border-primary/50 group cursor-pointer transition-all">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-label-md text-label-md text-on-surface">The Executive Package</span>
-                    <span className="font-body-md text-body-md text-on-surface-variant text-sm">75 mins • Haircut, beard trim, facial massage</span>
-                  </div>
-                  <div className="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">$70</div>
-                </div>
+                ) : (
+                  services.map((svc, idx) => (
+                    <div
+                      key={svc.id}
+                      className={`flex items-center justify-between p-4 rounded-lg bg-surface-container border ${
+                        idx === 0 ? "border-primary relative overflow-hidden" : "border-border-subtle hover:border-primary/50"
+                      } group cursor-pointer transition-all`}
+                    >
+                      <div className="flex flex-col gap-1">
+                        <span className="font-label-md text-label-md text-on-surface">{svc.name}</span>
+                        <span className="font-body-md text-body-md text-on-surface-variant text-sm">
+                          {svc.duration_minutes} mins{svc.description ? ` • ${svc.description}` : ""}
+                        </span>
+                      </div>
+                      <div
+                        className={`font-headline-md text-headline-md ${
+                          idx === 0 ? "text-primary" : "text-on-surface group-hover:text-primary transition-colors"
+                        }`}
+                      >
+                        {formatPrice(svc.price_cents)}
+                      </div>
+                      {idx === 0 && <div className="absolute inset-y-0 right-0 w-1 bg-primary" />}
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
