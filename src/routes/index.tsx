@@ -66,31 +66,26 @@ function MarketplacePage() {
         .replace(/[^a-z0-9]+/g, " ")
         .trim();
 
-    // Damerau-ish Levenshtein for short tokens.
+    // Levenshtein distance for short tokens.
     const editDistance = (a: string, b: string) => {
       if (a === b) return 0;
       const m = a.length;
       const n2 = b.length;
       if (!m) return n2;
       if (!n2) return m;
-      const prev = new Array(n2 + 1).fill(0).map((_, i) => i);
+      const row = new Array<number>(n2 + 1);
+      for (let j = 0; j <= n2; j++) row[j] = j;
       for (let i = 1; i <= m; i++) {
-        let curr = i;
-        let prevDiag = prev[0];
-        prev[0] = i;
+        let prevDiag = row[0];
+        row[0] = i;
         for (let j = 1; j <= n2; j++) {
-          const temp = prev[j];
+          const temp = row[j];
           const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
-          curr = Math.min(prev[j] + 1, prev[j - 1] + 1, prevDiag + cost);
-          prev[j - 1] = curr === i ? prev[j - 1] : prev[j - 1];
-          prev[j - 1] = temp === undefined ? prev[j - 1] : prev[j - 1];
-          // simpler: assign along
-          prev[j - 1] = temp;
+          row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prevDiag + cost);
           prevDiag = temp;
-          prev[j] = curr;
         }
       }
-      return prev[n2];
+      return row[n2];
     };
 
     // Fuzzy: every query token must match some target token via substring
