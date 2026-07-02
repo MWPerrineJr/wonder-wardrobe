@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
@@ -50,6 +51,32 @@ const FALLBACK_SHOP_IMG =
 
 function MarketplacePage() {
   const { data: shops } = useSuspenseQuery(shopsQuery);
+  const [nameInput, setNameInput] = useState("");
+  const [locationInput, setLocationInput] = useState("");
+  const [query, setQuery] = useState({ name: "", location: "" });
+
+  const filteredShops = useMemo(() => {
+    const n = query.name.trim().toLowerCase();
+    const l = query.location.trim().toLowerCase();
+    if (!n && !l) return shops;
+    return shops.filter((s) => {
+      const nameHit =
+        !n ||
+        s.name.toLowerCase().includes(n) ||
+        (s.description ?? "").toLowerCase().includes(n);
+      const locHit = !l || (s.address ?? "").toLowerCase().includes(l);
+      return nameHit && locHit;
+    });
+  }, [shops, query]);
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setQuery({ name: nameInput, location: locationInput });
+    if (typeof document !== "undefined") {
+      document.getElementById("featured-shops")?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen flex flex-col text-on-background">
       {/* Top nav — desktop */}
