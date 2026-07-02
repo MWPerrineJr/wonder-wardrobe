@@ -1,31 +1,26 @@
-## Switch Crown & Cut to a light theme
+## Verify `/onboarding/owner` end-to-end
 
-### Goal
-Move the whole app from the current near-black dark theme to a clean light theme, keeping all components readable and the gold/primary accent intact.
+### What exists today
+- `createOwnerShop` server fn: grants `owner` role (idempotent), checks slug uniqueness, inserts a `shops` row. **Does not create any services.**
+- `/onboarding/owner` form: collects name, slug, address, description; on success toasts and navigates to `/owner`.
+- Route sits under `_authenticated/`, so unauthenticated users get redirected to `/auth`.
 
-### What will change
+### Gap vs. your ask
+You mentioned "creates my first shop **and services**". The current flow does not create services — only the shop + owner role. Two options:
 
-1. **Global design tokens (`src/styles.css`)**
-   - Flip background/surface colors to light values (`#f5f5f5` background, `#ffffff` elevated cards).
-   - Flip text colors to dark values (`#1a1a1a` primary text, muted grays for secondary).
-   - Keep borders subtle (`#e0e0e0`).
-   - Update base `html/body` and helper classes (`.glass-panel`, `.calendar-grid`, `.time-slot`) so they work on light backgrounds.
+- **A. Verify as-built** (shop + role + redirect only). Services get added later from the owner dashboard.
+- **B. Extend onboarding** to also capture 1–3 starter services (name, duration, price) and insert them into `services` in the same server fn, then verify the full flow.
 
-2. **Route files**
-   - Replace hardcoded dark colors (`text-white`, `bg-[#0b0b0b]`, `bg-[#0F0F0F]`, `text-[#e2e2e2]`, `bg-surface-deep`) with semantic tokens (`text-on-surface`, `bg-surface-container-*`, `bg-background`).
-   - Update hero overlays, gradients, and input backgrounds so they remain legible on light surfaces.
-   - Keep the primary gold accent (`#D4AF37`) unchanged.
+### Verification steps (same for A or B)
+1. Drive Playwright headless against `http://localhost:8080`, restoring the injected Supabase session.
+2. Navigate to `/onboarding/owner`, screenshot the form.
+3. Fill name / slug / address / description (option B: also fill service rows), submit.
+4. Assert redirect to `/owner` and screenshot.
+5. Query the DB via `psql` to confirm:
+   - `shops` row exists with the expected `owner_id` and `slug`
+   - `user_roles` has `(user_id, 'owner')`
+   - (option B) `services` rows exist for the new shop
+6. Report results + screenshots; clean up the test rows.
 
-3. **Routes affected**
-   - `/` — Marketplace
-   - `/shop` — Booking page
-   - `/barber` — Barber schedule
-   - `/owner` — Owner dashboard
-
-### Verification
-- Run a type check / build to confirm no broken classes or imports.
-- Open the preview to confirm text, cards, inputs, and calendar remain readable on the light background.
-
-### Notes
-- No backend or route changes; purely a visual/theme refactor.
-- The mobile bottom nav and desktop top/side nav will also be lightened to match.
+### Which option should I take?
+Default is **B** (extend to also seed services), since that matches what you asked to verify. Reply "A" to just verify the current shop-only flow instead.
