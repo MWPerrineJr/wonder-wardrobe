@@ -50,9 +50,9 @@ const SHOPS = [
 
 function MarketplacePage() {
   return (
-    <div className="bg-surface-deep min-h-screen flex flex-col text-[#e2e2e2]">
+    <div className="bg-background min-h-screen flex flex-col text-on-background">
       {/* Top nav — desktop */}
-      <header className="hidden md:flex w-full sticky top-0 z-50 bg-surface-deep border-b border-border-subtle">
+      <header className="hidden md:flex w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full">
           <div className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
             Crown &amp; Cut
@@ -61,22 +61,22 @@ function MarketplacePage() {
             <Link to="/" className="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md">
               Marketplace
             </Link>
-            <Link to="/shop" className="text-on-surface-variant hover:text-white transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Services
             </Link>
-            <Link to="/barber" className="text-on-surface-variant hover:text-white transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link to="/barber" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Barber
             </Link>
-            <Link to="/owner" className="text-on-surface-variant hover:text-white transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link to="/owner" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Owner
             </Link>
           </nav>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-on-surface-variant">
-              <button className="hover:bg-surface-container-high p-2 rounded transition-all">
+              <button className="hover:bg-surface-container p-2 rounded transition-all">
                 <Icon name="notifications" />
               </button>
-              <button className="hover:bg-surface-container-high p-2 rounded transition-all">
+              <button className="hover:bg-surface-container p-2 rounded transition-all">
                 <Icon name="account_circle" />
               </button>
             </div>
@@ -98,28 +98,28 @@ function MarketplacePage() {
               className="bg-cover bg-center w-full h-full opacity-30"
               style={{ backgroundImage: `url('${HERO_BG}')` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-surface-deep to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
           </div>
           <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center gap-8">
-            <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-white">
+            <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
               Find your next cut
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
               Discover premium barbers, view their portfolios, and book your next appointment seamlessly.
             </p>
-            <div className="w-full max-w-2xl bg-surface-elevated border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors">
-              <div className="flex-grow flex items-center bg-surface-deep px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
+            <div className="w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm">
+              <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
                 <Icon name="search" className="text-text-muted mr-3" />
                 <input
-                  className="bg-transparent border-none outline-none text-white w-full font-body-md text-body-md placeholder:text-text-muted"
+                  className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Shop name or style..."
                   type="text"
                 />
               </div>
-              <div className="flex-grow flex items-center bg-surface-deep px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
+              <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
                 <Icon name="location_on" className="text-text-muted mr-3" />
                 <input
-                  className="bg-transparent border-none outline-none text-white w-full font-body-md text-body-md placeholder:text-text-muted"
+                  className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
                   placeholder="Location..."
                   type="text"
                 />
@@ -135,20 +135,20 @@ function MarketplacePage() {
           {/* Categories */}
           <section className="flex flex-col gap-8">
             <div className="flex justify-between items-end">
-              <h2 className="font-headline-md text-headline-md text-white">Categories</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface">Categories</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {CATEGORIES.map((c) => (
                 <div
                   key={c.title}
-                  className="group relative h-48 rounded-xl overflow-hidden border border-border-subtle hover:border-primary transition-colors cursor-pointer bg-surface-elevated"
+                  className="group relative h-48 rounded-xl overflow-hidden border border-border-subtle hover:border-primary transition-colors cursor-pointer bg-surface"
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity"
                     style={{ backgroundImage: `url('${c.img}')` }}
                   />
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-surface-deep via-surface-deep/80 to-transparent">
-                    <span className="font-headline-md text-headline-md text-white">{c.title}</span>
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+                    <span className="font-headline-md text-headline-md text-on-surface">{c.title}</span>
                     <span className="font-label-sm text-label-sm text-on-surface-variant mt-1">{c.subtitle}</span>
                   </div>
                 </div>
@@ -159,7 +159,7 @@ function MarketplacePage() {
           {/* Featured shops */}
           <section className="flex flex-col gap-8">
             <div className="flex justify-between items-end">
-              <h2 className="font-headline-md text-headline-md text-white">Featured Shops</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface">Featured Shops</h2>
               <a className="font-label-md text-label-md text-primary hover:underline" href="#">
                 View All
               </a>
@@ -169,27 +169,27 @@ function MarketplacePage() {
                 <Link
                   key={s.name}
                   to="/shop"
-                  className="bg-surface-elevated border border-border-subtle rounded-xl p-4 flex flex-col gap-4 hover:border-primary transition-colors cursor-pointer group"
+                  className="bg-surface border border-border-subtle rounded-xl p-4 flex flex-col gap-4 hover:border-primary transition-colors cursor-pointer group shadow-sm"
                 >
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-surface-deep">
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-surface-container">
                     <img
                       className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                       src={s.img}
                       alt={s.name}
                     />
-                    <div className="absolute top-2 right-2 bg-surface-deep/80 backdrop-blur-sm px-2 py-1 rounded border border-border-subtle flex items-center gap-1">
+                    <div className="absolute top-2 right-2 bg-surface/90 backdrop-blur-sm px-2 py-1 rounded border border-border-subtle flex items-center gap-1">
                       <Icon name="star" className="text-primary text-[14px]" />
-                      <span className="font-label-sm text-label-sm text-white">{s.rating}</span>
+                      <span className="font-label-sm text-label-sm text-on-surface">{s.rating}</span>
                     </div>
                   </div>
                   <div className="flex justify-between items-start">
                     <div className="flex flex-col">
-                      <h3 className="font-headline-md text-[20px] text-white">{s.name}</h3>
+                      <h3 className="font-headline-md text-[20px] text-on-surface">{s.name}</h3>
                       <span className="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
                         <Icon name="location_on" className="text-[16px]" /> {s.area}
                       </span>
                     </div>
-                    <span className="font-label-md text-label-md text-white bg-surface-deep px-2 py-1 rounded border border-border-subtle">
+                    <span className="font-label-md text-label-md text-on-surface bg-surface-container px-2 py-1 rounded border border-border-subtle">
                       {s.price}
                     </span>
                   </div>
@@ -211,20 +211,20 @@ function MarketplacePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-surface-deep border-t border-border-subtle w-full py-10 mt-auto">
+      <footer className="bg-background border-t border-border-subtle w-full py-10 mt-auto">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin-desktop max-w-container-max mx-auto gap-gutter">
-          <div className="font-headline-md text-headline-md text-white">Crown &amp; Cut</div>
+          <div className="font-headline-md text-headline-md text-on-surface">Crown &amp; Cut</div>
           <nav className="flex flex-wrap justify-center gap-6">
-            <a className="text-text-muted hover:text-white transition-colors font-label-sm text-label-sm" href="#">
+            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Privacy Policy
             </a>
-            <a className="text-text-muted hover:text-white transition-colors font-label-sm text-label-sm" href="#">
+            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Terms of Service
             </a>
-            <a className="text-text-muted hover:text-white transition-colors font-label-sm text-label-sm" href="#">
+            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               For Barbers
             </a>
-            <a className="text-text-muted hover:text-white transition-colors font-label-sm text-label-sm" href="#">
+            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Contact
             </a>
           </nav>
@@ -235,21 +235,21 @@ function MarketplacePage() {
       </footer>
 
       {/* Bottom nav — mobile */}
-      <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface-elevated border-t border-border-subtle shadow-lg">
+      <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-border-subtle shadow-lg">
         <div className="flex justify-around items-center h-16 px-margin-mobile">
           <Link to="/" className="flex flex-col items-center justify-center text-primary font-bold p-2 rounded">
             <Icon name="search" />
             <span className="font-label-sm text-label-sm mt-1">Explore</span>
           </Link>
-          <Link to="/shop" className="flex flex-col items-center justify-center text-secondary-fixed-dim p-2 rounded">
+          <Link to="/shop" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="event_note" />
             <span className="font-label-sm text-label-sm mt-1">Bookings</span>
           </Link>
-          <Link to="/barber" className="flex flex-col items-center justify-center text-secondary-fixed-dim p-2 rounded">
+          <Link to="/barber" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="calendar_today" />
             <span className="font-label-sm text-label-sm mt-1">Barber</span>
           </Link>
-          <Link to="/owner" className="flex flex-col items-center justify-center text-secondary-fixed-dim p-2 rounded">
+          <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="dashboard" />
             <span className="font-label-sm text-label-sm mt-1">Owner</span>
           </Link>

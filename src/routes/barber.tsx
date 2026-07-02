@@ -27,7 +27,7 @@ const SideLink = ({ icon, label, active = false, filled = false }: { icon: strin
     className={
       active
         ? "flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-fixed bg-primary-container font-bold font-label-md text-label-md"
-        : "flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-elevated transition-colors font-label-md text-label-md group"
+        : "flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-md text-label-md group"
     }
   >
     <Icon name={icon} className="text-[20px]" filled={filled} />
@@ -38,9 +38,9 @@ const SideLink = ({ icon, label, active = false, filled = false }: { icon: strin
 function BarberPage() {
   const dotDays = new Set([11, 12, 13, 16, 17, 18, 20, 23, 24, 25]);
   return (
-    <div className="bg-surface-deep text-white font-body-md min-h-screen flex">
+    <div className="bg-background text-on-background font-body-md min-h-screen flex">
       {/* Side nav */}
-      <nav className="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-[#0b0b0b] border-r border-border-subtle p-4 gap-baseline z-50">
+      <nav className="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface border-r border-border-subtle p-4 gap-baseline z-50">
         <div className="mb-8 flex items-center gap-4">
           <img
             className="w-10 h-10 rounded-full object-cover border border-border-subtle"
@@ -61,15 +61,15 @@ function BarberPage() {
         </div>
         <Link
           to="/"
-          className="w-full py-3 mb-4 rounded border border-border-subtle text-white hover:bg-surface-elevated transition-colors font-label-md text-label-md flex justify-center items-center gap-2"
+          className="w-full py-3 mb-4 rounded border border-border-subtle text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md flex justify-center items-center gap-2"
         >
           View Shop Page <Icon name="open_in_new" className="text-[16px]" />
         </Link>
         <div className="flex flex-col gap-2 mt-auto border-t border-border-subtle pt-4">
-          <a href="#" className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-elevated transition-colors font-label-sm text-label-sm">
+          <a href="#" className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-sm text-label-sm">
             <Icon name="settings" className="text-[18px]" /> Settings
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-elevated transition-colors font-label-sm text-label-sm">
+          <a href="#" className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-sm text-label-sm">
             <Icon name="help_outline" className="text-[18px]" /> Support
           </a>
         </div>
@@ -78,11 +78,11 @@ function BarberPage() {
       <main className="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full min-h-screen pb-24 md:pb-margin-desktop">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-2">My Schedule</h2>
+            <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">My Schedule</h2>
             <p className="font-body-md text-body-md text-text-muted">Manage your appointments for Thursday, Oct 26</p>
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto">
-            <div className="flex items-center gap-2 bg-surface-elevated px-4 py-2 rounded-full border border-border-subtle text-label-sm text-text-muted">
+            <div className="flex items-center gap-2 bg-surface px-4 py-2 rounded-full border border-border-subtle text-label-sm text-text-muted">
               <Icon name="check_circle" className="text-[16px] text-[#34A853]" filled />
               Google Calendar Synced
             </div>
@@ -96,28 +96,28 @@ function BarberPage() {
           {/* Left column */}
           <div className="lg:col-span-4 flex flex-col gap-gutter">
             {/* Today's Pulse */}
-            <div className="bg-surface-elevated rounded-xl p-6 border border-border-subtle relative overflow-hidden group hover:border-primary/50 transition-colors">
+            <div className="bg-surface rounded-xl p-6 border border-border-subtle relative overflow-hidden group hover:border-primary/50 transition-colors">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-headline-md text-headline-md text-white">Today's Pulse</h3>
+                <h3 className="font-headline-md text-headline-md text-on-surface">Today's Pulse</h3>
                 <button className="text-text-muted hover:text-primary transition-colors">
                   <Icon name="more_horiz" />
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#0b0b0b] p-4 rounded-lg border border-border-subtle">
+                <div className="bg-surface-container p-4 rounded-lg border border-border-subtle">
                   <p className="font-label-sm text-label-sm text-text-muted mb-1">Appointments</p>
                   <p className="font-headline-md text-headline-md text-primary">8</p>
                 </div>
-                <div className="bg-[#0b0b0b] p-4 rounded-lg border border-border-subtle">
+                <div className="bg-surface-container p-4 rounded-lg border border-border-subtle">
                   <p className="font-label-sm text-label-sm text-text-muted mb-1">Expected Revenue</p>
-                  <p className="font-headline-md text-headline-md text-white">$320</p>
+                  <p className="font-headline-md text-headline-md text-on-surface">$320</p>
                 </div>
-                <div className="col-span-2 bg-[#0b0b0b] p-4 rounded-lg border border-border-subtle flex items-center justify-between">
+                <div className="col-span-2 bg-surface-container p-4 rounded-lg border border-border-subtle flex items-center justify-between">
                   <div>
                     <p className="font-label-sm text-label-sm text-text-muted mb-1">Completion Rate</p>
                     <div className="flex items-center gap-2">
-                      <p className="font-headline-md text-headline-md text-white">37%</p>
+                      <p className="font-headline-md text-headline-md text-on-surface">37%</p>
                       <span className="text-[12px] text-electric-blue bg-electric-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Icon name="trending_up" className="text-[12px]" /> 3/8 Done
                       </span>
@@ -128,14 +128,14 @@ function BarberPage() {
               </div>
             </div>
             {/* Mini Calendar */}
-            <div className="bg-surface-elevated rounded-xl p-6 border border-border-subtle">
+            <div className="bg-surface rounded-xl p-6 border border-border-subtle">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-label-md text-label-md text-white font-semibold">October 2024</h4>
+                <h4 className="font-label-md text-label-md text-on-surface font-semibold">October 2024</h4>
                 <div className="flex gap-2">
-                  <button className="p-1 hover:bg-surface-elevated rounded text-text-muted hover:text-white transition-colors">
+                  <button className="p-1 hover:bg-surface-container rounded text-text-muted hover:text-primary transition-colors">
                     <Icon name="chevron_left" className="text-[20px]" />
                   </button>
-                  <button className="p-1 hover:bg-surface-elevated rounded text-text-muted hover:text-white transition-colors">
+                  <button className="p-1 hover:bg-surface-container rounded text-text-muted hover:text-primary transition-colors">
                     <Icon name="chevron_right" className="text-[20px]" />
                   </button>
                 </div>
@@ -157,7 +157,7 @@ function BarberPage() {
                       className={
                         active
                           ? "p-2 bg-primary text-on-primary rounded-full font-bold relative shadow-[0_0_15px_rgba(212,175,55,0.3)]"
-                          : "p-2 text-white hover:bg-[#0b0b0b] rounded-full transition-colors relative"
+                          : "p-2 text-on-surface hover:bg-surface-container rounded-full transition-colors relative"
                       }
                     >
                       {d}
@@ -174,29 +174,29 @@ function BarberPage() {
           </div>
 
           {/* Right column: schedule */}
-          <div className="lg:col-span-8 bg-surface-elevated rounded-xl border border-border-subtle flex flex-col h-[800px] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border-subtle bg-[#0b0b0b]">
+          <div className="lg:col-span-8 bg-surface rounded-xl border border-border-subtle flex flex-col h-[800px] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-border-subtle bg-surface-container">
               <div className="flex items-center gap-4">
-                <h3 className="font-headline-md text-headline-md text-white">Thursday, Oct 26</h3>
-                <div className="hidden sm:flex gap-1 bg-surface-deep p-1 rounded border border-border-subtle">
-                  <button className="px-3 py-1 bg-surface-container-highest text-black rounded font-label-sm text-label-sm shadow-sm border border-border-subtle">Day</button>
-                  <button className="px-3 py-1 text-text-muted hover:text-white rounded font-label-sm text-label-sm">Week</button>
+                <h3 className="font-headline-md text-headline-md text-on-surface">Thursday, Oct 26</h3>
+                <div className="hidden sm:flex gap-1 bg-surface p-1 rounded border border-border-subtle">
+                  <button className="px-3 py-1 bg-surface-container-high text-on-surface rounded font-label-sm text-label-sm shadow-sm border border-border-subtle">Day</button>
+                  <button className="px-3 py-1 text-text-muted hover:text-primary rounded font-label-sm text-label-sm">Week</button>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-2 rounded border border-border-subtle hover:bg-surface-elevated text-text-muted hover:text-white">
+                <button className="p-2 rounded border border-border-subtle hover:bg-surface-container text-text-muted hover:text-primary">
                   <Icon name="filter_list" className="text-[20px]" />
                 </button>
-                <button className="p-2 rounded border border-border-subtle hover:bg-surface-elevated text-text-muted hover:text-white">
+                <button className="p-2 rounded border border-border-subtle hover:bg-surface-container text-text-muted hover:text-primary">
                   <Icon name="print" className="text-[20px]" />
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto relative calendar-grid bg-surface-deep">
+            <div className="flex-1 overflow-y-auto relative calendar-grid bg-surface-container">
               <div className="flex">
                 {/* Time axis */}
-                <div className="w-16 flex-shrink-0 border-r border-border-subtle bg-surface-elevated flex flex-col text-right pr-2 py-2 text-text-muted font-label-sm text-label-sm sticky left-0 z-20">
+                <div className="w-16 flex-shrink-0 border-r border-border-subtle bg-surface flex flex-col text-right pr-2 py-2 text-text-muted font-label-sm text-label-sm sticky left-0 z-20">
                   {["9 AM","10 AM","11 AM","12 PM","1 PM","2 PM","3 PM","4 PM","5 PM","6 PM","7 PM"].map(t => (
                     <div key={t} className="time-slot flex justify-end -mt-3"><span>{t}</span></div>
                   ))}
@@ -207,17 +207,17 @@ function BarberPage() {
                     <div className="absolute -left-1.5 -top-1.5 w-3 h-3 rounded-full bg-error" />
                   </div>
 
-                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-[#0b0b0b] opacity-70 flex flex-col justify-between" style={{ top: 10, height: 50 }}>
+                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-surface-container opacity-70 flex flex-col justify-between" style={{ top: 10, height: 50 }}>
                     <div className="flex justify-between items-start">
-                      <p className="font-label-md text-label-md text-white line-through">Skin Fade &amp; Beard Trim</p>
+                      <p className="font-label-md text-label-md text-on-surface line-through">Skin Fade &amp; Beard Trim</p>
                       <Icon name="check_circle" className="text-[16px] text-text-muted" />
                     </div>
                     <p className="font-label-sm text-label-sm text-text-muted">Mike T. • 9:10 - 10:00 AM</p>
                   </div>
 
-                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-[#0b0b0b] opacity-70 flex flex-col justify-between" style={{ top: 70, height: 40 }}>
+                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-surface-container opacity-70 flex flex-col justify-between" style={{ top: 70, height: 40 }}>
                     <div className="flex justify-between items-center h-full">
-                      <p className="font-label-md text-label-md text-white line-through">Classic Haircut</p>
+                      <p className="font-label-md text-label-md text-on-surface line-through">Classic Haircut</p>
                       <p className="font-label-sm text-label-sm text-text-muted">James W.</p>
                     </div>
                   </div>
@@ -227,7 +227,7 @@ function BarberPage() {
                       <div>
                         <p className="font-label-md text-label-md text-primary font-bold mb-1">Executive Grooming Package</p>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-label-sm text-label-sm text-white px-2 py-0.5 border border-border-subtle rounded-full bg-surface-deep">In Progress</span>
+                          <span className="font-label-sm text-label-sm text-on-surface px-2 py-0.5 border border-border-subtle rounded-full bg-surface-container">In Progress</span>
                           <p className="font-label-sm text-label-sm text-text-muted">David S. • 11:10 - 12:30 PM</p>
                         </div>
                       </div>
@@ -239,11 +239,11 @@ function BarberPage() {
                     </div>
                   </div>
 
-                  <div className="absolute left-2 right-4 rounded-lg border border-border-subtle border-dashed bg-surface-deep opacity-50 flex items-center justify-center pointer-events-none" style={{ top: 220, height: 30 }}>
+                  <div className="absolute left-2 right-4 rounded-lg border border-border-subtle border-dashed bg-surface-container opacity-50 flex items-center justify-center pointer-events-none" style={{ top: 220, height: 30 }}>
                     <p className="font-label-sm text-label-sm text-text-muted tracking-widest uppercase">Lunch Break</p>
                   </div>
 
-                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-surface-container-highest text-black flex flex-col justify-between cursor-pointer hover:border-text-muted transition-colors" style={{ top: 260, height: 60 }}>
+                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-surface-container-high text-on-surface flex flex-col justify-between cursor-pointer hover:border-text-muted transition-colors" style={{ top: 260, height: 60 }}>
                     <div className="flex justify-between items-start">
                       <p className="font-label-md text-label-md">Hot Towel Shave</p>
                       <p className="font-label-md text-label-md">$45</p>
@@ -253,20 +253,20 @@ function BarberPage() {
 
                   <div className="absolute left-2 w-1/2 pr-1 rounded-lg p-3 border border-electric-blue/50 bg-electric-blue/10 flex flex-col justify-between cursor-pointer hover:bg-electric-blue/20 transition-colors" style={{ top: 330, height: 50 }}>
                     <div className="flex justify-between items-start">
-                      <p className="font-label-md text-label-md text-white truncate pr-2">Dentist Appt (Personal)</p>
+                      <p className="font-label-md text-label-md text-on-surface truncate pr-2">Dentist Appt (Personal)</p>
                       <Icon name="sync" className="text-[16px] text-electric-blue" />
                     </div>
                     <p className="font-label-sm text-label-sm text-text-muted">Google Cal</p>
                   </div>
 
-                  <div className="absolute right-4 rounded-lg p-3 border border-border-subtle bg-surface-container-highest text-black flex flex-col justify-between cursor-pointer hover:border-text-muted transition-colors" style={{ top: 360, height: 40, width: "calc(50% - 12px)" }}>
+                  <div className="absolute right-4 rounded-lg p-3 border border-border-subtle bg-surface-container-high text-on-surface flex flex-col justify-between cursor-pointer hover:border-text-muted transition-colors" style={{ top: 360, height: 40, width: "calc(50% - 12px)" }}>
                     <div className="flex justify-between items-center h-full">
                       <p className="font-label-md text-label-md truncate">Line Up</p>
                       <p className="font-label-sm text-label-sm text-text-muted ml-2">Chris B.</p>
                     </div>
                   </div>
 
-                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-surface-container-highest text-black flex flex-col justify-between cursor-pointer hover:border-text-muted transition-colors" style={{ top: 490, height: 60 }}>
+                  <div className="absolute left-2 right-4 rounded-lg p-3 border border-border-subtle bg-surface-container-high text-on-surface flex flex-col justify-between cursor-pointer hover:border-text-muted transition-colors" style={{ top: 490, height: 60 }}>
                     <div className="flex justify-between items-start">
                       <p className="font-label-md text-label-md">Kids Cut</p>
                       <p className="font-label-md text-label-md">$30</p>
@@ -281,23 +281,23 @@ function BarberPage() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface-elevated border-t border-border-subtle shadow-lg">
+      <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-border-subtle shadow-lg">
         <div className="flex justify-around items-center h-16 px-margin-mobile">
-          <Link to="/" className="flex flex-col items-center justify-center text-secondary-fixed-dim w-full h-full">
-            <Icon name="search" className="text-[24px]" />
-            <span className="font-label-sm text-[10px] mt-1">Explore</span>
+          <Link to="/" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+            <Icon name="search" />
+            <span className="font-label-sm text-label-sm mt-1">Explore</span>
           </Link>
-          <Link to="/shop" className="flex flex-col items-center justify-center text-secondary-fixed-dim w-full h-full">
-            <Icon name="event_note" className="text-[24px]" />
-            <span className="font-label-sm text-[10px] mt-1">Bookings</span>
+          <Link to="/shop" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+            <Icon name="event_note" />
+            <span className="font-label-sm text-label-sm mt-1">Bookings</span>
           </Link>
-          <Link to="/barber" className="flex flex-col items-center justify-center text-primary font-bold w-full h-full">
-            <Icon name="calendar_today" className="text-[24px]" filled />
-            <span className="font-label-sm text-[10px] mt-1">Barber</span>
+          <Link to="/barber" className="flex flex-col items-center justify-center text-primary font-bold p-2 rounded">
+            <Icon name="calendar_today" filled />
+            <span className="font-label-sm text-label-sm mt-1">Barber</span>
           </Link>
-          <Link to="/owner" className="flex flex-col items-center justify-center text-secondary-fixed-dim w-full h-full">
-            <Icon name="dashboard" className="text-[24px]" />
-            <span className="font-label-sm text-[10px] mt-1">Owner</span>
+          <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+            <Icon name="dashboard" />
+            <span className="font-label-sm text-label-sm mt-1">Owner</span>
           </Link>
         </div>
       </nav>

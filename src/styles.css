@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Crown & Cut design tokens — ported from the source HTML tailwind.config.
+ * Crown & Cut design tokens — light theme.
  */
 
 @theme {
@@ -38,29 +38,29 @@
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
-  --color-background: #f9f9f9;
-  --color-on-background: #1a1c1c;
-  --color-surface: #f9f9f9;
-  --color-on-surface: #1a1c1c;
-  --color-surface-variant: #e2e2e2;
-  --color-on-surface-variant: #4d4635;
-  --color-surface-dim: #dadada;
-  --color-surface-bright: #f9f9f9;
-  --color-surface-deep: #080808;
-  --color-surface-elevated: #1A1A1A;
+  --color-background: #f5f5f5;
+  --color-on-background: #1a1a1a;
+  --color-surface: #ffffff;
+  --color-on-surface: #1a1a1a;
+  --color-surface-variant: #f0f0f0;
+  --color-on-surface-variant: #5a5a5a;
+  --color-surface-dim: #e0e0e0;
+  --color-surface-bright: #ffffff;
+  --color-surface-deep: #f5f5f5;
+  --color-surface-elevated: #ffffff;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f3f3f4;
-  --color-surface-container: #eeeeee;
-  --color-surface-container-high: #e8e8e8;
-  --color-surface-container-highest: #e2e2e2;
+  --color-surface-container-low: #fafafa;
+  --color-surface-container: #f5f5f5;
+  --color-surface-container-high: #eeeeee;
+  --color-surface-container-highest: #e8e8e8;
   --color-surface-tint: #735c00;
-  --color-inverse-surface: #2f3131;
-  --color-inverse-on-surface: #f0f1f1;
+  --color-inverse-surface: #2a2a2a;
+  --color-inverse-on-surface: #f5f5f5;
   --color-inverse-primary: #e9c349;
-  --color-outline: #7f7663;
-  --color-outline-variant: #d0c5af;
-  --color-border-subtle: #2A2A2A;
-  --color-text-muted: #A1A1A1;
+  --color-outline: #d0d0d0;
+  --color-outline-variant: #e0e0e0;
+  --color-border-subtle: #e0e0e0;
+  --color-text-muted: #6b7280;
   --color-electric-blue: #007AFF;
   --color-classic-gold: #D4AF37;
 
@@ -115,8 +115,8 @@
 @layer base {
   html,
   body {
-    background-color: var(--color-surface-deep);
-    color: #e2e2e2;
+    background-color: var(--color-background);
+    color: var(--color-on-background);
   }
   body {
     font-family: var(--font-body);
@@ -124,20 +124,20 @@
   }
 }
 
-/* Barber schedule shared styles */
+/* Shared component styles */
 .glass-panel {
-  background: rgba(26, 26, 26, 0.7);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #2A2A2A;
+  border: 1px solid var(--color-border-subtle);
 }
 .calendar-grid {
   background-size: 100% 60px;
-  background-image: linear-gradient(to bottom, #2A2A2A 1px, transparent 1px);
+  background-image: linear-gradient(to bottom, var(--color-border-subtle) 1px, transparent 1px);
 }
 .time-slot {
   height: 60px;
-  border-bottom: 1px solid #2A2A2A;
+  border-bottom: 1px solid var(--color-border-subtle);
   position: relative;
 }
 .material-symbols-outlined {
