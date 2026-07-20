@@ -8,6 +8,9 @@ import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — Crown & Cut" },
@@ -22,6 +25,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { next } = Route.useSearch();
   const [mode, setMode] = useState<"sign_in" | "sign_up">("sign_in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,20 +41,28 @@ function AuthPage() {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: next ? window.location.origin + next : window.location.origin,
             data: { full_name: fullName },
           },
         });
         if (error) throw error;
         toast.success("Account created. You're signed in.");
         router.invalidate();
-        navigate({ to: "/" });
+        if (next) {
+          window.location.href = next;
+        } else {
+          navigate({ to: "/" });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back.");
         router.invalidate();
-        navigate({ to: "/" });
+        if (next) {
+          window.location.href = next;
+        } else {
+          navigate({ to: "/" });
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong";
@@ -64,7 +76,7 @@ function AuthPage() {
     setSubmitting(true);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+        redirect_uri: next ? window.location.origin + next : window.location.origin,
       });
       if (result.error) {
         const message = result.error instanceof Error ? result.error.message : String(result.error);
