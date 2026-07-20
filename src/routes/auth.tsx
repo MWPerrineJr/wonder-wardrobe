@@ -234,5 +234,15 @@ function AuthPage() {
         )}
       </div>
     </div>
+    <ConfirmSignOutDialog
+      open={signOutConfirmOpen}
+      onOpenChange={setSignOutConfirmOpen}
+      onConfirm={async () => {
+        await queryClient.cancelQueries();
+        queryClient.clear();
+        await signOut();
+        toast.success("Signed out.");
+      }}
+    />
   );
 }
