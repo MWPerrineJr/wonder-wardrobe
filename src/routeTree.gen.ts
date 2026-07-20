@@ -15,6 +15,7 @@ import { Route as BarberRouteImport } from './routes/barber'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthGoogleTestRouteImport } from './routes/auth.google-test'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -51,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthGoogleTestRoute = AuthGoogleTestRouteImport.update({
+  id: '/google-test',
+  path: '/google-test',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
   id: '/owner',
@@ -95,13 +101,14 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
   '/shop': typeof ShopRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/owner': typeof AuthenticatedOwnerRoute
+  '/auth/google-test': typeof AuthGoogleTestRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
@@ -109,13 +116,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
   '/shop': typeof ShopRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/owner': typeof AuthenticatedOwnerRoute
+  '/auth/google-test': typeof AuthGoogleTestRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
@@ -125,13 +133,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
   '/shop': typeof ShopRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/owner': typeof AuthenticatedOwnerRoute
+  '/auth/google-test': typeof AuthGoogleTestRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/owner'
+    | '/auth/google-test'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/onboarding/owner'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/owner'
+    | '/auth/google-test'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/onboarding/owner'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/owner'
+    | '/auth/google-test'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/onboarding/owner'
@@ -186,7 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   BarberRoute: typeof BarberRoute
   McpRoute: typeof McpRoute
   ShopRoute: typeof ShopRoute
@@ -239,6 +251,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/google-test': {
+      id: '/auth/google-test'
+      path: '/google-test'
+      fullPath: '/auth/google-test'
+      preLoaderRoute: typeof AuthGoogleTestRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_authenticated/owner': {
       id: '/_authenticated/owner'
@@ -307,10 +326,20 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthGoogleTestRoute: typeof AuthGoogleTestRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthGoogleTestRoute: AuthGoogleTestRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   BarberRoute: BarberRoute,
   McpRoute: McpRoute,
   ShopRoute: ShopRoute,
