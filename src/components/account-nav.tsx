@@ -90,6 +90,12 @@ export function AccountNav() {
               <Icon name="person_add" className="text-[18px] mr-2" /> Create an account
             </Link>
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link to="/auth/google-test" className="cursor-pointer">
+              <Icon name="science" className="text-[18px] mr-2" /> Test Google sign-in
+            </Link>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
@@ -132,6 +138,11 @@ export function AccountNav() {
         <DropdownMenuItem asChild>
           <Link to="/onboarding/owner" className="cursor-pointer">
             <Icon name="storefront" className="text-[18px] mr-2" /> Become a shop owner
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/auth/google-test" className="cursor-pointer">
+            <Icon name="science" className="text-[18px] mr-2" /> Test Google sign-in
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
