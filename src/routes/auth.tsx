@@ -96,6 +96,7 @@ function AuthPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-background text-on-background flex items-center justify-center px-4 py-12 font-body-md">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -244,5 +245,6 @@ function AuthPage() {
         toast.success("Signed out.");
       }}
     />
+    </>
   );
 }
