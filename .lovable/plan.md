@@ -1,20 +1,13 @@
-## Add "Continue with Google" to the Welcome Gate
+## Force Google account picker on sign-in
 
-Update `src/components/welcome-gate.tsx` to add a Google sign-in button alongside the existing Sign in / Create account / Continue as guest options.
+Google is skipping the account chooser and auto-using the last-used account. Fix by passing `prompt: "select_account"` to every `lovable.auth.signInWithOAuth("google", …)` call so users with multiple Gmail accounts always see the picker.
 
 ### Changes
 
-**`src/components/welcome-gate.tsx`**
-- Import `lovable` from `@/integrations/lovable/index`.
-- Add a `handleGoogle` handler calling `lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })`, following the standard result/error/redirected pattern.
-- Add a "Continue with Google" button (with Google icon) as the primary CTA at the top of the action list, above "Sign in".
-- Show a small error message inline if the OAuth call fails.
-- Keep guest mode behavior (localStorage flag) unchanged.
+Update each Google sign-in call site to include `extraParams: { prompt: "select_account" }`:
 
-### Layout order in the gate
-1. Continue with Google (primary, gold)
-2. Sign in (secondary)
-3. Create an account (secondary)
-4. Continue as guest (ghost/link)
+- `src/components/welcome-gate.tsx` — `handleGoogle` in the home welcome gate.
+- `src/routes/auth.tsx` — the "Continue with Google" button on the auth page.
+- Any other call site found during a quick grep for `signInWithOAuth("google"` / `signInWithOAuth('google'`.
 
-No changes to auth config — Google is already enabled from a prior step.
+No backend or provider config changes required.
