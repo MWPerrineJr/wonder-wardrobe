@@ -131,6 +131,11 @@ export function AccountNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
+          <Link to="/account" className="cursor-pointer">
+            <Icon name="person" className="text-[18px] mr-2" /> My account
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <Link to="/owner" className="cursor-pointer">
             <Icon name="dashboard" className="text-[18px] mr-2" /> Owner dashboard
           </Link>
