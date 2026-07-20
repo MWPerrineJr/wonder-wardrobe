@@ -53,7 +53,7 @@ export const updateMyProfile = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UpdateProfileInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const patch: Record<string, string | null> = {};
+    const patch: { full_name?: string | null; avatar_url?: string | null; phone?: string | null } = {};
     if (data.full_name !== undefined) patch.full_name = data.full_name || null;
     if (data.avatar_url !== undefined) patch.avatar_url = data.avatar_url ? data.avatar_url : null;
     if (data.phone !== undefined) patch.phone = data.phone || null;
