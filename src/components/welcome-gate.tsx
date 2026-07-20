@@ -84,7 +84,7 @@ export function WelcomeGate() {
           </button>
           <Link
             to="/auth"
-            className="w-full text-center bg-primary text-on-primary font-label-md text-label-md py-3 rounded-lg font-bold hover:bg-primary/90 transition-all"
+            className="w-full text-center border border-border-subtle bg-surface rounded-lg py-3 text-on-surface font-label-md text-label-md hover:border-primary transition-colors"
           >
             Sign in
           </Link>
