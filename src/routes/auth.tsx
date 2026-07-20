@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
+import { ConfirmSignOutDialog } from "@/components/confirm-sign-out";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -28,6 +29,7 @@ function AuthPage() {
   const queryClient = useQueryClient();
   const { next, mode: initialMode } = Route.useSearch();
   const [mode, setMode] = useState<"sign_in" | "sign_up">(initialMode === "sign_up" ? "sign_up" : "sign_in");
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -94,6 +96,7 @@ function AuthPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-background text-on-background flex items-center justify-center px-4 py-12 font-body-md">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -128,12 +131,7 @@ function AuthPage() {
             </button>
             <button
               type="button"
-              onClick={async () => {
-                await queryClient.cancelQueries();
-                queryClient.clear();
-                await signOut();
-                toast.success("Signed out.");
-              }}
+              onClick={() => setSignOutConfirmOpen(true)}
               className="w-full border border-border-subtle rounded-lg bg-surface hover:border-primary transition-colors py-3 text-on-surface font-label-md text-label-md"
             >
               Sign out
@@ -237,5 +235,16 @@ function AuthPage() {
         )}
       </div>
     </div>
+    <ConfirmSignOutDialog
+      open={signOutConfirmOpen}
+      onOpenChange={setSignOutConfirmOpen}
+      onConfirm={async () => {
+        await queryClient.cancelQueries();
+        queryClient.clear();
+        await signOut();
+        toast.success("Signed out.");
+      }}
+    />
+    </>
   );
 }
