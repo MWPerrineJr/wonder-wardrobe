@@ -1,34 +1,43 @@
 ## Goal
-Add an easy-to-test flow that (1) forces the Google account picker and (2) clearly shows which Google email is signed in after the redirect completes.
+Give signed-in customers an account page at `/account` that shows their profile and their booking/service history.
 
-## New route: `/auth/google-test`
-A dedicated, public page for verifying the Google sign-in round trip end to end without touching the marketplace gate or header.
+## New route: `/_authenticated/account.tsx`
+Sits behind the managed auth gate. Two sections:
 
-Contents:
-- Heading: "Google sign-in test"
-- Signed-out state: single "Continue with Google" button that calls `lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/auth/google-test`, extraParams: { prompt: "select_account" } })` so the account chooser is always shown.
-- Signed-in state: a card showing
-  - "Signed in as" + the Google email (from `supabase.auth.getUser()` → `user.email`)
-  - Provider + avatar/display name when present (`user.user_metadata.full_name`, `avatar_url`)
-  - Raw `identities[0].identity_data.email` as a fallback confirmation that it came from Google
-  - "Try another account" button → signs out then immediately re-invokes Google sign-in with `prompt: "select_account"`
-  - "Sign out" button (uses existing `ConfirmSignOutDialog`)
-- Small status line: last event from `onAuthStateChange` (e.g. `SIGNED_IN`, `SIGNED_OUT`) so testers can see the transition.
+1. **Profile**
+   - Read-only display of email + full name + avatar (from `profiles` + `auth.users`).
+   - Inline "Edit" toggles a form to update `full_name` and `avatar_url` (existing `profiles` table, RLS already scoped to self).
+
+2. **Service history**
+   - Lists this user's bookings, newest first, filtered by `bookings.customer_id = auth.uid()`.
+   - Tabs: **Upcoming** (`status in (pending, confirmed)` AND `starts_at >= now()`) and **Past** (everything else).
+   - Each row shows: date/time, shop name, service name + duration, barber name, price, status pill.
+   - Empty state with a "Find a shop" CTA linking to `/`.
+
+## Server functions (new file `src/lib/account.functions.ts`)
+All use `requireSupabaseAuth`:
+- `getMyProfile()` → returns `{ email, full_name, avatar_url }`.
+- `updateMyProfile({ full_name, avatar_url })` → updates `profiles` where `id = auth.uid()`.
+- `listMyBookings()` → selects from `bookings` joined with `shops(name, slug)`, `services(name, duration_minutes)`, `barbers(display_name)`, filtered by `customer_id = context.userId`, ordered by `starts_at desc`.
+
+Data shape returned as plain DTOs (SSR-serializable). Uses TanStack Query pattern: loader calls `ensureQueryData`, component uses `useSuspenseQuery`.
+
+## RLS check
+`bookings` already has policies; will verify a customer-self SELECT policy exists. If missing, add one in a small migration:
+```sql
+CREATE POLICY "Customers view own bookings" ON public.bookings
+FOR SELECT TO authenticated USING (auth.uid() = customer_id);
+```
+(Only added if not already present.)
 
 ## Header entry point
-Add a "Test Google sign-in" link to `src/components/account-nav.tsx` dropdown (visible in both signed-in and signed-out states) that navigates to `/auth/google-test`. This keeps the flow discoverable without altering existing auth surfaces.
-
-## Behavior details
-- Uses the already-enabled managed Google provider and existing `lovable.auth.signInWithOAuth` helper — no new backend config.
-- Reads user via `supabase.auth.getUser()` on mount and subscribes to `onAuthStateChange` so the picked email appears immediately after redirect.
-- Renders inside the current light theme; no design token changes.
+Add "My account" link to the signed-in dropdown in `src/components/account-nav.tsx`, pointing to `/account`.
 
 ## Files
-- New: `src/routes/auth.google-test.tsx` (public route, TanStack file route).
-- Edit: `src/components/account-nav.tsx` — add link to the test page.
+- New: `src/routes/_authenticated/account.tsx`
+- New: `src/lib/account.functions.ts`
+- Edit: `src/components/account-nav.tsx` (add link)
+- Migration only if a customer-self SELECT policy on `bookings` is missing.
 
-## How to test
-1. Sign out.
-2. Open `/auth/google-test` → click "Continue with Google" → Google account chooser appears.
-3. Pick an account → redirected back → page shows "Signed in as <that email>".
-4. Click "Try another account" → chooser appears again → pick a different account → email updates.
+## Out of scope
+Cancelling/rescheduling bookings, reviews/feedback submission, payment history — those can follow in a later phase.
