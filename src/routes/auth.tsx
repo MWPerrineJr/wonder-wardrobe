@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+    mode: s.mode === "sign_up" ? ("sign_up" as const) : undefined,
   }),
   head: () => ({
     meta: [
@@ -25,8 +26,8 @@ function AuthPage() {
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { next } = Route.useSearch();
-  const [mode, setMode] = useState<"sign_in" | "sign_up">("sign_in");
+  const { next, mode: initialMode } = Route.useSearch();
+  const [mode, setMode] = useState<"sign_in" | "sign_up">(initialMode === "sign_up" ? "sign_up" : "sign_in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");

@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { AccountNav } from "@/components/account-nav";
+import { WelcomeGate } from "@/components/welcome-gate";
 import { listPublicShops } from "@/lib/shops.functions";
 
 const shopsQuery = queryOptions({
@@ -129,6 +130,7 @@ function MarketplacePage() {
 
   return (
     <div className="bg-background min-h-screen flex flex-col text-on-background">
+      <WelcomeGate />
       {/* Top nav — desktop */}
       <header className="hidden md:flex w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full">
