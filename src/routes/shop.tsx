@@ -5,6 +5,9 @@ import { z } from "zod";
 
 import { getPublicShopBySlug } from "@/lib/shops.functions";
 import { ShopMap } from "@/components/shop-map";
+import { BookingPanel } from "@/components/booking-panel";
+import { FeedbackForm } from "@/components/feedback-form";
+import { getBookingContext } from "@/lib/booking.functions";
 
 const shopSearchSchema = z.object({
   slug: fallback(z.string(), "").default(""),
@@ -17,11 +20,21 @@ const shopBySlugQuery = (slug: string) =>
     enabled: !!slug,
   });
 
+const bookingContextQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["public", "booking-context", slug],
+    queryFn: () => getBookingContext({ data: { slug } }),
+    enabled: !!slug,
+  });
+
 export const Route = createFileRoute("/shop")({
   validateSearch: zodValidator(shopSearchSchema),
   loaderDeps: ({ search: { slug } }) => ({ slug }),
   loader: ({ deps, context }) => {
-    if (deps.slug) context.queryClient.ensureQueryData(shopBySlugQuery(deps.slug));
+    if (deps.slug) {
+      context.queryClient.ensureQueryData(shopBySlugQuery(deps.slug));
+      context.queryClient.ensureQueryData(bookingContextQuery(deps.slug));
+    }
   },
   head: () => ({
     meta: [
@@ -40,10 +53,6 @@ export const Route = createFileRoute("/shop")({
 
 const FALLBACK_HERO =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuC15Egl3FSRAl6spm53f0jNFHFvfm6gzWI869VRI42pcJfcsd-p1Jd8XgAOYNUXzxtQZvWezIvhwgWIGg9eimf3wql8CXkOgvnb20M_Ry8bUJyECeE6i7sLI27L4O6-AM8bQsnotKz6BzDLQEYzmXKL_iHeqoJxneXmxqwRprP4EEqrG_uh_MmEIBI7b_gYk-yUtKYxb3zpEDnRlqp9CQcK3NQBf9jrpFXFWzFVyMicYzyXbO5Q4JiK";
-
-function formatPrice(cents: number) {
-  return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
-}
 
 const Icon = ({ name, className = "", filled = false }: { name: string; className?: string; filled?: boolean }) => (
   <span
@@ -72,6 +81,7 @@ function ShopPage() {
 
 function ShopContent({ slug }: { slug: string }) {
   const { data } = useSuspenseQuery(shopBySlugQuery(slug));
+  const { data: bookingCtx } = useSuspenseQuery(bookingContextQuery(slug));
   if (!data) {
     return (
       <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
@@ -83,7 +93,7 @@ function ShopContent({ slug }: { slug: string }) {
     );
   }
 
-  const { shop, services } = data;
+  const { shop } = data;
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md">
@@ -152,178 +162,30 @@ function ShopContent({ slug }: { slug: string }) {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-          {/* Left column */}
           <div className="lg:col-span-8 flex flex-col gap-10">
-            {/* Step 1 Barber */}
-            <section className="glass-panel rounded-xl p-6 md:p-8">
-              <h2 className="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-3">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md">1</span>
-                Select Barber
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <button className="flex flex-col items-center gap-3 p-4 rounded-lg border border-border-subtle hover:border-primary bg-surface-container transition-all group">
-                  <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
-                    <Icon name="group" className="text-[32px]" />
-                  </div>
-                  <span className="font-label-md text-label-md text-on-surface">No Preference</span>
-                </button>
-                <button className="flex flex-col items-center gap-3 p-4 rounded-lg border border-primary bg-surface transition-all relative">
-                  <div className="absolute top-2 right-2 text-primary">
-                    <Icon name="check_circle" className="text-[20px]" filled />
-                  </div>
-                  <img
-                    className="w-16 h-16 rounded-full object-cover border border-border-subtle"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBfoFjMva9zWROLFbYfrJtP45n4LOaO707DjYTKkIMbzPKiPGo9H39799FTrmS_znxJ2tsSKvUB3EVCzRS5nz-uNNdrgsVUOan4BE2Xjl-UcLpxn3aiYv8sdSJRJszW9rZjep0xl2ddjxFlppOhLvHjjLvm08nWy3smANIn8s2i_rtfMgYZgS7fcBuAfJQVUTr2dzyr2oOh4Fjwj-cgru22z3cy97FCO6_RGZi93TLizH_8yK1Jw8Y"
-                    alt="Marcus T."
-                  />
-                  <span className="font-label-md text-label-md text-on-surface">Marcus T.</span>
-                  <div className="flex gap-1 flex-wrap justify-center">
-                    <span className="text-[10px] uppercase font-semibold tracking-wider border border-border-subtle rounded px-2 py-0.5 text-on-surface-variant bg-surface-container">Fades</span>
-                    <span className="text-[10px] uppercase font-semibold tracking-wider border border-border-subtle rounded px-2 py-0.5 text-on-surface-variant bg-surface-container">Beards</span>
-                  </div>
-                </button>
-                <button className="flex flex-col items-center gap-3 p-4 rounded-lg border border-border-subtle hover:border-primary bg-surface-container transition-all">
-                  <img
-                    className="w-16 h-16 rounded-full object-cover border border-border-subtle"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuChmFqpygZd8-G-38rX7qPMExVfXr-JlqAaSafaIwl0qcblRAeRtTNQA9AtyXCED1PZ32RnsyEFPAYa_rz4k3wRt8P-hciTxtHs30PRn0bWX2uTSdy0_36nHMKo4d8GGxX5zRRzJB0i4YeLE4yw5jouuoShnJf5ah207LRVl-2KcZIk_BhTgKstCa7LhE_tfIfOzxXBIYY_e7NuDg2ULf7OExbnO7hAdTatgBuI6EGhtvAD2xarqEcG"
-                    alt="Sarah J."
-                  />
-                  <span className="font-label-md text-label-md text-on-surface">Sarah J.</span>
-                  <div className="flex gap-1 flex-wrap justify-center">
-                    <span className="text-[10px] uppercase font-semibold tracking-wider border border-border-subtle rounded px-2 py-0.5 text-on-surface-variant bg-surface-container">Scissors</span>
-                    <span className="text-[10px] uppercase font-semibold tracking-wider border border-border-subtle rounded px-2 py-0.5 text-on-surface-variant bg-surface-container">Color</span>
-                  </div>
-                </button>
+            {bookingCtx ? (
+              <BookingPanel ctx={bookingCtx} slug={slug} />
+            ) : (
+              <div className="glass-panel rounded-xl p-6 text-on-surface-variant text-body-md">
+                Booking is not available for this shop yet.
               </div>
-            </section>
-
-            {/* Step 2 Services */}
-            <section className="glass-panel rounded-xl p-6 md:p-8">
-              <h2 className="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-3">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md border border-border-subtle">2</span>
-                Choose Services
-              </h2>
-              <div className="flex flex-col gap-2">
-                {services.length === 0 ? (
-                  <div className="p-4 rounded-lg bg-surface-container border border-border-subtle text-on-surface-variant text-body-md">
-                    This shop hasn't added any services yet.
-                  </div>
-                ) : (
-                  services.map((svc, idx) => (
-                    <div
-                      key={svc.id}
-                      className={`flex items-center justify-between p-4 rounded-lg bg-surface-container border ${
-                        idx === 0 ? "border-primary relative overflow-hidden" : "border-border-subtle hover:border-primary/50"
-                      } group cursor-pointer transition-all`}
-                    >
-                      <div className="flex flex-col gap-1">
-                        <span className="font-label-md text-label-md text-on-surface">{svc.name}</span>
-                        <span className="font-body-md text-body-md text-on-surface-variant text-sm">
-                          {svc.duration_minutes} mins{svc.description ? ` • ${svc.description}` : ""}
-                        </span>
-                      </div>
-                      <div
-                        className={`font-headline-md text-headline-md ${
-                          idx === 0 ? "text-primary" : "text-on-surface group-hover:text-primary transition-colors"
-                        }`}
-                      >
-                        {formatPrice(svc.price_cents)}
-                      </div>
-                      {idx === 0 && <div className="absolute inset-y-0 right-0 w-1 bg-primary" />}
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-
-            {/* Step 3 Date & Time */}
-            <section className="glass-panel rounded-xl p-6 md:p-8">
-              <h2 className="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-3">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md border border-border-subtle">3</span>
-                Date &amp; Time
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="border border-border-subtle p-4 rounded-lg bg-surface-container">
-                  <div className="flex justify-between items-center mb-4">
-                    <button className="text-on-surface-variant hover:text-primary"><Icon name="chevron_left" /></button>
-                    <span className="font-label-md text-label-md text-on-surface">October 2024</span>
-                    <button className="text-on-surface-variant hover:text-primary"><Icon name="chevron_right" /></button>
-                  </div>
-                  <div className="grid grid-cols-7 gap-1 text-center font-label-sm text-label-sm text-on-surface-variant mb-2">
-                    {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => <div key={d}>{d}</div>)}
-                  </div>
-                  <div className="grid grid-cols-7 gap-1 text-center font-body-md text-body-md text-on-surface">
-                    <div className="p-2 opacity-20">29</div>
-                    <div className="p-2 opacity-20">30</div>
-                    {[1,2].map(d => (
-                      <div key={d} className="p-2 border border-border-subtle rounded cursor-pointer hover:border-primary">{d}</div>
-                    ))}
-                    <div className="p-2 border border-primary rounded text-primary font-bold">3</div>
-                    {[4,5,6,7].map(d => (
-                      <div key={d} className="p-2 border border-border-subtle rounded cursor-pointer hover:border-primary">{d}</div>
-                    ))}
-                    {Array.from({length: 24}, (_,i) => i+8).map(d => (
-                      <div key={d} className="p-2 border border-border-subtle rounded cursor-pointer hover:border-primary">{d}</div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <h3 className="font-label-md text-label-md text-on-surface-variant mb-2 border-b border-border-subtle pb-2">
-                    Available Slots on Oct 3
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    <button className="p-2 border border-border-subtle rounded font-body-md text-body-md hover:border-primary bg-surface-container transition-colors text-on-surface">09:00 AM</button>
-                    <button className="p-2 border border-border-subtle rounded font-body-md text-body-md hover:border-primary bg-surface-container transition-colors text-on-surface">09:45 AM</button>
-                    <button className="p-2 border border-primary rounded font-body-md text-body-md text-primary font-bold bg-surface">10:30 AM</button>
-                    <button className="p-2 border border-border-subtle rounded font-body-md text-body-md opacity-20 cursor-not-allowed">11:15 AM</button>
-                    <button className="p-2 border border-border-subtle rounded font-body-md text-body-md hover:border-primary bg-surface-container transition-colors text-on-surface">01:00 PM</button>
-                    <button className="p-2 border border-border-subtle rounded font-body-md text-body-md hover:border-primary bg-surface-container transition-colors text-on-surface">01:45 PM</button>
-                  </div>
-                </div>
-              </div>
-            </section>
+            )}
           </div>
 
-          {/* Right column: summary */}
-          <div className="lg:col-span-4">
-            <div className="glass-panel rounded-xl p-6 md:p-8 lg:sticky lg:top-24 flex flex-col gap-6">
-              <h2 className="font-headline-md text-headline-md text-on-surface border-b border-border-subtle pb-4">Booking Summary</h2>
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex flex-col">
-                    <span className="font-label-md text-label-md text-on-surface">Signature Haircut</span>
-                    <span className="font-body-md text-body-md text-on-surface-variant text-sm">Marcus T.</span>
-                  </div>
-                  <span className="font-label-md text-label-md text-primary">$45</span>
-                </div>
-                <div className="flex items-center gap-2 text-on-surface-variant font-body-md text-body-md text-sm border-t border-border-subtle pt-4">
-                  <Icon name="calendar_today" className="text-[16px]" />
-                  Oct 3, 2024 at 10:30 AM (45m)
-                </div>
-              </div>
-              <div className="border-t border-border-subtle pt-4 mt-2">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="font-label-md text-label-md text-on-surface">Total</span>
-                  <span className="font-headline-md text-headline-md text-primary">$45</span>
-                </div>
-                <div className="flex flex-col gap-4 mb-6">
-                  <div>
-                    <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Full Name</label>
-                    <input className="w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:ring-0 font-body-md text-body-md placeholder:text-text-muted" placeholder="John Doe" type="text" />
-                  </div>
-                  <div>
-                    <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Phone Number</label>
-                    <input className="w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:ring-0 font-body-md text-body-md placeholder:text-text-muted" placeholder="(555) 000-0000" type="tel" />
-                  </div>
-                </div>
-                <button className="w-full bg-primary text-on-primary font-headline-md text-headline-md py-4 rounded-lg font-bold hover:bg-primary/90 transition-all">
-                  Confirm Booking
-                </button>
-                <p className="font-label-sm text-label-sm text-center text-on-surface-variant mt-4">
-                  By booking, you agree to our cancellation policy.
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <div className="glass-panel rounded-xl p-6 flex flex-col gap-3">
+              <h2 className="font-headline-md text-headline-md text-on-surface">About</h2>
+              <p className="text-on-surface-variant text-body-md">
+                {shop.description ?? "This shop hasn't added a description yet."}
+              </p>
+              {shop.address && (
+                <p className="text-on-surface-variant text-body-md flex items-center gap-2">
+                  <Icon name="location_on" className="text-[18px]" />
+                  {shop.address}
                 </p>
-              </div>
+              )}
             </div>
+            <FeedbackForm shopId={shop.id} slug={slug} />
           </div>
         </div>
       </main>

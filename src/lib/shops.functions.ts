@@ -79,8 +79,8 @@ export const getMyShops = createServerFn({ method: "GET" })
               .from("bookings")
               .select("id", { count: "exact", head: true })
               .eq("shop_id", s.id)
-              .gte("start_time", start)
-              .lt("start_time", end),
+              .gte("starts_at", start)
+              .lt("starts_at", end),
           ]);
         return {
           ...s,

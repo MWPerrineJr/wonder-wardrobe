@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { ConfirmSignOutDialog } from "@/components/confirm-sign-out";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { next?: string; mode?: "sign_up" } => ({
     next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
     mode: s.mode === "sign_up" ? ("sign_up" as const) : undefined,
   }),
