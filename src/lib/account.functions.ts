@@ -43,9 +43,15 @@ export const getMyProfile = createServerFn({ method: "GET" })
   });
 
 const UpdateProfileInput = z.object({
-  full_name: z.string().trim().max(80).nullable().optional(),
+  full_name: z.string().trim().min(2, "Enter your full name").max(80).nullable().optional(),
   avatar_url: z.string().trim().url().max(500).nullable().optional().or(z.literal("")),
-  phone: z.string().trim().max(30).nullable().optional(),
+  phone: z
+    .string()
+    .trim()
+    .max(30)
+    .regex(/^[+()\d\s.-]*$/, "Phone can only contain digits and + ( ) - . spaces")
+    .nullable()
+    .optional(),
 });
 
 export const updateMyProfile = createServerFn({ method: "POST" })
@@ -57,9 +63,14 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     if (data.full_name !== undefined) patch.full_name = data.full_name || null;
     if (data.avatar_url !== undefined) patch.avatar_url = data.avatar_url ? data.avatar_url : null;
     if (data.phone !== undefined) patch.phone = data.phone || null;
-    const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+    const { data: saved, error } = await supabase
+      .from("profiles")
+      .update(patch)
+      .eq("id", userId)
+      .select("id, full_name, avatar_url, phone, updated_at")
+      .single();
     if (error) throw error;
-    return { ok: true };
+    return saved;
   });
 
 export const listMyBookings = createServerFn({ method: "GET" })

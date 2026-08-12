@@ -63,18 +63,22 @@ export const createOwnerShop = createServerFn({ method: "POST" })
     if (shopError) throw new Error(shopError.message);
 
     if (data.services && data.services.length > 0) {
-      const { error: servicesError } = await supabaseAdmin.from("services").insert(
-        data.services.map((s) => ({
-          shop_id: shop.id,
-          name: s.name,
-          duration_minutes: s.duration_minutes,
-          price_cents: s.price_cents,
-        })),
-      );
+      const { data: savedServices, error: servicesError } = await supabaseAdmin
+        .from("services")
+        .insert(
+          data.services.map((s) => ({
+            shop_id: shop.id,
+            name: s.name,
+            duration_minutes: s.duration_minutes,
+            price_cents: s.price_cents,
+          })),
+        )
+        .select("id, name, duration_minutes, price_cents");
       if (servicesError) throw new Error(`Shop created but services failed: ${servicesError.message}`);
+      return { ...shop, services: savedServices ?? [] };
     }
 
-    return shop;
+    return { ...shop, services: [] as Array<{ id: string; name: string; duration_minutes: number; price_cents: number }> };
   });
 
 // ---------- Shop details ----------
@@ -94,20 +98,22 @@ export const updateShop = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UpdateShopInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { error } = await supabase
+    const { data: saved, error } = await supabase
       .from("shops")
       .update(data.patch)
-      .eq("id", data.shopId);
+      .eq("id", data.shopId)
+      .select("id, name, description, address, cover_image_url, updated_at")
+      .single();
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return saved;
   });
 
 // ---------- Services CRUD ----------
 
 const ServiceFields = z.object({
-  name: z.string().min(1).max(80),
+  name: z.string().trim().min(2, "Service name is required").max(80),
   description: z.string().max(500).nullable().optional(),
-  duration_minutes: z.number().int().positive().max(600),
+  duration_minutes: z.number().int().min(5, "Duration must be at least 5 minutes").max(600),
   price_cents: z.number().int().nonnegative().max(1_000_000),
   is_active: z.boolean().optional(),
 });
@@ -118,12 +124,13 @@ export const createService = createServerFn({ method: "POST" })
     z.object({ shopId: z.string().uuid(), fields: ServiceFields }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("services").insert({
-      shop_id: data.shopId,
-      ...data.fields,
-    });
+    const { data: saved, error } = await context.supabase
+      .from("services")
+      .insert({ shop_id: data.shopId, ...data.fields })
+      .select("id, name, description, duration_minutes, price_cents, is_active")
+      .single();
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return saved;
   });
 
 export const updateService = createServerFn({ method: "POST" })
@@ -132,34 +139,43 @@ export const updateService = createServerFn({ method: "POST" })
     z.object({ serviceId: z.string().uuid(), fields: ServiceFields.partial() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { data: saved, error } = await context.supabase
       .from("services")
       .update(data.fields)
-      .eq("id", data.serviceId);
+      .eq("id", data.serviceId)
+      .select("id, name, description, duration_minutes, price_cents, is_active")
+      .single();
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return saved;
   });
 
 export const deleteService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ serviceId: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { data: deleted, error } = await context.supabase
       .from("services")
       .delete()
-      .eq("id", data.serviceId);
+      .eq("id", data.serviceId)
+      .select("id")
+      .maybeSingle();
     if (error) throw new Error(error.message);
-    return { ok: true };
+    if (!deleted) throw new Error("Service could not be deleted");
+    return deleted;
   });
 
 // ---------- Weekly hours ----------
 
-const HourRow = z.object({
-  weekday: z.number().int().min(0).max(6),
-  open_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
-  close_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
-  is_closed: z.boolean(),
-});
+const HourRow = z
+  .object({
+    weekday: z.number().int().min(0).max(6),
+    open_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+    close_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+    is_closed: z.boolean(),
+  })
+  .refine((h) => h.is_closed || h.close_time > h.open_time, {
+    message: "Closing time must be after opening time",
+  });
 
 export const getShopHours = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -180,9 +196,10 @@ export const upsertShopHours = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const payload = data.hours.map((h) => ({ shop_id: data.shopId, ...h }));
-    const { error } = await context.supabase
+    const { data: saved, error } = await context.supabase
       .from("shop_hours")
-      .upsert(payload, { onConflict: "shop_id,weekday" });
+      .upsert(payload, { onConflict: "shop_id,weekday" })
+      .select("weekday, open_time, close_time, is_closed");
     if (error) throw new Error(error.message);
-    return { ok: true };
+    return saved ?? [];
   });
