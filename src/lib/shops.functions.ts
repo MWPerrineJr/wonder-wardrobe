@@ -132,7 +132,7 @@ export const updateShopCategories = createServerFn({ method: "POST" })
     z
       .object({
         shopId: z.string().uuid(),
-        categories: z.array(z.string()),
+        categories: categorySchema,
       })
       .parse(input),
   )
