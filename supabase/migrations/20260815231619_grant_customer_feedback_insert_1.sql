@@ -1,0 +1,12 @@
+-- Fix: customer feedback submission was broken.
+--
+-- The "Customers can submit their own feedback" RLS policy (added in
+-- 20260702113606) grants INSERT at the row level, but the `authenticated`
+-- role was only ever granted SELECT, UPDATE on customer_feedback
+-- (20260702155757). Postgres checks table privileges BEFORE RLS, so with no
+-- INSERT privilege the policy is dead code and every submitFeedback() call
+-- fails with "permission denied for table customer_feedback".
+--
+-- Grant the missing table privilege. The existing RLS policy
+-- WITH CHECK (auth.uid() = customer_id) remains the actual authorization gate.
+GRANT INSERT ON public.customer_feedback TO authenticated;
