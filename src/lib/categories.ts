@@ -38,11 +38,12 @@ export const CATEGORY_ICONS: Record<ServiceCategory, string> = Object.fromEntrie
   SERVICE_CATEGORIES.map((c) => [c.value, c.icon]),
 ) as Record<ServiceCategory, string>;
 
-export function categoryLabel(value: ServiceCategory) {
-  return CATEGORY_LABELS[value] ?? value;
+export function categoryLabel(value: string) {
+  return CATEGORY_LABELS[value as ServiceCategory] ?? value;
 }
 
-export function categoryIcon(value: ServiceCategory) {
-  return CATEGORY_ICONS[value] ?? "category";
+export function categoryIcon(value: string) {
+  return CATEGORY_ICONS[value as ServiceCategory] ?? "category";
 }
+
 
