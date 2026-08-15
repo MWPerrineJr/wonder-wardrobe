@@ -181,9 +181,10 @@ export type SavedBooking = {
   customer_phone: string | null;
   notes: string | null;
   service: { id: string; name: string; duration_minutes: number } | null;
-  barber: { id: string; display_name: string } | null;
+  provider: { id: string; display_name: string } | null;
   shop: { id: string; name: string; slug: string } | null;
 };
+
 
 export const createBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
