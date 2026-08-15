@@ -14,56 +14,8 @@ export type Database = {
   }
   public: {
     Tables: {
-      barbers: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string
-          display_name: string
-          id: string
-          is_active: boolean
-          shop_id: string
-          specialties: string[]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          display_name: string
-          id?: string
-          is_active?: boolean
-          shop_id: string
-          specialties?: string[]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          display_name?: string
-          id?: string
-          is_active?: boolean
-          shop_id?: string
-          specialties?: string[]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "barbers_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       bookings: {
         Row: {
-          barber_id: string | null
           created_at: string
           customer_id: string
           customer_name: string | null
@@ -72,6 +24,7 @@ export type Database = {
           id: string
           notes: string | null
           price_cents: number
+          provider_id: string | null
           service_id: string
           shop_id: string
           starts_at: string
@@ -79,7 +32,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          barber_id?: string | null
           created_at?: string
           customer_id: string
           customer_name?: string | null
@@ -88,6 +40,7 @@ export type Database = {
           id?: string
           notes?: string | null
           price_cents: number
+          provider_id?: string | null
           service_id: string
           shop_id: string
           starts_at: string
@@ -95,7 +48,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          barber_id?: string | null
           created_at?: string
           customer_id?: string
           customer_name?: string | null
@@ -104,6 +56,7 @@ export type Database = {
           id?: string
           notes?: string | null
           price_cents?: number
+          provider_id?: string | null
           service_id?: string
           shop_id?: string
           starts_at?: string
@@ -112,10 +65,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "bookings_barber_id_fkey"
-            columns: ["barber_id"]
+            foreignKeyName: "bookings_provider_id_fkey"
+            columns: ["provider_id"]
             isOneToOne: false
-            referencedRelation: "barbers"
+            referencedRelation: "providers"
             referencedColumns: ["id"]
           },
           {
@@ -235,8 +188,56 @@ export type Database = {
         }
         Relationships: []
       }
+      providers: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean
+          shop_id: string
+          specialties: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean
+          shop_id: string
+          specialties?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          shop_id?: string
+          specialties?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "providers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
+          category: Database["public"]["Enums"]["service_category"]
           created_at: string
           description: string | null
           duration_minutes: number
@@ -248,6 +249,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
           description?: string | null
           duration_minutes: number
@@ -259,6 +261,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: Database["public"]["Enums"]["service_category"]
           created_at?: string
           description?: string | null
           duration_minutes?: number
@@ -323,6 +326,7 @@ export type Database = {
       shops: {
         Row: {
           address: string | null
+          categories: Database["public"]["Enums"]["service_category"][]
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -335,6 +339,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          categories?: Database["public"]["Enums"]["service_category"][]
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -347,6 +352,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          categories?: Database["public"]["Enums"]["service_category"][]
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -394,13 +400,22 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "customer" | "barber" | "owner"
+      app_role: "customer" | "provider" | "owner"
       booking_status:
         | "pending"
         | "confirmed"
         | "completed"
         | "cancelled"
         | "no_show"
+      service_category:
+        | "hair_barber"
+        | "nails"
+        | "waxing"
+        | "makeup"
+        | "massage"
+        | "skincare_facials"
+        | "brows_lashes"
+        | "spa_wellness"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -528,13 +543,23 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["customer", "barber", "owner"],
+      app_role: ["customer", "provider", "owner"],
       booking_status: [
         "pending",
         "confirmed",
         "completed",
         "cancelled",
         "no_show",
+      ],
+      service_category: [
+        "hair_barber",
+        "nails",
+        "waxing",
+        "makeup",
+        "massage",
+        "skincare_facials",
+        "brows_lashes",
+        "spa_wellness",
       ],
     },
   },
