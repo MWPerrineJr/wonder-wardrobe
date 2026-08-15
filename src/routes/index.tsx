@@ -59,6 +59,8 @@ function MarketplacePage() {
   const [nameInput, setNameInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
   const [query, setQuery] = useState({ name: "", location: "" });
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
+
 
   const filteredShops = useMemo(() => {
     // Normalize: lowercase, strip accents/punctuation, collapse whitespace.
