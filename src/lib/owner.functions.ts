@@ -100,8 +100,10 @@ const UpdateShopInput = z.object({
     description: z.string().max(1000).nullable().optional(),
     address: z.string().max(200).nullable().optional(),
     cover_image_url: z.string().url().max(500).nullable().optional(),
+    categories: categorySchema.optional(),
   }),
 });
+
 
 export const updateShop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
