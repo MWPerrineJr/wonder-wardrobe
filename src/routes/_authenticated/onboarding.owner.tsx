@@ -189,6 +189,30 @@ function OnboardingOwnerPage() {
           </div>
 
           <div>
+            <label className="font-label-md text-label-md text-on-surface-variant block mb-2">
+              Categories
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {SERVICE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => toggleCategory(cat.value)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-label-sm transition ${
+                    categories.includes(cat.value)
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "bg-surface border-border-subtle text-on-surface-variant hover:border-primary"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">{cat.icon}</span>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+
             <div className="flex items-center justify-between mb-2">
               <label className="font-label-md text-label-md text-on-surface-variant">
                 Starter services
