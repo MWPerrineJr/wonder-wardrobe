@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { createOwnerShop } from "@/lib/owner.functions";
+import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
+
 
 export const Route = createFileRoute("/_authenticated/onboarding/owner")({
   head: () => ({
