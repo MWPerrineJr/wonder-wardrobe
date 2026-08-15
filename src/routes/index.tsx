@@ -296,15 +296,16 @@ function MarketplacePage() {
           <section id="featured-shops" className="flex flex-col gap-8 scroll-mt-24">
             <div className="flex justify-between items-end">
               <h2 className="font-headline-md text-headline-md text-on-surface">
-                {query.name || query.location ? "Search Results" : "Featured Shops"}
+                {query.name || query.location || selectedCategory ? "Search Results" : "Featured Shops"}
               </h2>
-              {(query.name || query.location) && (
+              {(query.name || query.location || selectedCategory) && (
                 <button
                   type="button"
                   onClick={() => {
                     setNameInput("");
                     setLocationInput("");
                     setQuery({ name: "", location: "" });
+                    setSelectedCategory(null);
                   }}
                   className="font-label-md text-label-md text-primary hover:underline"
                 >
@@ -312,6 +313,7 @@ function MarketplacePage() {
                 </button>
               )}
             </div>
+
             {filteredShops.length === 0 ? (
               <div className="bg-surface border border-border-subtle rounded-xl p-8 text-center flex flex-col gap-3">
                 <p className="text-on-surface font-headline-md text-[20px]">
