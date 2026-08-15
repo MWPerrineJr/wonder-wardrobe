@@ -104,7 +104,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           {new Date(confirmed.starts_at).toLocaleString()} • {confirmed.service?.duration_minutes} mins
         </p>
         <p className="text-on-surface-variant text-body-md">
-          {confirmed.barber?.display_name ?? "No barber preference"} • {formatPrice(confirmed.price_cents)} •{" "}
+          {confirmed.provider?.display_name ?? "No provider preference"} • {formatPrice(confirmed.price_cents)} •{" "}
           {confirmed.status}
         </p>
         <div className="flex gap-3 mt-2">
@@ -122,6 +122,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
       </div>
     );
   }
+
 
   return (
     <div className="flex flex-col gap-10">
