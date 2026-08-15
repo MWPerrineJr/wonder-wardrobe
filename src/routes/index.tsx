@@ -285,10 +285,10 @@ function MarketplacePage() {
                   className="group relative h-48 rounded-xl overflow-hidden border border-border-subtle hover:border-primary transition-colors cursor-pointer bg-surface"
                 >
                   <div
-                    className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity"
+                    className="absolute inset-0 bg-cover bg-center opacity-90 group-hover:opacity-100 transition-opacity"
                     style={{ backgroundImage: `url('${c.img}')` }}
                   />
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/30 to-transparent">
                     <span className="font-headline-md text-headline-md text-on-surface">{c.title}</span>
                     <span className="font-label-sm text-label-sm text-on-surface-variant mt-1">{c.subtitle}</span>
                   </div>
@@ -347,7 +347,7 @@ function MarketplacePage() {
                   >
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-surface-container">
                       <img
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                         src={s.cover_image_url ?? FALLBACK_SHOP_IMG}
                         alt={s.name}
                       />
