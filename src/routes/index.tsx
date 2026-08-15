@@ -183,16 +183,17 @@ function MarketplacePage() {
           <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="flex flex-col items-start gap-6 max-w-xl">
               <span className="inline-flex items-center gap-2 rounded-full border border-border-subtle bg-surface px-3 py-1 font-label-sm text-label-sm text-on-surface-variant">
-                <Icon name="content_cut" className="text-[16px] text-primary" />
-                Barbershop booking, simplified
+                <Icon name="spa" className="text-[16px] text-primary" />
+                Beauty & wellness booking, simplified
               </span>
               <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
-                Find your next cut
+                Find your next appointment
               </h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant">
-                Discover premium barbers, view their portfolios, and book your next appointment
+                Discover top-rated studios, salons, and spas, view their services, and book your next appointment
                 seamlessly.
               </p>
+
               <form
                 onSubmit={handleSearch}
                 className="w-full bg-surface border border-border-subtle rounded-2xl p-2 flex flex-col gap-2 focus-within:border-primary transition-colors"
