@@ -5,10 +5,12 @@ import { BarberSchedule } from "@/components/barber-schedule";
 export const Route = createFileRoute("/barber")({
   head: () => ({
     meta: [
-      { title: "My Schedule — The Sharp Edge Barber Terminal" },
+      { title: "My Schedule — The Standing Chair" },
       { name: "description", content: "Personal calendar view for barbers — manage appointments and Google Calendar sync." },
-      { property: "og:title", content: "My Schedule — Barber Terminal" },
+      { property: "og:title", content: "My Schedule — The Standing Chair" },
       { property: "og:description", content: "Personal calendar with appointments, breaks and Google Calendar sync." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: BarberPage,
