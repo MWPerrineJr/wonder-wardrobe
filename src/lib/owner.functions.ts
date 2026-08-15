@@ -157,11 +157,12 @@ export const updateService = createServerFn({ method: "POST" })
       .from("services")
       .update(data.fields)
       .eq("id", data.serviceId)
-      .select("id, name, description, duration_minutes, price_cents, is_active")
+      .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .single();
     if (error) throw new Error(error.message);
     return saved;
   });
+
 
 export const deleteService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
