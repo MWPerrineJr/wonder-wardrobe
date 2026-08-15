@@ -4,7 +4,7 @@ Turn the app from a barbershop marketplace into a multi-category beauty and well
 
 ## Categories at launch
 
-Hair & Barber, Nails, Waxing, Makeup, Massage, Skincare & Facials, Brows & Lashes, Spa & Wellness, Tattoo & Piercing.
+Hair & Barber, Nails, Waxing, Makeup, Massage, Skincare & Facials, Brows & Lashes, Spa & Wellness.
 
 ## What changes for customers
 
