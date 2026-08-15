@@ -344,7 +344,9 @@ type ServiceRow = {
   duration_minutes: number;
   price_cents: number;
   is_active: boolean;
+  category: ServiceCategory;
 };
+
 
 function ServicesPanel({ shopId }: { shopId: string }) {
   const qc = useQueryClient();
