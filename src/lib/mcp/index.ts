@@ -15,7 +15,7 @@ export default defineMcp({
   title: "The Standing Chair",
   version: "0.1.0",
   instructions:
-    "Tools for The Standing Chair shop owners. Sign in as a The Standing Chair owner to list your shops, view services, browse upcoming bookings, and read/triage customer feedback.",
+    "Tools for The Standing Chair shop owners. Sign in as a shop owner to list your shops, view services, browse upcoming bookings, and read/triage customer feedback.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
