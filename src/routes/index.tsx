@@ -289,8 +289,12 @@ function MarketplacePage() {
                     style={{ backgroundImage: `url('${c.img}')` }}
                   />
                   <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/30 to-transparent">
-                    <span className="font-headline-md text-headline-md text-on-surface">{c.title}</span>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant mt-1">{c.subtitle}</span>
+                    <span className="font-headline-md text-headline-md text-inverse-on-surface">
+                      {c.title}
+                    </span>
+                    <span className="font-label-sm text-label-sm text-inverse-on-surface/80 mt-1">
+                      {c.subtitle}
+                    </span>
                   </div>
                 </div>
               ))}
