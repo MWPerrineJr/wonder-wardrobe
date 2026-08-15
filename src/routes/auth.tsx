@@ -16,7 +16,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — The Standing Chair" },
-      { name: "description", content: "Sign in or create your The Standing Chair account to book barbers and manage appointments." },
+      { name: "description", content: "Sign in or create your The Standing Chair account to book providers and manage appointments." },
     ],
   }),
   component: AuthPage,

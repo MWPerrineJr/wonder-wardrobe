@@ -276,7 +276,7 @@ function BookingRow({ b }: { b: MyBooking }) {
         </div>
         <div className="text-body-sm text-on-surface-variant">
           {b.shop?.name ?? "Shop"}
-          {b.barber?.display_name ? ` · with ${b.barber.display_name}` : ""}
+          {b.provider?.display_name ? ` · with ${b.provider.display_name}` : ""}
         </div>
       </div>
       <div className="flex items-center gap-3">

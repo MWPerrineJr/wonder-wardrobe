@@ -118,7 +118,7 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
     const openM = toMinutes(open);
     const closeM = toMinutes(close);
 
-    // Busy ranges for the chosen barber require reading other customers' rows,
+    // Busy ranges for the chosen provider require reading other customers' rows,
     // so use the privileged client and return only opaque time ranges.
     let busy: Array<{ start: number; end: number }> = [];
     if (data.providerId) {

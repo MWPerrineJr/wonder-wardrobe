@@ -20,7 +20,7 @@ export type MyBooking = {
   notes: string | null;
   shop: { id: string; name: string; slug: string | null } | null;
   service: { id: string; name: string; duration_minutes: number | null } | null;
-  barber: { id: string; display_name: string | null } | null;
+  provider: { id: string; display_name: string | null } | null;
 };
 
 export const getMyProfile = createServerFn({ method: "GET" })

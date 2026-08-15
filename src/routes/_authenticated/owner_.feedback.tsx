@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/owner_/feedback")({
       { title: "Feedback Intelligence — The Standing Chair" },
       {
         name: "description",
-        content: "AI-powered customer feedback insights for your barbershop.",
+        content: "AI-powered customer feedback insights for your business.",
       },
     ],
   }),

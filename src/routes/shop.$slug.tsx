@@ -45,7 +45,7 @@ export const Route = createFileRoute("/shop/$slug")({
     const title = `${loaderData.name} — Book online | The Standing Chair`;
     const description =
       loaderData.description?.slice(0, 155) ??
-      `Book your next appointment at ${loaderData.name}. Pick your barber, service, date and time.`;
+      `Book your next appointment at ${loaderData.name}. Pick your provider, service, date and time.`;
     const image =
       loaderData.cover && loaderData.cover.startsWith("https://") ? loaderData.cover : null;
     return {
