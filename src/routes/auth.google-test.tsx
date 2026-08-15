@@ -9,7 +9,7 @@ import { ConfirmSignOutDialog } from "@/components/confirm-sign-out";
 export const Route = createFileRoute("/auth/google-test")({
   head: () => ({
     meta: [
-      { title: "Google sign-in test — Crown & Cut" },
+      { title: "Google sign-in test — The Standing Chair" },
       { name: "description", content: "Verify the Google sign-in round trip and see the selected account email." },
       { name: "robots", content: "noindex" },
     ],
@@ -69,7 +69,7 @@ function GoogleTestPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link to="/" className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-              Crown &amp; Cut
+              The Standing Chair
             </Link>
             <h1 className="mt-6 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
               Google sign-in test

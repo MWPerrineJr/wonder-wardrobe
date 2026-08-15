@@ -23,7 +23,7 @@ const bookingsQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
     meta: [
-      { title: "My account — Crown & Cut" },
+      { title: "My account — The Standing Chair" },
       { name: "description", content: "Your profile and appointment history." },
       { name: "robots", content: "noindex" },
     ],

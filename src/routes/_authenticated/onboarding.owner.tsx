@@ -7,10 +7,10 @@ import { createOwnerShop } from "@/lib/owner.functions";
 export const Route = createFileRoute("/_authenticated/onboarding/owner")({
   head: () => ({
     meta: [
-      { title: "Become a shop owner — Crown & Cut" },
+      { title: "Become a shop owner — The Standing Chair" },
       {
         name: "description",
-        content: "Create your shop and start accepting bookings on Crown & Cut.",
+        content: "Create your shop and start accepting bookings on The Standing Chair.",
       },
     ],
   }),
@@ -94,7 +94,7 @@ function OnboardingOwnerPage() {
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-8">
           <Link to="/" className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-            Crown &amp; Cut
+            The Standing Chair
           </Link>
           <h1 className="mt-6 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
             Set up your shop

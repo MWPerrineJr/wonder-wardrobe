@@ -15,8 +15,8 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in — Crown & Cut" },
-      { name: "description", content: "Sign in or create your Crown & Cut account to book barbers and manage appointments." },
+      { title: "Sign in — The Standing Chair" },
+      { name: "description", content: "Sign in or create your The Standing Chair account to book barbers and manage appointments." },
     ],
   }),
   component: AuthPage,
@@ -101,7 +101,7 @@ function AuthPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-            Crown &amp; Cut
+            The Standing Chair
           </Link>
           <h1 className="mt-6 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
             {session ? "You're already signed in" : mode === "sign_in" ? "Welcome back" : "Create your account"}

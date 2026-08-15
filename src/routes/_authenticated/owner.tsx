@@ -35,7 +35,7 @@ const myShopsQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/owner")({
   head: () => ({
     meta: [
-      { title: "Shop Owner Dashboard — Crown & Cut" },
+      { title: "Shop Owner Dashboard — The Standing Chair" },
       { name: "description", content: "Manage your shops, services and bookings." },
     ],
   }),
@@ -91,7 +91,7 @@ function OwnerPage() {
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link to="/" className="font-headline-md text-headline-md text-primary tracking-tight">
-              Crown &amp; Cut
+              The Standing Chair
             </Link>
             <nav className="hidden md:flex items-center gap-4 text-label-md">
               <Link to="/owner" className="text-primary font-semibold">

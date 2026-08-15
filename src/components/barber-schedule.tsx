@@ -25,7 +25,7 @@ function timeRange(b: BarberBooking) {
 const statusColor: Record<string, string> = {
   pending: "border-border-subtle text-on-surface-variant",
   confirmed: "border-primary text-primary",
-  completed: "border-[#34A853] text-[#34A853]",
+  completed: "border-tertiary text-tertiary",
   cancelled: "border-error text-error",
   no_show: "border-error text-error",
 };

@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { lovable } from "@/integrations/lovable/index";
 
-const GUEST_KEY = "cnc_guest";
+const GUEST_KEY = "tsc_guest";
 
 export function WelcomeGate() {
   const { user, loading } = useAuth();
@@ -58,7 +58,7 @@ export function WelcomeGate() {
       <div className="glass-panel w-full max-w-md rounded-2xl p-8 flex flex-col gap-6 shadow-2xl">
         <div className="text-center">
           <div className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-            Crown &amp; Cut
+            The Standing Chair
           </div>
           <h2 className="mt-3 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
             Welcome
