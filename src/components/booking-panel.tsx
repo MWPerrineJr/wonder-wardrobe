@@ -36,7 +36,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
   const { user, loading } = useAuth();
   const tzOffsetMinutes = useMemo(() => new Date().getTimezoneOffset(), []);
 
-  const [providerId, setBarberId] = useState<string | null>(null);
+  const [providerId, setProviderId] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(ctx.services[0]?.id ?? null);
   const [date, setDate] = useState<string>(() => isoDate(new Date(Date.now() + 24 * 60 * 60 * 1000)));
   const [time, setTime] = useState<string | null>(null);
@@ -134,7 +134,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <button
             type="button"
-            onClick={() => setBarberId(null)}
+            onClick={() => setProviderId(null)}
             className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
               providerId === null ? "border-primary" : "border-border-subtle hover:border-primary"
             }`}
@@ -146,7 +146,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
             <button
               key={provider.id}
               type="button"
-              onClick={() => setBarberId(provider.id)}
+              onClick={() => setProviderId(provider.id)}
               className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
                 providerId === provider.id ? "border-primary" : "border-border-subtle hover:border-primary"
               }`}

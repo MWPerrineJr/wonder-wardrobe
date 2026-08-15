@@ -84,13 +84,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "The Standing Chair is the premium marketplace for booking barbers — discover shops, view portfolios, and book seamlessly.",
+          "The Standing Chair is the premium marketplace for booking beauty & wellness providers — discover businesses, view portfolios, and book seamlessly.",
       },
       { name: "author", content: "The Standing Chair" },
       { property: "og:title", content: "The Standing Chair — Find your next cut" },
       {
         property: "og:description",
-        content: "Discover premium barbers and book your next appointment seamlessly.",
+        content: "Discover premium providers and book your next appointment seamlessly.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

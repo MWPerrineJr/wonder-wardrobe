@@ -19,7 +19,7 @@
       {
         "name": "list_my_shops",
         "title": "List my shops",
-        "description": "List all barbershops owned by the signed-in The Standing Chair user.",
+        "description": "List all businesses owned by the signed-in The Standing Chair user.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,

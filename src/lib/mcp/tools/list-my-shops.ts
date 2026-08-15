@@ -4,7 +4,7 @@ import { createSupabaseForUser } from "../supabase";
 export default defineTool({
   name: "list_my_shops",
   title: "List my shops",
-  description: "List all barbershops owned by the signed-in The Standing Chair user.",
+  description: "List all businesses owned by the signed-in The Standing Chair user.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {

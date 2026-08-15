@@ -24,12 +24,12 @@ export const Route = createFileRoute("/shop/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(shopsQuery),
   head: () => ({
     meta: [
-      { title: "Browse barbershops — The Standing Chair" },
+      { title: "Browse businesses — The Standing Chair" },
       {
         name: "description",
         content: "Every shop on The Standing Chair. Open a shop's page to book your next appointment.",
       },
-      { property: "og:title", content: "Browse barbershops — The Standing Chair" },
+      { property: "og:title", content: "Browse businesses — The Standing Chair" },
       {
         property: "og:description",
         content: "Every shop on The Standing Chair. Open a shop's page to book your next appointment.",
