@@ -230,13 +230,13 @@ function OnboardingOwnerPage() {
             </p>
             <div className="flex flex-col gap-2">
               {services.map((s, i) => (
-                <div key={i} className="grid grid-cols-12 gap-2">
+                <div key={i} className="grid grid-cols-12 gap-2 items-center">
                   <input
                     type="text"
                     value={s.name}
                     onChange={(e) => updateService(i, { name: e.target.value })}
                     placeholder="Service name"
-                    className="col-span-6 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                    className="col-span-5 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
                   />
                   <input
                     type="number"
@@ -253,8 +253,19 @@ function OnboardingOwnerPage() {
                     value={s.price}
                     onChange={(e) => updateService(i, { price: e.target.value })}
                     placeholder="Price"
-                    className="col-span-3 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                    className="col-span-2 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
                   />
+                  <select
+                    value={s.category}
+                    onChange={(e) => updateService(i, { category: e.target.value as ServiceCategory })}
+                    className="col-span-2 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                  >
+                    {SERVICE_CATEGORIES.map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     type="button"
                     onClick={() => removeService(i)}
@@ -266,6 +277,7 @@ function OnboardingOwnerPage() {
                 </div>
               ))}
             </div>
+
           </div>
 
           <button
