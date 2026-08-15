@@ -403,12 +403,13 @@ function ServicesPanel({ shopId }: { shopId: string }) {
                   {!s.is_active && <span className="ml-2 text-label-sm text-on-surface-variant">(inactive)</span>}
                 </p>
                 <p className="text-label-sm text-on-surface-variant">
-                  {s.duration_minutes} min · ${(s.price_cents / 100).toFixed(2)}
+                  {categoryLabel(s.category)} · {s.duration_minutes} min · ${(s.price_cents / 100).toFixed(2)}
                 </p>
                 {s.description && (
                   <p className="text-label-sm text-on-surface-variant mt-1 line-clamp-2">{s.description}</p>
                 )}
               </div>
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleActive.mutate(s)}
