@@ -302,10 +302,11 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Anything your barber should know?"
+                placeholder="Anything your provider should know?"
                 className={inputClass}
               />
             </div>
+
 
             <div className="border-t border-border-subtle pt-4 flex flex-col gap-2">
               <div className="flex justify-between text-body-md text-on-surface">
