@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { categorySchema } from "@/lib/categories";
 
 const CreateShopInput = z.object({
   name: z.string().min(2).max(80),
@@ -12,18 +13,21 @@ const CreateShopInput = z.object({
     .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and hyphens only"),
   description: z.string().max(500).optional().nullable(),
   address: z.string().max(200).optional().nullable(),
+  categories: categorySchema.optional().default([]),
   services: z
     .array(
       z.object({
         name: z.string().min(1).max(80),
         duration_minutes: z.number().int().positive().max(600),
         price_cents: z.number().int().nonnegative().max(1_000_000),
+        category: z.string().optional().nullable(),
       }),
     )
     .max(10)
     .optional()
     .default([]),
 });
+
 
 export const createOwnerShop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
