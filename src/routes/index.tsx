@@ -361,11 +361,25 @@ function MarketplacePage() {
                         )}
                       </div>
                     </div>
+                    {s.categories && s.categories.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {s.categories.map((cat) => (
+                          <span
+                            key={cat}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-container border border-border-subtle text-label-sm text-on-surface-variant"
+                          >
+                            <Icon name={CATEGORY_ICONS[cat]} className="text-[14px]" />
+                            {CATEGORY_LABELS[cat]}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {s.description && (
                       <p className="text-on-surface-variant text-label-sm line-clamp-2">
                         {s.description}
                       </p>
                     )}
+
                   </Link>
                 ))}
               </div>
