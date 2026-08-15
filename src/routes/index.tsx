@@ -400,8 +400,9 @@ function MarketplacePage() {
               Terms of Service
             </a>
             <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
-              For Barbers
+              For Providers
             </a>
+
             <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Contact
             </a>
