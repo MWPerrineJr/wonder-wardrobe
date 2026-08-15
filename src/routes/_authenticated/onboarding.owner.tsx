@@ -111,8 +111,9 @@ function OnboardingOwnerPage() {
             Set up your shop
           </h1>
           <p className="mt-2 text-on-surface-variant text-body-md">
-            Tell us about your shop. You can add barbers and services after this.
+            Tell us about your shop. You can add providers and services after this.
           </p>
+
         </div>
 
         <form
