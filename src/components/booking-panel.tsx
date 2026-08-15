@@ -126,9 +126,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Step 1: barber */}
+      {/* Step 1: provider */}
       <section className="glass-panel rounded-xl p-6 md:p-8">
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">1. Select barber</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">1. Select provider</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <button
             type="button"
@@ -140,32 +140,33 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
             <span className="material-symbols-outlined text-[32px] text-on-surface-variant">group</span>
             <span className="font-label-md text-label-md text-on-surface">No preference</span>
           </button>
-          {ctx.barbers.map((b) => (
+          {ctx.providers.map((provider) => (
             <button
-              key={b.id}
+              key={provider.id}
               type="button"
-              onClick={() => setBarberId(b.id)}
+              onClick={() => setBarberId(provider.id)}
               className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
-                providerId === b.id ? "border-primary" : "border-border-subtle hover:border-primary"
+                providerId === provider.id ? "border-primary" : "border-border-subtle hover:border-primary"
               }`}
             >
               <div className="w-16 h-16 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center text-primary">
-                {b.avatar_url ? (
-                  <img src={b.avatar_url} alt={b.display_name} className="w-full h-full object-cover" />
+                {provider.avatar_url ? (
+                  <img src={provider.avatar_url} alt={provider.display_name} className="w-full h-full object-cover" />
                 ) : (
-                  b.display_name.charAt(0)
+                  provider.display_name.charAt(0)
                 )}
               </div>
-              <span className="font-label-md text-label-md text-on-surface">{b.display_name}</span>
+              <span className="font-label-md text-label-md text-on-surface">{provider.display_name}</span>
             </button>
           ))}
         </div>
-        {ctx.barbers.length === 0 && (
+        {ctx.providers.length === 0 && (
           <p className="mt-4 text-on-surface-variant text-body-md">
-            This shop hasn't added barbers yet — book with no preference.
+            This shop hasn't added providers yet — book with no preference.
           </p>
         )}
       </section>
+
 
       {/* Step 2: service */}
       <section className="glass-panel rounded-xl p-6 md:p-8">
