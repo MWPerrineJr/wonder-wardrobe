@@ -160,7 +160,7 @@ function MarketplacePage() {
               Marketplace
             </Link>
             <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
-              Services
+              Shops
             </Link>
             <Link to="/barber" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Barber
@@ -345,8 +345,8 @@ function MarketplacePage() {
                 {filteredShops.map((s) => (
                   <Link
                     key={s.id}
-                    to="/shop"
-                    search={{ slug: s.slug }}
+                    to="/shop/$slug"
+                    params={{ slug: s.slug }}
                     className="bg-surface border border-border-subtle rounded-xl p-4 flex flex-col gap-4 hover:border-primary transition-colors cursor-pointer group shadow-sm"
                   >
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-surface-container">
