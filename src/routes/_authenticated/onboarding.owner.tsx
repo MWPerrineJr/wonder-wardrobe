@@ -183,7 +183,8 @@ function OnboardingOwnerPage() {
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
               className="w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md"
-              placeholder="Premium barbershop in the heart of downtown…"
+              placeholder="A welcoming studio in the heart of downtown…"
+
             />
           </div>
 
