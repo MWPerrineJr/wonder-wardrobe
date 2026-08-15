@@ -472,8 +472,20 @@ function ServiceDialog({
   const [durationMin, setDurationMin] = useState(service?.duration_minutes ?? 30);
   const [priceDollars, setPriceDollars] = useState(((service?.price_cents ?? 3500) / 100).toFixed(2));
   const [isActive, setIsActive] = useState(service?.is_active ?? true);
+  const [category, setCategory] = useState<ServiceCategory>(service?.category ?? "hair_barber");
 
   const isEdit = !!service;
+
+  // Reset form when opening for a different service
+  useEffect(() => {
+    if (!open) return;
+    setName(service?.name ?? "");
+    setDescription(service?.description ?? "");
+    setDurationMin(service?.duration_minutes ?? 30);
+    setPriceDollars(((service?.price_cents ?? 3500) / 100).toFixed(2));
+    setIsActive(service?.is_active ?? true);
+    setCategory(service?.category ?? "hair_barber");
+  }, [open, service?.id]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -485,6 +497,7 @@ function ServiceDialog({
         duration_minutes: Number(durationMin),
         price_cents,
         is_active: isActive,
+        category,
       };
       if (isEdit && service) {
         return updateService({ data: { serviceId: service.id, fields } });
@@ -498,6 +511,7 @@ function ServiceDialog({
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
