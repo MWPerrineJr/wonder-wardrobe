@@ -557,6 +557,19 @@ function ServiceDialog({
               />
             </Field>
           </div>
+          <Field label="Category">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ServiceCategory)}
+              className={inputCls}
+            >
+              {SERVICE_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </Field>
           <label className="flex items-center gap-2 text-body-md text-on-surface">
             <input
               type="checkbox"
@@ -567,6 +580,7 @@ function ServiceDialog({
             Active (bookable by customers)
           </label>
           <DialogFooter>
+
             <button
               type="submit"
               disabled={mutation.isPending}
