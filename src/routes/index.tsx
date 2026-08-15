@@ -114,16 +114,19 @@ function MarketplacePage() {
 
     const n = norm(query.name);
     const l = norm(query.location);
-    if (!n && !l) return shops;
+    if (!n && !l && !selectedCategory) return shops;
     return shops.filter((s) => {
       const nameHit =
         !n ||
         fuzzyMatch(n, norm(s.name)) ||
         fuzzyMatch(n, norm(s.description ?? ""));
       const locHit = !l || fuzzyMatch(l, norm(s.address ?? ""));
-      return nameHit && locHit;
+      const categoryHit =
+        !selectedCategory || (s.categories ?? []).includes(selectedCategory);
+      return nameHit && locHit && categoryHit;
     });
-  }, [shops, query]);
+  }, [shops, query, selectedCategory]);
+
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
