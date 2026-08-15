@@ -208,7 +208,9 @@ type ShopSummary = {
   description: string | null;
   address: string | null;
   cover_image_url: string | null;
+  categories: ServiceCategory[] | null;
 };
+
 
 function DetailsPanel({ shop }: { shop: ShopSummary }) {
   const qc = useQueryClient();
