@@ -10,8 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as ProviderRouteImport } from './routes/provider'
 import { Route as McpRouteImport } from './routes/mcp'
-import { Route as BarberRouteImport } from './routes/barber'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -32,14 +32,14 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProviderRoute = ProviderRouteImport.update({
+  id: '/provider',
+  path: '/provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BarberRoute = BarberRouteImport.update({
-  id: '/barber',
-  path: '/barber',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -120,8 +120,8 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
+  '/provider': typeof ProviderRoute
   '/shop': typeof ShopRouteWithChildren
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -138,8 +138,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
+  '/provider': typeof ProviderRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
@@ -157,8 +157,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
+  '/provider': typeof ProviderRoute
   '/shop': typeof ShopRouteWithChildren
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -177,8 +177,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/barber'
     | '/mcp'
+    | '/provider'
     | '/shop'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -195,8 +195,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/barber'
     | '/mcp'
+    | '/provider'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/account'
@@ -213,8 +213,8 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/barber'
     | '/mcp'
+    | '/provider'
     | '/shop'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -233,8 +233,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
-  BarberRoute: typeof BarberRoute
   McpRoute: typeof McpRoute
+  ProviderRoute: typeof ProviderRoute
   ShopRoute: typeof ShopRouteWithChildren
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -251,18 +251,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/provider': {
+      id: '/provider'
+      path: '/provider'
+      fullPath: '/provider'
+      preLoaderRoute: typeof ProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mcp': {
       id: '/mcp'
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/barber': {
-      id: '/barber'
-      path: '/barber'
-      fullPath: '/barber'
-      preLoaderRoute: typeof BarberRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -409,8 +409,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-  BarberRoute: BarberRoute,
   McpRoute: McpRoute,
+  ProviderRoute: ProviderRoute,
   ShopRoute: ShopRouteWithChildren,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { BarberSchedule } from "@/components/barber-schedule";
 
-export const Route = createFileRoute("/barber")({
+export const Route = createFileRoute("/provider")({
   head: () => ({
     meta: [
       { title: "My Schedule — The Standing Chair" },
