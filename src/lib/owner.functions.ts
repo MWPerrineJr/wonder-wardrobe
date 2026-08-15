@@ -128,6 +128,7 @@ const ServiceFields = z.object({
   duration_minutes: z.number().int().min(5, "Duration must be at least 5 minutes").max(600),
   price_cents: z.number().int().nonnegative().max(1_000_000),
   is_active: z.boolean().optional(),
+  category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const).default("hair_barber"),
 });
 
 export const createService = createServerFn({ method: "POST" })
@@ -139,11 +140,12 @@ export const createService = createServerFn({ method: "POST" })
     const { data: saved, error } = await context.supabase
       .from("services")
       .insert({ shop_id: data.shopId, ...data.fields })
-      .select("id, name, description, duration_minutes, price_cents, is_active")
+      .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .single();
     if (error) throw new Error(error.message);
     return saved;
   });
+
 
 export const updateService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
