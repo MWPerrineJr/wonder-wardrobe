@@ -70,6 +70,7 @@ function OnboardingOwnerPage() {
           name: s.name.trim(),
           duration_minutes: parseInt(s.duration, 10),
           price_cents: Math.round(parseFloat(s.price || "0") * 100),
+          category: s.category,
         }))
         .filter(
           (s) =>
@@ -85,6 +86,7 @@ function OnboardingOwnerPage() {
           slug: slug || slugify(name),
           description: description || null,
           address: address || null,
+          categories,
           services: cleanedServices,
         },
       });
@@ -96,6 +98,7 @@ function OnboardingOwnerPage() {
       setSubmitting(false);
     }
   }
+
 
   return (
     <div className="min-h-screen bg-background text-on-background px-4 py-12 font-body-md">
