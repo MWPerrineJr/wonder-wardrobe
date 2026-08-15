@@ -28,7 +28,7 @@ const myShopsQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/owner_/feedback")({
   head: () => ({
     meta: [
-      { title: "Feedback Intelligence — Crown & Cut" },
+      { title: "Feedback Intelligence — The Standing Chair" },
       {
         name: "description",
         content: "AI-powered customer feedback insights for your barbershop.",
@@ -98,7 +98,7 @@ function FeedbackPage() {
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link to="/" className="font-headline-md text-headline-md text-primary tracking-tight">
-              Crown &amp; Cut
+              The Standing Chair
             </Link>
             <nav className="hidden md:flex items-center gap-4 text-label-md">
               <Link to="/owner" className="text-on-surface-variant hover:text-on-surface">

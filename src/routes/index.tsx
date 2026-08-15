@@ -135,7 +135,7 @@ function MarketplacePage() {
       <header className="hidden md:flex w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full">
           <div className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-            Crown &amp; Cut
+            The Standing Chair
           </div>
           <nav className="flex items-center gap-8">
             <Link to="/" className="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md">
@@ -284,7 +284,7 @@ function MarketplacePage() {
                 </p>
                 <p className="text-on-surface-variant text-body-md">
                   {shops.length === 0
-                    ? "Be the first to list your shop on Crown & Cut."
+                    ? "Be the first to list your shop on The Standing Chair."
                     : "Try a different name or location."}
                 </p>
                 {shops.length === 0 && (
@@ -338,7 +338,7 @@ function MarketplacePage() {
       {/* Footer */}
       <footer className="bg-background border-t border-border-subtle w-full py-10 mt-auto">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin-desktop max-w-container-max mx-auto gap-gutter">
-          <div className="font-headline-md text-headline-md text-on-surface">Crown &amp; Cut</div>
+          <div className="font-headline-md text-headline-md text-on-surface">The Standing Chair</div>
           <nav className="flex flex-wrap justify-center gap-6">
             <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Privacy Policy
@@ -354,7 +354,7 @@ function MarketplacePage() {
             </a>
           </nav>
           <div className="font-body-md text-body-md text-text-muted">
-            © 2024 Crown &amp; Cut SaaS. All rights reserved.
+            © 2024 The Standing Chair SaaS. All rights reserved.
           </div>
         </div>
       </footer>

@@ -11,15 +11,15 @@
   },
   "mcp": {
     "server": {
-      "name": "crown-and-cut-mcp",
+      "name": "the-standing-chair-mcp",
       "version": "0.1.0",
-      "title": "Crown & Cut"
+      "title": "The Standing Chair"
     },
     "tools": [
       {
         "name": "list_my_shops",
         "title": "List my shops",
-        "description": "List all barbershops owned by the signed-in Crown & Cut user.",
+        "description": "List all barbershops owned by the signed-in The Standing Chair user.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,

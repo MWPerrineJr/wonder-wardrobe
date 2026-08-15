@@ -20,7 +20,7 @@ export function ConfirmSignOutDialog({ open, onOpenChange, onConfirm }: Props) {
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Sign out of Crown &amp; Cut?</AlertDialogTitle>
+          <AlertDialogTitle>Sign out of The Standing Chair?</AlertDialogTitle>
           <AlertDialogDescription>
             You'll need to sign back in to book appointments or manage your shop.
           </AlertDialogDescription>

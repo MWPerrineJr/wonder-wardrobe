@@ -38,7 +38,7 @@ export const Route = createFileRoute("/shop")({
   },
   head: () => ({
     meta: [
-      { title: "Book an appointment — Crown & Cut" },
+      { title: "Book an appointment — The Standing Chair" },
       { name: "description", content: "Pick your barber, service, date and time." },
     ],
   }),
@@ -100,7 +100,7 @@ function ShopContent({ slug }: { slug: string }) {
       {/* Top nav */}
       <nav className="hidden md:flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-          Crown &amp; Cut
+          The Standing Chair
         </div>
         <div className="flex items-center gap-gutter">
           <Link to="/" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">

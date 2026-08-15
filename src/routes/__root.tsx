@@ -80,14 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Crown & Cut — Find your next cut" },
+      { title: "The Standing Chair — Find your next cut" },
       {
         name: "description",
         content:
-          "Crown & Cut is the premium marketplace for booking barbers — discover shops, view portfolios, and book seamlessly.",
+          "The Standing Chair is the premium marketplace for booking barbers — discover shops, view portfolios, and book seamlessly.",
       },
-      { name: "author", content: "Crown & Cut" },
-      { property: "og:title", content: "Crown & Cut — Find your next cut" },
+      { name: "author", content: "The Standing Chair" },
+      { property: "og:title", content: "The Standing Chair — Find your next cut" },
       {
         property: "og:description",
         content: "Discover premium barbers and book your next appointment seamlessly.",
