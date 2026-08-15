@@ -244,7 +244,8 @@ function MarketplacePage() {
               <div className="relative aspect-4/5 sm:aspect-video lg:aspect-4/5 w-full overflow-hidden rounded-3xl border border-border-subtle bg-surface-container">
                 <img
                   src={HERO_BG}
-                  alt="Provider finishing a fresh haircut in a modern barbershop"
+                  alt="Provider finishing a fresh service in a modern studio"
+
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
