@@ -35,13 +35,14 @@ function OnboardingOwnerPage() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [services, setServices] = useState<
-    Array<{ name: string; duration: string; price: string }>
+    Array<{ name: string; duration: string; price: string; category: ServiceCategory }>
   >([
-    { name: "Classic Haircut", duration: "30", price: "35" },
-    { name: "Beard Trim", duration: "20", price: "20" },
-    { name: "Cut & Beard", duration: "45", price: "50" },
+    { name: "Classic Haircut", duration: "30", price: "35", category: "hair_barber" },
+    { name: "Beard Trim", duration: "20", price: "20", category: "hair_barber" },
+    { name: "Cut & Beard", duration: "45", price: "50", category: "hair_barber" },
   ]);
 
   function updateService(i: number, patch: Partial<(typeof services)[number]>) {
@@ -49,11 +50,16 @@ function OnboardingOwnerPage() {
   }
   function addService() {
     if (services.length >= 10) return;
-    setServices((prev) => [...prev, { name: "", duration: "30", price: "0" }]);
+    setServices((prev) => [...prev, { name: "", duration: "30", price: "0", category: "hair_barber" }]);
   }
   function removeService(i: number) {
     setServices((prev) => prev.filter((_, idx) => idx !== i));
   }
+
+  function toggleCategory(cat: ServiceCategory) {
+    setCategories((prev) => (prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]));
+  }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
