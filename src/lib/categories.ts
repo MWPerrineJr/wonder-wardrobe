@@ -25,7 +25,10 @@ export const SERVICE_CATEGORIES: { value: ServiceCategory; label: string; icon: 
   { value: "spa_wellness", label: "Spa & Wellness", icon: "hot_tub" },
 ];
 
-export const categorySchema = z.array(z.enum(SERVICE_CATEGORY_VALUES as [string, ...string[]]));
+export const categorySchema = z.array(
+  z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const),
+);
+
 
 export const CATEGORY_LABELS: Record<ServiceCategory, string> = Object.fromEntries(
   SERVICE_CATEGORIES.map((c) => [c.value, c.label]),
