@@ -34,7 +34,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
   const { user, loading } = useAuth();
   const tzOffsetMinutes = useMemo(() => new Date().getTimezoneOffset(), []);
 
-  const [barberId, setBarberId] = useState<string | null>(null);
+  const [providerId, setBarberId] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(ctx.services[0]?.id ?? null);
   const [date, setDate] = useState<string>(() => isoDate(new Date(Date.now() + 24 * 60 * 60 * 1000)));
   const [time, setTime] = useState<string | null>(null);
@@ -47,17 +47,17 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
 
   useEffect(() => {
     setTime(null);
-  }, [barberId, serviceId, date]);
+  }, [providerId, serviceId, date]);
 
   const slotsQuery = useQuery({
-    queryKey: ["slots", ctx.shop.id, serviceId, barberId, date, tzOffsetMinutes],
+    queryKey: ["slots", ctx.shop.id, serviceId, providerId, date, tzOffsetMinutes],
     enabled: !!user && !!serviceId,
     queryFn: () =>
       getAvailableSlots({
         data: {
           shopId: ctx.shop.id,
           serviceId: serviceId!,
-          barberId,
+          providerId,
           date,
           tzOffsetMinutes,
         },
@@ -70,7 +70,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
         data: {
           shopId: ctx.shop.id,
           serviceId: serviceId!,
-          barberId,
+          providerId,
           date,
           time: time!,
           tzOffsetMinutes,
@@ -133,7 +133,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
             type="button"
             onClick={() => setBarberId(null)}
             className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
-              barberId === null ? "border-primary" : "border-border-subtle hover:border-primary"
+              providerId === null ? "border-primary" : "border-border-subtle hover:border-primary"
             }`}
           >
             <span className="material-symbols-outlined text-[32px] text-on-surface-variant">group</span>
@@ -145,7 +145,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               type="button"
               onClick={() => setBarberId(b.id)}
               className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
-                barberId === b.id ? "border-primary" : "border-border-subtle hover:border-primary"
+                providerId === b.id ? "border-primary" : "border-border-subtle hover:border-primary"
               }`}
             >
               <div className="w-16 h-16 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center text-primary">

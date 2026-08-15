@@ -33,12 +33,12 @@ shown only after the database confirms the write.
 | Full name | profiles.full_name |
 | Phone | profiles.phone |
 | Avatar URL | profiles.avatar_url |
-| Service history | bookings joined to shops / services / barbers (read-only) |
+| Service history | bookings joined to shops / services / providers (read-only) |
 
 ## Booking — `/shop?slug=…` (`createBooking`)
 | Field | Table.column |
 | --- | --- |
-| Barber choice | bookings.barber_id (nullable = no preference) |
+| Barber choice | bookings.provider_id (nullable = no preference) |
 | Service choice | bookings.service_id |
 | Date + slot | bookings.starts_at (ends_at derived from services.duration_minutes) |
 | Full name | bookings.customer_name |
@@ -63,11 +63,11 @@ shown only after the database confirms the write.
   have no form field; they are populated by analysis, not customer input.
 
 ## Integrity, timestamps and access rules
-- Foreign keys: bookings → shops / services / barbers / auth.users; services, shop_hours,
-  barbers, customer_feedback → shops; profiles, user_roles → auth.users.
+- Foreign keys: bookings → shops / services / providers / auth.users; services, shop_hours,
+  providers, customer_feedback → shops; profiles, user_roles → auth.users.
 - `created_at` / `updated_at` on every table, with `update_updated_at_column()` triggers.
-- `validate_booking()` trigger: end must be after start, service and barber must belong to the
-  booked shop, and overlapping pending/confirmed bookings for the same barber are rejected.
+- `validate_booking()` trigger: end must be after start, service and provider must belong to the
+  booked shop, and overlapping pending/confirmed bookings for the same provider are rejected.
 - Check constraints on `customer_feedback` for rating range and allowed status/sentiment/urgency.
-- RLS: customers read/write only their own bookings, profile and feedback; barbers read and
+- RLS: customers read/write only their own bookings, profile and feedback; providers read and
   update bookings assigned to them; owners manage their own shops, services, hours and feedback.

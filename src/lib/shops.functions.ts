@@ -72,7 +72,7 @@ export const getMyShops = createServerFn({ method: "GET" })
               .eq("shop_id", s.id)
               .eq("is_active", true),
             supabase
-              .from("barbers")
+              .from("providers")
               .select("id", { count: "exact", head: true })
               .eq("shop_id", s.id),
             supabase

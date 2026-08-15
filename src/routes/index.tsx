@@ -163,7 +163,7 @@ function MarketplacePage() {
               Shops
             </Link>
             <Link to="/barber" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
-              Barber
+              Provider
             </Link>
             <Link to="/owner" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Owner
@@ -252,7 +252,7 @@ function MarketplacePage() {
               <div className="relative aspect-4/5 sm:aspect-video lg:aspect-4/5 w-full overflow-hidden rounded-3xl border border-border-subtle bg-surface-container">
                 <img
                   src={HERO_BG}
-                  alt="Barber finishing a fresh haircut in a modern barbershop"
+                  alt="Provider finishing a fresh haircut in a modern barbershop"
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
@@ -416,7 +416,7 @@ function MarketplacePage() {
           </Link>
           <Link to="/barber" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="calendar_today" />
-            <span className="font-label-sm text-label-sm mt-1">Barber</span>
+            <span className="font-label-sm text-label-sm mt-1">Provider</span>
           </Link>
           <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="dashboard" />

@@ -41,7 +41,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
 
     const [barbersRes, servicesRes, hoursRes] = await Promise.all([
       supabase
-        .from("barbers")
+        .from("providers")
         .select("id, display_name, avatar_url, specialties")
         .eq("shop_id", shop.id)
         .eq("is_active", true)
@@ -72,7 +72,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
 const SlotsInput = z.object({
   shopId: z.string().uuid(),
   serviceId: z.string().uuid(),
-  barberId: z.string().uuid().nullable().optional(),
+  providerId: z.string().uuid().nullable().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   tzOffsetMinutes: z.number().int().min(-900).max(900),
 });
@@ -119,14 +119,14 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
     // Busy ranges for the chosen barber require reading other customers' rows,
     // so use the privileged client and return only opaque time ranges.
     let busy: Array<{ start: number; end: number }> = [];
-    if (data.barberId) {
+    if (data.providerId) {
       const dayStart = toInstant(data.date, "00:00", data.tzOffsetMinutes);
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: rows, error } = await supabaseAdmin
         .from("bookings")
         .select("starts_at, ends_at")
-        .eq("barber_id", data.barberId)
+        .eq("provider_id", data.providerId)
         .in("status", ["pending", "confirmed"])
         .gte("starts_at", dayStart.toISOString())
         .lt("starts_at", dayEnd.toISOString());
@@ -155,7 +155,7 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
 const CreateBookingInput = z.object({
   shopId: z.string().uuid(),
   serviceId: z.string().uuid(),
-  barberId: z.string().uuid().nullable().optional(),
+  providerId: z.string().uuid().nullable().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   time: z.string().regex(/^\d{2}:\d{2}$/),
   tzOffsetMinutes: z.number().int().min(-900).max(900),
@@ -209,7 +209,7 @@ export const createBooking = createServerFn({ method: "POST" })
       .insert({
         shop_id: data.shopId,
         service_id: data.serviceId,
-        barber_id: data.barberId ?? null,
+        provider_id: data.providerId ?? null,
         customer_id: userId,
         starts_at: startsAt.toISOString(),
         ends_at: endsAt.toISOString(),
@@ -222,7 +222,7 @@ export const createBooking = createServerFn({ method: "POST" })
       .select(
         `id, starts_at, ends_at, status, price_cents, customer_name, customer_phone, notes,
          service:services(id, name, duration_minutes),
-         barber:barbers(id, display_name),
+         provider:providers(id, display_name),
          shop:shops(id, name, slug)`,
       )
       .single();
