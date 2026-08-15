@@ -61,6 +61,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
         slug: data.slug,
         description: data.description ?? null,
         address: data.address ?? null,
+        categories: data.categories,
       })
       .select("id, slug, name")
       .single();
@@ -75,14 +76,16 @@ export const createOwnerShop = createServerFn({ method: "POST" })
             name: s.name,
             duration_minutes: s.duration_minutes,
             price_cents: s.price_cents,
+            category: s.category ?? null,
           })),
         )
-        .select("id, name, duration_minutes, price_cents");
+        .select("id, name, duration_minutes, price_cents, category");
       if (servicesError) throw new Error(`Shop created but services failed: ${servicesError.message}`);
       return { ...shop, services: savedServices ?? [] };
     }
 
-    return { ...shop, services: [] as Array<{ id: string; name: string; duration_minutes: number; price_cents: number }> };
+    return { ...shop, services: [] as Array<{ id: string; name: string; duration_minutes: number; price_cents: number; category: string | null }> };
+
   });
 
 // ---------- Shop details ----------
