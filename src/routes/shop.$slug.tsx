@@ -127,7 +127,7 @@ function ShopPage() {
           <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
             Shops
           </Link>
-          <Link to="/barber" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
+          <Link to="/provider" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
             Provider
           </Link>
           <Link to="/owner" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
@@ -213,7 +213,7 @@ function ShopPage() {
           <Icon name="event_note" filled />
           <span className="font-label-sm text-label-sm mt-1">Shops</span>
         </Link>
-        <Link to="/barber" className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full">
+        <Link to="/provider" className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full">
           <Icon name="calendar_today" />
           <span className="font-label-sm text-label-sm mt-1">Provider</span>
         </Link>

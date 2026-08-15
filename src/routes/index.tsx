@@ -162,7 +162,7 @@ function MarketplacePage() {
             <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Shops
             </Link>
-            <Link to="/barber" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link to="/provider" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Provider
             </Link>
             <Link to="/owner" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
@@ -414,7 +414,7 @@ function MarketplacePage() {
             <Icon name="event_note" />
             <span className="font-label-sm text-label-sm mt-1">Bookings</span>
           </Link>
-          <Link to="/barber" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+          <Link to="/provider" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="calendar_today" />
             <span className="font-label-sm text-label-sm mt-1">Provider</span>
           </Link>
