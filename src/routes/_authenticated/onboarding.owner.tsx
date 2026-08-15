@@ -142,7 +142,8 @@ function OnboardingOwnerPage() {
               Shop URL
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-on-surface-variant text-body-md">crown-cut.app/shop/</span>
+              <span className="text-on-surface-variant text-body-md">thestandingchair.app/shop/</span>
+
               <input
                 type="text"
                 required
