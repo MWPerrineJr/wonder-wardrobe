@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { categorySchema } from "@/lib/categories";
+import { categorySchema, type ServiceCategory } from "@/lib/categories";
 
 const CreateShopInput = z.object({
   name: z.string().min(2).max(80),
@@ -20,13 +20,14 @@ const CreateShopInput = z.object({
         name: z.string().min(1).max(80),
         duration_minutes: z.number().int().positive().max(600),
         price_cents: z.number().int().nonnegative().max(1_000_000),
-        category: z.string().optional().nullable(),
+        category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const).default("hair_barber"),
       }),
     )
     .max(10)
     .optional()
     .default([]),
 });
+
 
 
 export const createOwnerShop = createServerFn({ method: "POST" })
