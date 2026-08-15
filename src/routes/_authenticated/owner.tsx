@@ -14,6 +14,7 @@ import {
   updateShop,
   upsertShopHours,
 } from "@/lib/owner.functions";
+import { categoryLabel, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -27,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
 
 const myShopsQuery = queryOptions({
   queryKey: ["owner", "shops"],
