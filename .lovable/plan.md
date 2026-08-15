@@ -22,7 +22,7 @@ Hair & Barber, Nails, Waxing, Makeup, Massage, Skincare & Facials, Brows & Lashe
 ## Technical section
 
 ### Database migration
-- New enum `service_category` with the nine values above.
+- New enum `service_category` with the eight values above.
 - `services`: add `category service_category NOT NULL DEFAULT 'hair_barber'`; backfill existing rows to `hair_barber`.
 - `shops`: add `categories service_category[] NOT NULL DEFAULT '{}'`; backfill from each shop's existing services.
 - Rename `public.barbers` to `public.providers`; rename `bookings.barber_id` to `provider_id`. Postgres carries constraints, indexes and policies over, but policy bodies and the `validate_booking()` trigger reference the old names, so recreate the affected policies and the trigger function with the new identifiers in the same migration.
