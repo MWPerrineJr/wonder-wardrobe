@@ -76,7 +76,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
             name: s.name,
             duration_minutes: s.duration_minutes,
             price_cents: s.price_cents,
-            category: s.category ?? null,
+            category: s.category ?? "hair_barber",
           })),
         )
         .select("id, name, duration_minutes, price_cents, category");
@@ -85,6 +85,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
     }
 
     return { ...shop, services: [] as Array<{ id: string; name: string; duration_minutes: number; price_cents: number; category: string | null }> };
+
 
   });
 
