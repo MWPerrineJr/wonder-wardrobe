@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { createOwnerShop } from "@/lib/owner.functions";
+import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
+
 
 export const Route = createFileRoute("/_authenticated/onboarding/owner")({
   head: () => ({
@@ -33,13 +35,14 @@ function OnboardingOwnerPage() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [services, setServices] = useState<
-    Array<{ name: string; duration: string; price: string }>
+    Array<{ name: string; duration: string; price: string; category: ServiceCategory }>
   >([
-    { name: "Classic Haircut", duration: "30", price: "35" },
-    { name: "Beard Trim", duration: "20", price: "20" },
-    { name: "Cut & Beard", duration: "45", price: "50" },
+    { name: "Classic Haircut", duration: "30", price: "35", category: "hair_barber" },
+    { name: "Beard Trim", duration: "20", price: "20", category: "hair_barber" },
+    { name: "Cut & Beard", duration: "45", price: "50", category: "hair_barber" },
   ]);
 
   function updateService(i: number, patch: Partial<(typeof services)[number]>) {
@@ -47,11 +50,16 @@ function OnboardingOwnerPage() {
   }
   function addService() {
     if (services.length >= 10) return;
-    setServices((prev) => [...prev, { name: "", duration: "30", price: "0" }]);
+    setServices((prev) => [...prev, { name: "", duration: "30", price: "0", category: "hair_barber" }]);
   }
   function removeService(i: number) {
     setServices((prev) => prev.filter((_, idx) => idx !== i));
   }
+
+  function toggleCategory(cat: ServiceCategory) {
+    setCategories((prev) => (prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]));
+  }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -62,6 +70,7 @@ function OnboardingOwnerPage() {
           name: s.name.trim(),
           duration_minutes: parseInt(s.duration, 10),
           price_cents: Math.round(parseFloat(s.price || "0") * 100),
+          category: s.category,
         }))
         .filter(
           (s) =>
@@ -77,6 +86,7 @@ function OnboardingOwnerPage() {
           slug: slug || slugify(name),
           description: description || null,
           address: address || null,
+          categories,
           services: cleanedServices,
         },
       });
@@ -89,6 +99,7 @@ function OnboardingOwnerPage() {
     }
   }
 
+
   return (
     <div className="min-h-screen bg-background text-on-background px-4 py-12 font-body-md">
       <div className="mx-auto w-full max-w-2xl">
@@ -100,8 +111,9 @@ function OnboardingOwnerPage() {
             Set up your shop
           </h1>
           <p className="mt-2 text-on-surface-variant text-body-md">
-            Tell us about your shop. You can add barbers and services after this.
+            Tell us about your shop. You can add providers and services after this.
           </p>
+
         </div>
 
         <form
@@ -130,7 +142,8 @@ function OnboardingOwnerPage() {
               Shop URL
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-on-surface-variant text-body-md">crown-cut.app/shop/</span>
+              <span className="text-on-surface-variant text-body-md">thestandingchair.app/shop/</span>
+
               <input
                 type="text"
                 required
@@ -170,11 +183,36 @@ function OnboardingOwnerPage() {
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
               className="w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md"
-              placeholder="Premium barbershop in the heart of downtown…"
+              placeholder="A welcoming studio in the heart of downtown…"
+
             />
           </div>
 
           <div>
+            <label className="font-label-md text-label-md text-on-surface-variant block mb-2">
+              Categories
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {SERVICE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.value}
+                  type="button"
+                  onClick={() => toggleCategory(cat.value)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-label-sm transition ${
+                    categories.includes(cat.value)
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "bg-surface border-border-subtle text-on-surface-variant hover:border-primary"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">{cat.icon}</span>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+
             <div className="flex items-center justify-between mb-2">
               <label className="font-label-md text-label-md text-on-surface-variant">
                 Starter services
@@ -192,13 +230,13 @@ function OnboardingOwnerPage() {
             </p>
             <div className="flex flex-col gap-2">
               {services.map((s, i) => (
-                <div key={i} className="grid grid-cols-12 gap-2">
+                <div key={i} className="grid grid-cols-12 gap-2 items-center">
                   <input
                     type="text"
                     value={s.name}
                     onChange={(e) => updateService(i, { name: e.target.value })}
                     placeholder="Service name"
-                    className="col-span-6 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                    className="col-span-5 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
                   />
                   <input
                     type="number"
@@ -215,8 +253,19 @@ function OnboardingOwnerPage() {
                     value={s.price}
                     onChange={(e) => updateService(i, { price: e.target.value })}
                     placeholder="Price"
-                    className="col-span-3 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                    className="col-span-2 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
                   />
+                  <select
+                    value={s.category}
+                    onChange={(e) => updateService(i, { category: e.target.value as ServiceCategory })}
+                    className="col-span-2 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
+                  >
+                    {SERVICE_CATEGORIES.map((cat) => (
+                      <option key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     type="button"
                     onClick={() => removeService(i)}
@@ -228,6 +277,7 @@ function OnboardingOwnerPage() {
                 </div>
               ))}
             </div>
+
           </div>
 
           <button

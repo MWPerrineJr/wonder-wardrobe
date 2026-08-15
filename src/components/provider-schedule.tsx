@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
-import { getMyBarberDay, setBookingStatus, type BarberBooking } from "@/lib/barber.functions";
+import { getMyProviderDay, setBookingStatus, type ProviderBooking } from "@/lib/provider.functions";
 
 const STATUSES = ["pending", "confirmed", "completed", "cancelled", "no_show"] as const;
 
@@ -16,7 +16,7 @@ function money(cents: number) {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
 }
 
-function timeRange(b: BarberBooking) {
+function timeRange(b: ProviderBooking) {
   const f = (iso: string) =>
     new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   return `${f(b.starts_at)} – ${f(b.ends_at)}`;
@@ -30,16 +30,16 @@ const statusColor: Record<string, string> = {
   no_show: "border-error text-error",
 };
 
-export function BarberSchedule() {
+export function ProviderSchedule() {
   const { user, loading } = useAuth();
   const qc = useQueryClient();
   const tzOffsetMinutes = useMemo(() => new Date().getTimezoneOffset(), []);
   const [date, setDate] = useState(() => isoDate(new Date()));
 
   const dayQuery = useQuery({
-    queryKey: ["barber-day", date, tzOffsetMinutes],
+    queryKey: ["provider-day", date, tzOffsetMinutes],
     enabled: !!user,
-    queryFn: () => getMyBarberDay({ data: { date, tzOffsetMinutes } }),
+    queryFn: () => getMyProviderDay({ data: { date, tzOffsetMinutes } }),
   });
 
   const statusMutation = useMutation({
@@ -47,7 +47,7 @@ export function BarberSchedule() {
       setBookingStatus({ data: vars }),
     onSuccess: (saved) => {
       toast.success(`Appointment marked ${saved.status.replace("_", " ")}.`);
-      qc.invalidateQueries({ queryKey: ["barber-day"] });
+      qc.invalidateQueries({ queryKey: ["provider-day"] });
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Could not update appointment"),
   });
@@ -57,11 +57,11 @@ export function BarberSchedule() {
       <div className="bg-surface rounded-xl p-6 border border-border-subtle flex flex-col gap-3">
         <h3 className="font-headline-md text-headline-md text-on-surface">Sign in to see your schedule</h3>
         <p className="text-on-surface-variant text-body-md">
-          {loading ? "Checking your session…" : "Your appointments load once you're signed in as a barber."}
+          {loading ? "Checking your session…" : "Your appointments load once you're signed in as a provider."}
         </p>
         <Link
           to="/auth"
-          search={{ next: "/barber", mode: undefined }}
+          search={{ next: "/provider", mode: undefined }}
           className="self-start bg-primary text-on-primary px-4 py-2 rounded font-bold text-label-md"
         >
           Sign in
@@ -126,9 +126,9 @@ export function BarberSchedule() {
               day: "numeric",
             })}
           </h3>
-          {dayQuery.data?.barber && (
+          {dayQuery.data?.provider && (
             <span className="text-label-sm text-text-muted">
-              {dayQuery.data.barber.display_name} • {dayQuery.data.barber.shop_name}
+              {dayQuery.data.provider.display_name} • {dayQuery.data.provider.shop_name}
             </span>
           )}
         </div>
@@ -140,9 +140,9 @@ export function BarberSchedule() {
             <p className="text-error text-body-md">
               {dayQuery.error instanceof Error ? dayQuery.error.message : "Could not load schedule"}
             </p>
-          ) : !dayQuery.data?.barber ? (
+          ) : !dayQuery.data?.provider ? (
             <p className="text-on-surface-variant text-body-md">
-              Your account isn't linked to a barber profile yet. Ask your shop owner to add you.
+              Your account isn't linked to a provider profile yet. Ask your shop owner to add you.
             </p>
           ) : bookings.length === 0 ? (
             <p className="text-on-surface-variant text-body-md">No appointments booked for this day.</p>

@@ -14,6 +14,7 @@ import {
   updateShop,
   upsertShopHours,
 } from "@/lib/owner.functions";
+import { categoryLabel, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -27,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
 
 const myShopsQuery = queryOptions({
   queryKey: ["owner", "shops"],
@@ -147,7 +149,7 @@ function OwnerPage() {
             <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
               <StatCard icon="event_available" label="Bookings today" value={selected.today_bookings} />
               <StatCard icon="content_cut" label="Active services" value={selected.services_count} />
-              <StatCard icon="groups" label="Barbers" value={selected.barbers_count} />
+              <StatCard icon="groups" label="Team providers" value={selected.providers_count} />
             </section>
             <PublicLinkCard slug={selected.slug} shopName={selected.name} />
             <div className="flex flex-wrap gap-3">
@@ -206,7 +208,9 @@ type ShopSummary = {
   description: string | null;
   address: string | null;
   cover_image_url: string | null;
+  categories: ServiceCategory[] | null;
 };
+
 
 function DetailsPanel({ shop }: { shop: ShopSummary }) {
   const qc = useQueryClient();
@@ -214,6 +218,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
   const [address, setAddress] = useState(shop.address ?? "");
   const [description, setDescription] = useState(shop.description ?? "");
   const [coverUrl, setCoverUrl] = useState(shop.cover_image_url ?? "");
+  const [categories, setCategories] = useState<ServiceCategory[]>(shop.categories ?? []);
 
   // Reset local state when the selected shop changes
   useEffect(() => {
@@ -221,11 +226,23 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     setAddress(shop.address ?? "");
     setDescription(shop.description ?? "");
     setCoverUrl(shop.cover_image_url ?? "");
-  }, [shop.id, shop.name, shop.address, shop.description, shop.cover_image_url]);
+    setCategories(shop.categories ?? []);
+  }, [shop.id, shop.name, shop.address, shop.description, shop.cover_image_url, shop.categories]);
 
   const mutation = useMutation({
-    mutationFn: (patch: Record<string, string | null>) =>
-      updateShop({ data: { shopId: shop.id, patch } }),
+    mutationFn: () =>
+      updateShop({
+        data: {
+          shopId: shop.id,
+          patch: {
+            name,
+            address: address || null,
+            description: description || null,
+            cover_image_url: coverUrl || null,
+            categories,
+          },
+        },
+      }),
     onSuccess: () => {
       toast.success("Shop updated.");
       qc.invalidateQueries({ queryKey: ["owner", "shops"] });
@@ -234,6 +251,12 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  function toggleCategory(cat: ServiceCategory) {
+    setCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+    );
+  }
+
   return (
     <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm max-w-2xl">
       <h2 className="font-headline-md text-[20px] font-semibold text-on-surface mb-4">Shop details</h2>
@@ -241,12 +264,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          mutation.mutate({
-            name,
-            address: address || null,
-            description: description || null,
-            cover_image_url: coverUrl || null,
-          });
+          mutation.mutate();
         }}
       >
         <Field label="Name">
@@ -268,6 +286,25 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
             rows={4}
             className={inputCls}
           />
+        </Field>
+        <Field label="Categories">
+          <div className="flex flex-wrap gap-2">
+            {SERVICE_CATEGORIES.map((cat) => (
+              <button
+                key={cat.value}
+                type="button"
+                onClick={() => toggleCategory(cat.value)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-label-sm transition ${
+                  categories.includes(cat.value)
+                    ? "bg-primary/10 border-primary text-primary"
+                    : "bg-surface border-border-subtle text-on-surface-variant hover:border-primary"
+                }`}
+              >
+                <Icon name={cat.icon} className="text-[16px]" />
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </Field>
         <Field label="Cover image URL">
           <input
@@ -297,6 +334,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
   );
 }
 
+
 // -------------------- Services --------------------
 
 type ServiceRow = {
@@ -306,7 +344,9 @@ type ServiceRow = {
   duration_minutes: number;
   price_cents: number;
   is_active: boolean;
+  category: ServiceCategory;
 };
+
 
 function ServicesPanel({ shopId }: { shopId: string }) {
   const qc = useQueryClient();
@@ -363,12 +403,13 @@ function ServicesPanel({ shopId }: { shopId: string }) {
                   {!s.is_active && <span className="ml-2 text-label-sm text-on-surface-variant">(inactive)</span>}
                 </p>
                 <p className="text-label-sm text-on-surface-variant">
-                  {s.duration_minutes} min · ${(s.price_cents / 100).toFixed(2)}
+                  {categoryLabel(s.category)} · {s.duration_minutes} min · ${(s.price_cents / 100).toFixed(2)}
                 </p>
                 {s.description && (
                   <p className="text-label-sm text-on-surface-variant mt-1 line-clamp-2">{s.description}</p>
                 )}
               </div>
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => toggleActive.mutate(s)}
@@ -431,8 +472,20 @@ function ServiceDialog({
   const [durationMin, setDurationMin] = useState(service?.duration_minutes ?? 30);
   const [priceDollars, setPriceDollars] = useState(((service?.price_cents ?? 3500) / 100).toFixed(2));
   const [isActive, setIsActive] = useState(service?.is_active ?? true);
+  const [category, setCategory] = useState<ServiceCategory>(service?.category ?? "hair_barber");
 
   const isEdit = !!service;
+
+  // Reset form when opening for a different service
+  useEffect(() => {
+    if (!open) return;
+    setName(service?.name ?? "");
+    setDescription(service?.description ?? "");
+    setDurationMin(service?.duration_minutes ?? 30);
+    setPriceDollars(((service?.price_cents ?? 3500) / 100).toFixed(2));
+    setIsActive(service?.is_active ?? true);
+    setCategory(service?.category ?? "hair_barber");
+  }, [open, service?.id]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -444,6 +497,7 @@ function ServiceDialog({
         duration_minutes: Number(durationMin),
         price_cents,
         is_active: isActive,
+        category,
       };
       if (isEdit && service) {
         return updateService({ data: { serviceId: service.id, fields } });
@@ -457,6 +511,7 @@ function ServiceDialog({
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -502,6 +557,19 @@ function ServiceDialog({
               />
             </Field>
           </div>
+          <Field label="Category">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ServiceCategory)}
+              className={inputCls}
+            >
+              {SERVICE_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </Field>
           <label className="flex items-center gap-2 text-body-md text-on-surface">
             <input
               type="checkbox"
@@ -512,6 +580,7 @@ function ServiceDialog({
             Active (bookable by customers)
           </label>
           <DialogFooter>
+
             <button
               type="submit"
               disabled={mutation.isPending}

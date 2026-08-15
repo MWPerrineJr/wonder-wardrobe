@@ -4,12 +4,14 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
+import { categoryLabel } from "@/lib/categories";
 import {
   createBooking,
   getAvailableSlots,
   type BookingContext,
   type SavedBooking,
 } from "@/lib/booking.functions";
+
 
 function formatPrice(cents: number) {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
@@ -34,7 +36,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
   const { user, loading } = useAuth();
   const tzOffsetMinutes = useMemo(() => new Date().getTimezoneOffset(), []);
 
-  const [barberId, setBarberId] = useState<string | null>(null);
+  const [providerId, setBarberId] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(ctx.services[0]?.id ?? null);
   const [date, setDate] = useState<string>(() => isoDate(new Date(Date.now() + 24 * 60 * 60 * 1000)));
   const [time, setTime] = useState<string | null>(null);
@@ -47,17 +49,17 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
 
   useEffect(() => {
     setTime(null);
-  }, [barberId, serviceId, date]);
+  }, [providerId, serviceId, date]);
 
   const slotsQuery = useQuery({
-    queryKey: ["slots", ctx.shop.id, serviceId, barberId, date, tzOffsetMinutes],
+    queryKey: ["slots", ctx.shop.id, serviceId, providerId, date, tzOffsetMinutes],
     enabled: !!user && !!serviceId,
     queryFn: () =>
       getAvailableSlots({
         data: {
           shopId: ctx.shop.id,
           serviceId: serviceId!,
-          barberId,
+          providerId,
           date,
           tzOffsetMinutes,
         },
@@ -70,7 +72,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
         data: {
           shopId: ctx.shop.id,
           serviceId: serviceId!,
-          barberId,
+          providerId,
           date,
           time: time!,
           tzOffsetMinutes,
@@ -104,7 +106,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           {new Date(confirmed.starts_at).toLocaleString()} • {confirmed.service?.duration_minutes} mins
         </p>
         <p className="text-on-surface-variant text-body-md">
-          {confirmed.barber?.display_name ?? "No barber preference"} • {formatPrice(confirmed.price_cents)} •{" "}
+          {confirmed.provider?.display_name ?? "No provider preference"} • {formatPrice(confirmed.price_cents)} •{" "}
           {confirmed.status}
         </p>
         <div className="flex gap-3 mt-2">
@@ -123,48 +125,50 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
     );
   }
 
+
   return (
     <div className="flex flex-col gap-10">
-      {/* Step 1: barber */}
+      {/* Step 1: provider */}
       <section className="glass-panel rounded-xl p-6 md:p-8">
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">1. Select barber</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">1. Select provider</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <button
             type="button"
             onClick={() => setBarberId(null)}
             className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
-              barberId === null ? "border-primary" : "border-border-subtle hover:border-primary"
+              providerId === null ? "border-primary" : "border-border-subtle hover:border-primary"
             }`}
           >
             <span className="material-symbols-outlined text-[32px] text-on-surface-variant">group</span>
             <span className="font-label-md text-label-md text-on-surface">No preference</span>
           </button>
-          {ctx.barbers.map((b) => (
+          {ctx.providers.map((provider) => (
             <button
-              key={b.id}
+              key={provider.id}
               type="button"
-              onClick={() => setBarberId(b.id)}
+              onClick={() => setBarberId(provider.id)}
               className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
-                barberId === b.id ? "border-primary" : "border-border-subtle hover:border-primary"
+                providerId === provider.id ? "border-primary" : "border-border-subtle hover:border-primary"
               }`}
             >
               <div className="w-16 h-16 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center text-primary">
-                {b.avatar_url ? (
-                  <img src={b.avatar_url} alt={b.display_name} className="w-full h-full object-cover" />
+                {provider.avatar_url ? (
+                  <img src={provider.avatar_url} alt={provider.display_name} className="w-full h-full object-cover" />
                 ) : (
-                  b.display_name.charAt(0)
+                  provider.display_name.charAt(0)
                 )}
               </div>
-              <span className="font-label-md text-label-md text-on-surface">{b.display_name}</span>
+              <span className="font-label-md text-label-md text-on-surface">{provider.display_name}</span>
             </button>
           ))}
         </div>
-        {ctx.barbers.length === 0 && (
+        {ctx.providers.length === 0 && (
           <p className="mt-4 text-on-surface-variant text-body-md">
-            This shop hasn't added barbers yet — book with no preference.
+            This shop hasn't added providers yet — book with no preference.
           </p>
         )}
       </section>
+
 
       {/* Step 2: service */}
       <section className="glass-panel rounded-xl p-6 md:p-8">
@@ -187,9 +191,11 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
                 <span className="flex flex-col gap-1">
                   <span className="font-label-md text-label-md text-on-surface">{svc.name}</span>
                   <span className="font-body-md text-body-md text-on-surface-variant text-sm">
-                    {svc.duration_minutes} mins{svc.description ? ` • ${svc.description}` : ""}
+                    {svc.duration_minutes} mins{svc.category ? ` • ${categoryLabel(svc.category)}` : ""}{svc.description ? ` • ${svc.description}` : ""}
                   </span>
                 </span>
+
+
                 <span className={`font-headline-md text-headline-md ${serviceId === svc.id ? "text-primary" : "text-on-surface"}`}>
                   {formatPrice(svc.price_cents)}
                 </span>
@@ -253,12 +259,13 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
             <p className="text-on-surface-variant text-body-md">Sign in to book this appointment.</p>
             <Link
               to="/auth"
-              search={{ next: `/shop?slug=${slug}`, mode: undefined }}
+              search={{ next: `/shop/${slug}`, mode: undefined }}
               className="bg-primary text-on-primary px-4 py-3 rounded font-bold text-label-md text-center"
             >
               Sign in to book
             </Link>
           </div>
+
         ) : (
           <form
             className="flex flex-col gap-4"
@@ -295,10 +302,11 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
                 rows={3}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Anything your barber should know?"
+                placeholder="Anything your provider should know?"
                 className={inputClass}
               />
             </div>
+
 
             <div className="border-t border-border-subtle pt-4 flex flex-col gap-2">
               <div className="flex justify-between text-body-md text-on-surface">

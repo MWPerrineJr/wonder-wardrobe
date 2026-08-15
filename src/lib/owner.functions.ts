@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { categorySchema, type ServiceCategory } from "@/lib/categories";
 
 const CreateShopInput = z.object({
   name: z.string().min(2).max(80),
@@ -12,18 +13,22 @@ const CreateShopInput = z.object({
     .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers, and hyphens only"),
   description: z.string().max(500).optional().nullable(),
   address: z.string().max(200).optional().nullable(),
+  categories: categorySchema.optional().default([]),
   services: z
     .array(
       z.object({
         name: z.string().min(1).max(80),
         duration_minutes: z.number().int().positive().max(600),
         price_cents: z.number().int().nonnegative().max(1_000_000),
+        category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const).default("hair_barber"),
       }),
     )
     .max(10)
     .optional()
     .default([]),
 });
+
+
 
 export const createOwnerShop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -57,6 +62,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
         slug: data.slug,
         description: data.description ?? null,
         address: data.address ?? null,
+        categories: data.categories,
       })
       .select("id, slug, name")
       .single();
@@ -71,14 +77,18 @@ export const createOwnerShop = createServerFn({ method: "POST" })
             name: s.name,
             duration_minutes: s.duration_minutes,
             price_cents: s.price_cents,
+            category: s.category as ServiceCategory,
           })),
         )
-        .select("id, name, duration_minutes, price_cents");
+        .select("id, name, duration_minutes, price_cents, category");
       if (servicesError) throw new Error(`Shop created but services failed: ${servicesError.message}`);
       return { ...shop, services: savedServices ?? [] };
     }
 
-    return { ...shop, services: [] as Array<{ id: string; name: string; duration_minutes: number; price_cents: number }> };
+    return { ...shop, services: [] as Array<{ id: string; name: string; duration_minutes: number; price_cents: number; category: string | null }> };
+
+
+
   });
 
 // ---------- Shop details ----------
@@ -90,8 +100,10 @@ const UpdateShopInput = z.object({
     description: z.string().max(1000).nullable().optional(),
     address: z.string().max(200).nullable().optional(),
     cover_image_url: z.string().url().max(500).nullable().optional(),
+    categories: categorySchema.optional(),
   }),
 });
+
 
 export const updateShop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -116,6 +128,7 @@ const ServiceFields = z.object({
   duration_minutes: z.number().int().min(5, "Duration must be at least 5 minutes").max(600),
   price_cents: z.number().int().nonnegative().max(1_000_000),
   is_active: z.boolean().optional(),
+  category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const).default("hair_barber"),
 });
 
 export const createService = createServerFn({ method: "POST" })
@@ -127,11 +140,12 @@ export const createService = createServerFn({ method: "POST" })
     const { data: saved, error } = await context.supabase
       .from("services")
       .insert({ shop_id: data.shopId, ...data.fields })
-      .select("id, name, description, duration_minutes, price_cents, is_active")
+      .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .single();
     if (error) throw new Error(error.message);
     return saved;
   });
+
 
 export const updateService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -143,11 +157,12 @@ export const updateService = createServerFn({ method: "POST" })
       .from("services")
       .update(data.fields)
       .eq("id", data.serviceId)
-      .select("id, name, description, duration_minutes, price_cents, is_active")
+      .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .single();
     if (error) throw new Error(error.message);
     return saved;
   });
+
 
 export const deleteService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

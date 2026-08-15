@@ -83,7 +83,7 @@ export const listMyBookings = createServerFn({ method: "GET" })
         `id, starts_at, ends_at, status, price_cents, notes,
          shop:shops(id, name, slug),
          service:services(id, name, duration_minutes),
-         barber:barbers(id, display_name)`,
+         provider:providers(id, display_name)`,
       )
       .eq("customer_id", userId)
       .order("starts_at", { ascending: false });

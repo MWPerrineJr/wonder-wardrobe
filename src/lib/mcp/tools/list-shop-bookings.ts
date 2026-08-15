@@ -22,7 +22,7 @@ export default defineTool({
     let query = supabase
       .from("bookings")
       .select(
-        "id, customer_name, customer_phone, starts_at, ends_at, status, price_cents, notes, service_id, barber_id",
+        "id, customer_name, customer_phone, starts_at, ends_at, status, price_cents, notes, service_id, provider_id",
       )
       .eq("shop_id", shop_id)
       .order("starts_at", { ascending: true })

@@ -5,6 +5,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AccountNav } from "@/components/account-nav";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { listPublicShops } from "@/lib/shops.functions";
+import { CATEGORY_ICONS, CATEGORY_LABELS, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
+
 
 const shopsQuery = queryOptions({
   queryKey: ["public", "shops"],
@@ -14,22 +16,23 @@ const shopsQuery = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "The Standing Chair — Book barbers near you" },
+      { title: "The Standing Chair — Book beauty & wellness services" },
       {
         name: "description",
         content:
-          "Browse barbershops on The Standing Chair, compare services and prices, and book your next cut in a few taps.",
+          "Browse salons, spas, and studios on The Standing Chair, compare services and prices, and book your next appointment in a few taps.",
       },
-      { property: "og:title", content: "The Standing Chair — Book barbers near you" },
+      { property: "og:title", content: "The Standing Chair — Book beauty & wellness services" },
       {
         property: "og:description",
         content:
-          "Browse barbershops, compare services and prices, and book your next cut in a few taps.",
+          "Browse salons, spas, and studios, compare services and prices, and book your next appointment in a few taps.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+
   loader: ({ context }) => context.queryClient.ensureQueryData(shopsQuery),
   errorComponent: ({ error }) => (
     <div className="p-8 text-on-surface bg-background min-h-screen">
@@ -47,23 +50,6 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 const HERO_BG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA8cpAj_UG6ago_RiH5Y5HvlAh7URwYB-Lhg9to3EXFyzf9AH_8W1JthLNdq43ksvarR8otGhDrLGRnqVPLzRn2v1qGYEtNYNezkhbbsOws_29yUbWdAH5ot3zwrWR5meCqg74g8ORDITM0fvnQzwUaOKwSngFhPkbB-99a3vmFjtQy1l2hR0z1Z23LA2X5B776bWXhAdtLDUyM6kTsODsp5K7BLaVXeqzVO_onraeIhg5CD3mNx8BS";
 
-const CATEGORIES = [
-  {
-    title: "Modern",
-    subtitle: "Fades & Textures",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCBQ_oo-9XZF7b4hy_fMXTatFfMq5bP45UHmBWLOkgdUaOhkyC-oybJfGB2NOrfAUh936eyvN6kne76GW3xm9yMKJ-YLVwClw3GK35nzZs2kmS01338RefCXUlzE0tIGZ7iBRGSOKFcRBcVXd1FCvic9fPMCahko7oD55rfU33JqibpSf-HYeXE3Lkj_lSHHEMyFYdU5SLXijMMN7wOgENOG02ghiI9Qk9ujLi9bRKZZuhkhZ7OpasT",
-  },
-  {
-    title: "Classic",
-    subtitle: "Traditional Cuts",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuC3wxEk68Iu4BXiO3ixsL0qXahqZfQ6Knjw-nppPdnNQTwfZI6v7xvyb1-ETeq3Vzdq3i7S6OKOw5cYjkqujuwgL5ZCRHtG1lmxCP4JudYwc3T1Jhy-VTnkVzZE9yT4oHOlHxIK0rR7jEv9QwNKTg7g8V-CrI9DKbmaeur9muJGV4M7kc-qAO4yb8JkarjKv2nwgY-WRPBA0nWGVb2305TNKY5n3Rw7Uyz4GZ17EJMeh5uvEldfpvNT",
-  },
-  {
-    title: "Beard Specialist",
-    subtitle: "Trims & Hot Towels",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFYwKYZ5F9KZ4gYLGZCMx0HgVg4VuqkKHsiYwoSxokWLL7Izl41hG5luyukEmFiXcZJ_NnNqIpJAiw9A-N3HiB9hHWysHWk6chLbVc7qXFWMzKX4b81L5H-MMJW6uVDLd69hYEH-ZwrDYJno2yU-n5-7sm4hJAcGqC1t1WjUhRuiwTB-3Kxo_gdfqXfQ6ChLMKVfpuP8YcYBelhnHW__EBytLWkxSvXyrndy_kN0A1Xjlncf-aPTHz",
-  },
-];
 
 const FALLBACK_SHOP_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCGuKuKoUkaNsFqKp3Zjp0Sj0XtbFYL1y3qe1fynBBGO0jzvYr0Wt4LdowxOrSnGETsNuTDc1Dvf9NsWpGU11DEU1bUa6lIypidQCuVCGQ6ZDGj4BlRHgza9bTBML87SeW8jpnRmYyCSP4d7XBhjFYyQItmAdWJc7NoLFPMXA4TP0jCTVmqWPehX198QFQzZSrqS_MNWs4R6lP9KS7Tl54pcN_yEF10uqu4HiiVuUNzESaQoysPGFzc";
@@ -73,6 +59,8 @@ function MarketplacePage() {
   const [nameInput, setNameInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
   const [query, setQuery] = useState({ name: "", location: "" });
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
+
 
   const filteredShops = useMemo(() => {
     // Normalize: lowercase, strip accents/punctuation, collapse whitespace.
@@ -126,16 +114,19 @@ function MarketplacePage() {
 
     const n = norm(query.name);
     const l = norm(query.location);
-    if (!n && !l) return shops;
+    if (!n && !l && !selectedCategory) return shops;
     return shops.filter((s) => {
       const nameHit =
         !n ||
         fuzzyMatch(n, norm(s.name)) ||
         fuzzyMatch(n, norm(s.description ?? ""));
       const locHit = !l || fuzzyMatch(l, norm(s.address ?? ""));
-      return nameHit && locHit;
+      const categoryHit =
+        !selectedCategory || (s.categories ?? []).includes(selectedCategory);
+      return nameHit && locHit && categoryHit;
     });
-  }, [shops, query]);
+  }, [shops, query, selectedCategory]);
+
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -162,8 +153,8 @@ function MarketplacePage() {
             <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Shops
             </Link>
-            <Link to="/barber" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
-              Barber
+            <Link to="/provider" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
+              Provider
             </Link>
             <Link to="/owner" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Owner
@@ -192,16 +183,17 @@ function MarketplacePage() {
           <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="flex flex-col items-start gap-6 max-w-xl">
               <span className="inline-flex items-center gap-2 rounded-full border border-border-subtle bg-surface px-3 py-1 font-label-sm text-label-sm text-on-surface-variant">
-                <Icon name="content_cut" className="text-[16px] text-primary" />
-                Barbershop booking, simplified
+                <Icon name="spa" className="text-[16px] text-primary" />
+                Beauty & wellness booking, simplified
               </span>
               <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
-                Find your next cut
+                Find your next appointment
               </h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant">
-                Discover premium barbers, view their portfolios, and book your next appointment
+                Discover top-rated studios, salons, and spas, view their services, and book your next appointment
                 seamlessly.
               </p>
+
               <form
                 onSubmit={handleSearch}
                 className="w-full bg-surface border border-border-subtle rounded-2xl p-2 flex flex-col gap-2 focus-within:border-primary transition-colors"
@@ -252,7 +244,8 @@ function MarketplacePage() {
               <div className="relative aspect-4/5 sm:aspect-video lg:aspect-4/5 w-full overflow-hidden rounded-3xl border border-border-subtle bg-surface-container">
                 <img
                   src={HERO_BG}
-                  alt="Barber finishing a fresh haircut in a modern barbershop"
+                  alt="Provider finishing a fresh service in a modern studio"
+
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
@@ -274,46 +267,47 @@ function MarketplacePage() {
 
         <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-16 flex flex-col gap-24">
           {/* Categories */}
-          <section className="flex flex-col gap-8">
+          <section className="flex flex-col gap-6">
             <div className="flex justify-between items-end">
               <h2 className="font-headline-md text-headline-md text-on-surface">Categories</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {CATEGORIES.map((c) => (
-                <div
-                  key={c.title}
-                  className="group relative h-48 rounded-xl overflow-hidden border border-border-subtle hover:border-primary transition-colors cursor-pointer bg-surface"
-                >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center opacity-90 group-hover:opacity-100 transition-opacity"
-                    style={{ backgroundImage: `url('${c.img}')` }}
-                  />
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/30 to-transparent">
-                    <span className="font-headline-md text-headline-md text-inverse-on-surface">
-                      {c.title}
-                    </span>
-                    <span className="font-label-sm text-label-sm text-inverse-on-surface/80 mt-1">
-                      {c.subtitle}
-                    </span>
-                  </div>
-                </div>
-              ))}
+            <div className="flex flex-wrap gap-3">
+              {SERVICE_CATEGORIES.map((c) => {
+                const active = selectedCategory === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setSelectedCategory(active ? null : c.value)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border font-label-md text-label-md transition ${
+                      active
+                        ? "bg-primary text-on-primary border-primary"
+                        : "bg-surface border-border-subtle text-on-surface hover:border-primary"
+                    }`}
+                  >
+                    <Icon name={CATEGORY_ICONS[c.value]} className="text-[18px]" />
+                    {CATEGORY_LABELS[c.value]}
+                  </button>
+                );
+              })}
             </div>
           </section>
+
 
           {/* Featured shops */}
           <section id="featured-shops" className="flex flex-col gap-8 scroll-mt-24">
             <div className="flex justify-between items-end">
               <h2 className="font-headline-md text-headline-md text-on-surface">
-                {query.name || query.location ? "Search Results" : "Featured Shops"}
+                {query.name || query.location || selectedCategory ? "Search Results" : "Featured Shops"}
               </h2>
-              {(query.name || query.location) && (
+              {(query.name || query.location || selectedCategory) && (
                 <button
                   type="button"
                   onClick={() => {
                     setNameInput("");
                     setLocationInput("");
                     setQuery({ name: "", location: "" });
+                    setSelectedCategory(null);
                   }}
                   className="font-label-md text-label-md text-primary hover:underline"
                 >
@@ -321,6 +315,7 @@ function MarketplacePage() {
                 </button>
               )}
             </div>
+
             {filteredShops.length === 0 ? (
               <div className="bg-surface border border-border-subtle rounded-xl p-8 text-center flex flex-col gap-3">
                 <p className="text-on-surface font-headline-md text-[20px]">
@@ -366,11 +361,25 @@ function MarketplacePage() {
                         )}
                       </div>
                     </div>
+                    {s.categories && s.categories.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {s.categories.map((cat) => (
+                          <span
+                            key={cat}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-container border border-border-subtle text-label-sm text-on-surface-variant"
+                          >
+                            <Icon name={CATEGORY_ICONS[cat]} className="text-[14px]" />
+                            {CATEGORY_LABELS[cat]}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     {s.description && (
                       <p className="text-on-surface-variant text-label-sm line-clamp-2">
                         {s.description}
                       </p>
                     )}
+
                   </Link>
                 ))}
               </div>
@@ -391,8 +400,9 @@ function MarketplacePage() {
               Terms of Service
             </a>
             <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
-              For Barbers
+              For Providers
             </a>
+
             <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Contact
             </a>
@@ -414,9 +424,9 @@ function MarketplacePage() {
             <Icon name="event_note" />
             <span className="font-label-sm text-label-sm mt-1">Bookings</span>
           </Link>
-          <Link to="/barber" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+          <Link to="/provider" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="calendar_today" />
-            <span className="font-label-sm text-label-sm mt-1">Barber</span>
+            <span className="font-label-sm text-label-sm mt-1">Provider</span>
           </Link>
           <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="dashboard" />
