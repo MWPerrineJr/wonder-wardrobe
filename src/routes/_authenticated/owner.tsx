@@ -218,6 +218,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
   const [address, setAddress] = useState(shop.address ?? "");
   const [description, setDescription] = useState(shop.description ?? "");
   const [coverUrl, setCoverUrl] = useState(shop.cover_image_url ?? "");
+  const [categories, setCategories] = useState<ServiceCategory[]>(shop.categories ?? []);
 
   // Reset local state when the selected shop changes
   useEffect(() => {
@@ -225,11 +226,23 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     setAddress(shop.address ?? "");
     setDescription(shop.description ?? "");
     setCoverUrl(shop.cover_image_url ?? "");
-  }, [shop.id, shop.name, shop.address, shop.description, shop.cover_image_url]);
+    setCategories(shop.categories ?? []);
+  }, [shop.id, shop.name, shop.address, shop.description, shop.cover_image_url, shop.categories]);
 
   const mutation = useMutation({
-    mutationFn: (patch: Record<string, string | null>) =>
-      updateShop({ data: { shopId: shop.id, patch } }),
+    mutationFn: () =>
+      updateShop({
+        data: {
+          shopId: shop.id,
+          patch: {
+            name,
+            address: address || null,
+            description: description || null,
+            cover_image_url: coverUrl || null,
+            categories,
+          },
+        },
+      }),
     onSuccess: () => {
       toast.success("Shop updated.");
       qc.invalidateQueries({ queryKey: ["owner", "shops"] });
@@ -238,6 +251,12 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  function toggleCategory(cat: ServiceCategory) {
+    setCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+    );
+  }
+
   return (
     <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm max-w-2xl">
       <h2 className="font-headline-md text-[20px] font-semibold text-on-surface mb-4">Shop details</h2>
@@ -245,12 +264,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          mutation.mutate({
-            name,
-            address: address || null,
-            description: description || null,
-            cover_image_url: coverUrl || null,
-          });
+          mutation.mutate();
         }}
       >
         <Field label="Name">
@@ -272,6 +286,25 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
             rows={4}
             className={inputCls}
           />
+        </Field>
+        <Field label="Categories">
+          <div className="flex flex-wrap gap-2">
+            {SERVICE_CATEGORIES.map((cat) => (
+              <button
+                key={cat.value}
+                type="button"
+                onClick={() => toggleCategory(cat.value)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-label-sm transition ${
+                  categories.includes(cat.value)
+                    ? "bg-primary/10 border-primary text-primary"
+                    : "bg-surface border-border-subtle text-on-surface-variant hover:border-primary"
+                }`}
+              >
+                <Icon name={cat.icon} className="text-[16px]" />
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </Field>
         <Field label="Cover image URL">
           <input
@@ -300,6 +333,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     </section>
   );
 }
+
 
 // -------------------- Services --------------------
 
