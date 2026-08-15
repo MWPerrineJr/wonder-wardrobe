@@ -17,7 +17,7 @@ export const listPublicShops = createServerFn({ method: "GET" }).handler(async (
   const supabase = publicClient();
   const { data, error } = await supabase
     .from("shops")
-    .select("id, slug, name, description, address, cover_image_url")
+    .select("id, slug, name, description, address, cover_image_url, categories")
     .order("created_at", { ascending: false })
     .limit(24);
   if (error) throw new Error(error.message);
@@ -30,7 +30,7 @@ export const getPublicShopBySlug = createServerFn({ method: "GET" })
     const supabase = publicClient();
     const { data: shop, error } = await supabase
       .from("shops")
-      .select("id, slug, name, description, address, cover_image_url")
+      .select("id, slug, name, description, address, cover_image_url, categories")
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -38,13 +38,21 @@ export const getPublicShopBySlug = createServerFn({ method: "GET" })
 
     const { data: services, error: sErr } = await supabase
       .from("services")
-      .select("id, name, description, duration_minutes, price_cents")
+      .select("id, name, description, duration_minutes, price_cents, category")
       .eq("shop_id", shop.id)
       .eq("is_active", true)
       .order("price_cents", { ascending: true });
     if (sErr) throw new Error(sErr.message);
 
-    return { shop, services: services ?? [] };
+    const { data: providers, error: pErr } = await supabase
+      .from("providers")
+      .select("id, display_name, specialties, avatar_url")
+      .eq("shop_id", shop.id)
+      .eq("is_active", true)
+      .order("created_at", { ascending: true });
+    if (pErr) throw new Error(pErr.message);
+
+    return { shop, services: services ?? [], providers: providers ?? [] };
   });
 
 export const getMyShops = createServerFn({ method: "GET" })
@@ -53,7 +61,7 @@ export const getMyShops = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: shops, error } = await supabase
       .from("shops")
-      .select("id, slug, name, description, address, cover_image_url, created_at")
+      .select("id, slug, name, description, address, cover_image_url, categories, created_at")
       .eq("owner_id", userId)
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
@@ -64,7 +72,7 @@ export const getMyShops = createServerFn({ method: "GET" })
 
     const enriched = await Promise.all(
       (shops ?? []).map(async (s) => {
-        const [{ count: servicesCount }, { count: barbersCount }, { count: todayBookings }] =
+        const [{ count: servicesCount }, { count: providersCount }, { count: todayBookings }] =
           await Promise.all([
             supabase
               .from("services")
@@ -85,7 +93,7 @@ export const getMyShops = createServerFn({ method: "GET" })
         return {
           ...s,
           services_count: servicesCount ?? 0,
-          barbers_count: barbersCount ?? 0,
+          providers_count: providersCount ?? 0,
           today_bookings: todayBookings ?? 0,
         };
       }),
@@ -100,7 +108,7 @@ export const getShopDetail = createServerFn({ method: "GET" })
     const { supabase } = context;
     const { data: shop, error: shopError } = await supabase
       .from("shops")
-      .select("id, slug, name, description, address, cover_image_url")
+      .select("id, slug, name, description, address, cover_image_url, categories")
       .eq("id", data.shopId)
       .maybeSingle();
     if (shopError) throw new Error(shopError.message);
@@ -108,10 +116,34 @@ export const getShopDetail = createServerFn({ method: "GET" })
 
     const { data: services, error: servicesError } = await supabase
       .from("services")
-      .select("id, name, description, duration_minutes, price_cents, is_active")
+      .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .eq("shop_id", data.shopId)
       .order("created_at", { ascending: true });
     if (servicesError) throw new Error(servicesError.message);
 
     return { shop, services: services ?? [] };
   });
+
+export const updateShopCategories = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        shopId: z.string().uuid(),
+        categories: z.array(z.string()),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: updated, error } = await supabase
+      .from("shops")
+      .update({ categories: data.categories })
+      .eq("id", data.shopId)
+      .eq("owner_id", context.userId)
+      .select("id, categories")
+      .single();
+    if (error) throw new Error(error.message);
+    return updated;
+  });
+
