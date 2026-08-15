@@ -16,7 +16,7 @@ export const SERVICE_CATEGORY_VALUES: ServiceCategory[] = [
 
 export const SERVICE_CATEGORIES: { value: ServiceCategory; label: string; icon: string }[] = [
   { value: "hair_barber", label: "Hair & Barber", icon: "content_cut" },
-  { value: "nails", label: "Nails", icon: "nails" },
+  { value: "nails", label: "Nails", icon: "brush" },
   { value: "waxing", label: "Waxing", icon: "spa" },
   { value: "makeup", label: "Makeup", icon: "palette" },
   { value: "massage", label: "Massage", icon: "self_care" },
@@ -24,6 +24,7 @@ export const SERVICE_CATEGORIES: { value: ServiceCategory; label: string; icon: 
   { value: "brows_lashes", label: "Brows & Lashes", icon: "visibility" },
   { value: "spa_wellness", label: "Spa & Wellness", icon: "hot_tub" },
 ];
+
 
 export const categorySchema = z.array(
   z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const),
