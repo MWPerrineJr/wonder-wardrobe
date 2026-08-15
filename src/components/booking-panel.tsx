@@ -259,12 +259,13 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
             <p className="text-on-surface-variant text-body-md">Sign in to book this appointment.</p>
             <Link
               to="/auth"
-              search={{ next: `/shop?slug=${slug}`, mode: undefined }}
+              search={{ next: `/shop/${slug}`, mode: undefined }}
               className="bg-primary text-on-primary px-4 py-3 rounded font-bold text-label-md text-center"
             >
               Sign in to book
             </Link>
           </div>
+
         ) : (
           <form
             className="flex flex-col gap-4"
