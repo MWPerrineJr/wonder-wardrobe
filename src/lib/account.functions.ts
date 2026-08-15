@@ -59,7 +59,8 @@ export const updateMyProfile = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UpdateProfileInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const patch: { full_name?: string | null; avatar_url?: string | null; phone?: string | null } = {};
+    const patch: { full_name?: string | null; avatar_url?: string | null; phone?: string | null } =
+      {};
     if (data.full_name !== undefined) patch.full_name = data.full_name || null;
     if (data.avatar_url !== undefined) patch.avatar_url = data.avatar_url ? data.avatar_url : null;
     if (data.phone !== undefined) patch.phone = data.phone || null;
@@ -70,6 +71,25 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       .select("id, full_name, avatar_url, phone, updated_at")
       .single();
     if (error) throw error;
+    return saved;
+  });
+
+export const cancelMyBooking = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ bookingId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    // Only status is sent; the DB trigger (restrict_customer_booking_update)
+    // enforces that a customer can only move their own booking to
+    // "cancelled" from "pending"/"confirmed" and cannot touch any other
+    // column, regardless of what a client sends.
+    const { data: saved, error } = await supabase
+      .from("bookings")
+      .update({ status: "cancelled" })
+      .eq("id", data.bookingId)
+      .select("id, status")
+      .single();
+    if (error) throw new Error(error.message);
     return saved;
   });
 
