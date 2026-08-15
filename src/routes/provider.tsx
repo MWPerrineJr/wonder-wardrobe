@@ -1,19 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { BarberSchedule } from "@/components/barber-schedule";
+import { ProviderSchedule } from "@/components/provider-schedule";
 
 export const Route = createFileRoute("/provider")({
   head: () => ({
     meta: [
       { title: "My Schedule — The Standing Chair" },
-      { name: "description", content: "Personal calendar view for barbers — manage appointments and Google Calendar sync." },
+      { name: "description", content: "Personal calendar view for providers — manage appointments and Google Calendar sync." },
       { property: "og:title", content: "My Schedule — The Standing Chair" },
       { property: "og:description", content: "Personal calendar with appointments, breaks and Google Calendar sync." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: BarberPage,
+  component: ProviderPage,
 });
 
 const Icon = ({ name, className = "", filled = false, style }: { name: string; className?: string; filled?: boolean; style?: React.CSSProperties }) => (
@@ -39,7 +39,7 @@ const SideLink = ({ icon, label, active = false, filled = false }: { icon: strin
   </a>
 );
 
-function BarberPage() {
+function ProviderPage() {
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex">
       {/* Side nav */}
@@ -52,7 +52,7 @@ function BarberPage() {
           />
           <div>
             <h1 className="font-headline-md text-headline-md text-primary tracking-tight">The Sharp Edge</h1>
-            <p className="font-label-sm text-label-sm text-text-muted">Barber Terminal</p>
+            <p className="font-label-sm text-label-sm text-text-muted">provider Terminal</p>
           </div>
         </div>
         <div className="flex-1 flex flex-col gap-2">
@@ -94,7 +94,7 @@ function BarberPage() {
           </div>
         </header>
 
-        <BarberSchedule />
+        <ProviderSchedule />
       </main>
 
       {/* Mobile bottom nav */}
@@ -108,9 +108,9 @@ function BarberPage() {
             <Icon name="event_note" />
             <span className="font-label-sm text-label-sm mt-1">Bookings</span>
           </Link>
-          <Link to="/barber" className="flex flex-col items-center justify-center text-primary font-bold p-2 rounded">
+          <Link to="/provider" className="flex flex-col items-center justify-center text-primary font-bold p-2 rounded">
             <Icon name="calendar_today" filled />
-            <span className="font-label-sm text-label-sm mt-1">Barber</span>
+            <span className="font-label-sm text-label-sm mt-1">provider</span>
           </Link>
           <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="dashboard" />
