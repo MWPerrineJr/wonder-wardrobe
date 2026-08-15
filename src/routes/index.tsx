@@ -50,23 +50,6 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 const HERO_BG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA8cpAj_UG6ago_RiH5Y5HvlAh7URwYB-Lhg9to3EXFyzf9AH_8W1JthLNdq43ksvarR8otGhDrLGRnqVPLzRn2v1qGYEtNYNezkhbbsOws_29yUbWdAH5ot3zwrWR5meCqg74g8ORDITM0fvnQzwUaOKwSngFhPkbB-99a3vmFjtQy1l2hR0z1Z23LA2X5B776bWXhAdtLDUyM6kTsODsp5K7BLaVXeqzVO_onraeIhg5CD3mNx8BS";
 
-const CATEGORIES = [
-  {
-    title: "Modern",
-    subtitle: "Fades & Textures",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCBQ_oo-9XZF7b4hy_fMXTatFfMq5bP45UHmBWLOkgdUaOhkyC-oybJfGB2NOrfAUh936eyvN6kne76GW3xm9yMKJ-YLVwClw3GK35nzZs2kmS01338RefCXUlzE0tIGZ7iBRGSOKFcRBcVXd1FCvic9fPMCahko7oD55rfU33JqibpSf-HYeXE3Lkj_lSHHEMyFYdU5SLXijMMN7wOgENOG02ghiI9Qk9ujLi9bRKZZuhkhZ7OpasT",
-  },
-  {
-    title: "Classic",
-    subtitle: "Traditional Cuts",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuC3wxEk68Iu4BXiO3ixsL0qXahqZfQ6Knjw-nppPdnNQTwfZI6v7xvyb1-ETeq3Vzdq3i7S6OKOw5cYjkqujuwgL5ZCRHtG1lmxCP4JudYwc3T1Jhy-VTnkVzZE9yT4oHOlHxIK0rR7jEv9QwNKTg7g8V-CrI9DKbmaeur9muJGV4M7kc-qAO4yb8JkarjKv2nwgY-WRPBA0nWGVb2305TNKY5n3Rw7Uyz4GZ17EJMeh5uvEldfpvNT",
-  },
-  {
-    title: "Beard Specialist",
-    subtitle: "Trims & Hot Towels",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBFYwKYZ5F9KZ4gYLGZCMx0HgVg4VuqkKHsiYwoSxokWLL7Izl41hG5luyukEmFiXcZJ_NnNqIpJAiw9A-N3HiB9hHWysHWk6chLbVc7qXFWMzKX4b81L5H-MMJW6uVDLd69hYEH-ZwrDYJno2yU-n5-7sm4hJAcGqC1t1WjUhRuiwTB-3Kxo_gdfqXfQ6ChLMKVfpuP8YcYBelhnHW__EBytLWkxSvXyrndy_kN0A1Xjlncf-aPTHz",
-  },
-];
 
 const FALLBACK_SHOP_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCGuKuKoUkaNsFqKp3Zjp0Sj0XtbFYL1y3qe1fynBBGO0jzvYr0Wt4LdowxOrSnGETsNuTDc1Dvf9NsWpGU11DEU1bUa6lIypidQCuVCGQ6ZDGj4BlRHgza9bTBML87SeW8jpnRmYyCSP4d7XBhjFYyQItmAdWJc7NoLFPMXA4TP0jCTVmqWPehX198QFQzZSrqS_MNWs4R6lP9KS7Tl54pcN_yEF10uqu4HiiVuUNzESaQoysPGFzc";
