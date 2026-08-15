@@ -52,7 +52,7 @@ function ProviderPage() {
           />
           <div>
             <h1 className="font-headline-md text-headline-md text-primary tracking-tight">The Sharp Edge</h1>
-            <p className="font-label-sm text-label-sm text-text-muted">provider Terminal</p>
+            <p className="font-label-sm text-label-sm text-text-muted">Provider Terminal</p>
           </div>
         </div>
         <div className="flex-1 flex flex-col gap-2">
@@ -110,7 +110,7 @@ function ProviderPage() {
           </Link>
           <Link to="/provider" className="flex flex-col items-center justify-center text-primary font-bold p-2 rounded">
             <Icon name="calendar_today" filled />
-            <span className="font-label-sm text-label-sm mt-1">provider</span>
+            <span className="font-label-sm text-label-sm mt-1">Provider</span>
           </Link>
           <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
             <Icon name="dashboard" />
