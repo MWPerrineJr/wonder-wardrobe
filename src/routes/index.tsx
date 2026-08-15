@@ -187,27 +187,26 @@ function MarketplacePage() {
       </header>
 
       <main className="flex-grow flex flex-col pb-20 md:pb-0">
-        {/* Hero */}
-        <section className="relative w-full py-20 px-margin-mobile md:px-margin-desktop flex flex-col items-center justify-center min-h-[614px] border-b border-border-subtle overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <div
-              className="bg-cover bg-center w-full h-full opacity-30"
-              style={{ backgroundImage: `url('${HERO_BG}')` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
-          </div>
-          <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center gap-8">
-            <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
-              Find your next cut
-            </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
-              Discover premium barbers, view their portfolios, and book your next appointment seamlessly.
-            </p>
-            <form
-              onSubmit={handleSearch}
-              className="relative z-20 w-full max-w-2xl bg-surface border border-border-subtle rounded-xl p-2 flex flex-col md:flex-row gap-2 focus-within:border-primary transition-colors shadow-sm"
-            >
-              <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
+        {/* Hero — split screen */}
+        <section className="w-full border-b border-border-subtle">
+          <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="flex flex-col items-start gap-6 max-w-xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border-subtle bg-surface px-3 py-1 font-label-sm text-label-sm text-on-surface-variant">
+                <Icon name="content_cut" className="text-[16px] text-primary" />
+                Barbershop booking, simplified
+              </span>
+              <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
+                Find your next cut
+              </h1>
+              <p className="font-body-lg text-body-lg text-on-surface-variant">
+                Discover premium barbers, view their portfolios, and book your next appointment
+                seamlessly.
+              </p>
+              <form
+                onSubmit={handleSearch}
+                className="w-full bg-surface border border-border-subtle rounded-2xl p-2 flex flex-col gap-2 focus-within:border-primary transition-colors"
+              >
+                <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-xl border border-border-subtle focus-within:border-primary">
                 <Icon name="search" className="text-text-muted mr-3" />
                 <input
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
@@ -219,8 +218,8 @@ function MarketplacePage() {
                   onFocus={() => console.log("[search] name focused")}
                   onClick={() => console.log("[search] name clicked")}
                 />
-              </div>
-              <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-lg border border-border-subtle focus-within:border-primary">
+                </div>
+                <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-xl border border-border-subtle focus-within:border-primary">
                 <Icon name="location_on" className="text-text-muted mr-3" />
                 <input
                   className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
@@ -239,14 +238,37 @@ function MarketplacePage() {
                   }}
                   onClick={() => console.log("[search] location clicked")}
                 />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-primary text-on-primary px-8 py-3 rounded-xl font-label-md text-label-md font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
+                >
+                  Search
+                </button>
+              </form>
+            </div>
+
+            <div className="relative">
+              <div className="relative aspect-4/5 sm:aspect-video lg:aspect-4/5 w-full overflow-hidden rounded-3xl border border-border-subtle bg-surface-container">
+                <img
+                  src={HERO_BG}
+                  alt="Barber finishing a fresh haircut in a modern barbershop"
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
-              <button
-                type="submit"
-                className="bg-primary text-on-primary px-8 py-3 rounded-lg font-label-md text-label-md font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
-              >
-                Search
-              </button>
-            </form>
+              <div className="hidden lg:flex absolute -bottom-6 -left-6 items-center gap-3 rounded-2xl border border-border-subtle bg-surface px-5 py-4">
+                <Icon name="event_available" className="text-primary" />
+                <div className="flex flex-col">
+                  <span className="font-headline-md text-[18px] text-on-surface">
+                    {shops.length} {shops.length === 1 ? "shop" : "shops"} listed
+                  </span>
+                  <span className="font-label-sm text-label-sm text-on-surface-variant">
+                    Book in under a minute
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
