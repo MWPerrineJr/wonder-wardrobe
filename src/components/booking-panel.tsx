@@ -191,9 +191,10 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
                 <span className="flex flex-col gap-1">
                   <span className="font-label-md text-label-md text-on-surface">{svc.name}</span>
                   <span className="font-body-md text-body-md text-on-surface-variant text-sm">
-                    {svc.duration_minutes} mins{svc.category ? ` • ${svc.category}` : ""}{svc.description ? ` • ${svc.description}` : ""}
+                    {svc.duration_minutes} mins{svc.category ? ` • ${categoryLabel(svc.category)}` : ""}{svc.description ? ` • ${svc.description}` : ""}
                   </span>
                 </span>
+
 
                 <span className={`font-headline-md text-headline-md ${serviceId === svc.id ? "text-primary" : "text-on-surface"}`}>
                   {formatPrice(svc.price_cents)}
