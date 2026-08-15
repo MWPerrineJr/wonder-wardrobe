@@ -160,7 +160,7 @@ function MarketplacePage() {
               Marketplace
             </Link>
             <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
-              Services
+              Shops
             </Link>
             <Link to="/barber" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Barber
