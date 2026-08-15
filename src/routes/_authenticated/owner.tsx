@@ -147,7 +147,7 @@ function OwnerPage() {
             <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
               <StatCard icon="event_available" label="Bookings today" value={selected.today_bookings} />
               <StatCard icon="content_cut" label="Active services" value={selected.services_count} />
-              <StatCard icon="groups" label="Barbers" value={selected.barbers_count} />
+              <StatCard icon="groups" label="Team providers" value={selected.providers_count} />
             </section>
             <PublicLinkCard slug={selected.slug} shopName={selected.name} />
             <div className="flex flex-wrap gap-3">
