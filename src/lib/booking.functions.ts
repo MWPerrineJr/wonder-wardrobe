@@ -40,7 +40,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!shop) return null;
 
-    const [barbersRes, servicesRes, hoursRes] = await Promise.all([
+    const [providersRes, servicesRes, hoursRes] = await Promise.all([
       supabase
         .from("providers")
         .select("id, display_name, avatar_url, specialties")
@@ -49,7 +49,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
         .order("display_name"),
       supabase
         .from("services")
-        .select("id, name, description, duration_minutes, price_cents")
+        .select("id, name, description, duration_minutes, price_cents, category")
         .eq("shop_id", shop.id)
         .eq("is_active", true)
         .order("price_cents"),
@@ -58,16 +58,17 @@ export const getBookingContext = createServerFn({ method: "GET" })
         .select("weekday, open_time, close_time, is_closed")
         .eq("shop_id", shop.id),
     ]);
-    if (barbersRes.error) throw new Error(barbersRes.error.message);
+    if (providersRes.error) throw new Error(providersRes.error.message);
     if (servicesRes.error) throw new Error(servicesRes.error.message);
     if (hoursRes.error) throw new Error(hoursRes.error.message);
 
     return {
       shop,
-      barbers: barbersRes.data ?? [],
+      providers: providersRes.data ?? [],
       services: servicesRes.data ?? [],
       hours: hoursRes.data ?? [],
     };
+
   });
 
 const SlotsInput = z.object({
