@@ -12,6 +12,24 @@ const shopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "The Standing Chair — Book barbers near you" },
+      {
+        name: "description",
+        content:
+          "Browse barbershops on The Standing Chair, compare services and prices, and book your next cut in a few taps.",
+      },
+      { property: "og:title", content: "The Standing Chair — Book barbers near you" },
+      {
+        property: "og:description",
+        content:
+          "Browse barbershops, compare services and prices, and book your next cut in a few taps.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(shopsQuery),
   errorComponent: ({ error }) => (
     <div className="p-8 text-on-surface bg-background min-h-screen">
