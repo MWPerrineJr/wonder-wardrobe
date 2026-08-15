@@ -22,10 +22,11 @@ function toInstant(date: string, time: string, tzOffsetMinutes: number) {
 
 export type BookingContext = {
   shop: { id: string; slug: string; name: string };
-  barbers: Array<{ id: string; display_name: string; avatar_url: string | null; specialties: string[] }>;
-  services: Array<{ id: string; name: string; description: string | null; duration_minutes: number; price_cents: number }>;
+  providers: Array<{ id: string; display_name: string; avatar_url: string | null; specialties: string[] }>;
+  services: Array<{ id: string; name: string; description: string | null; duration_minutes: number; price_cents: number; category: string | null }>;
   hours: Array<{ weekday: number; open_time: string; close_time: string; is_closed: boolean }>;
 };
+
 
 export const getBookingContext = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => z.object({ slug: z.string().min(1) }).parse(input))
