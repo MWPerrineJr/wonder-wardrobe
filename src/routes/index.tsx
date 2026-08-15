@@ -262,32 +262,32 @@ function MarketplacePage() {
 
         <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop py-16 flex flex-col gap-24">
           {/* Categories */}
-          <section className="flex flex-col gap-8">
+          <section className="flex flex-col gap-6">
             <div className="flex justify-between items-end">
               <h2 className="font-headline-md text-headline-md text-on-surface">Categories</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {CATEGORIES.map((c) => (
-                <div
-                  key={c.title}
-                  className="group relative h-48 rounded-xl overflow-hidden border border-border-subtle hover:border-primary transition-colors cursor-pointer bg-surface"
-                >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center opacity-90 group-hover:opacity-100 transition-opacity"
-                    style={{ backgroundImage: `url('${c.img}')` }}
-                  />
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/30 to-transparent">
-                    <span className="font-headline-md text-headline-md text-inverse-on-surface">
-                      {c.title}
-                    </span>
-                    <span className="font-label-sm text-label-sm text-inverse-on-surface/80 mt-1">
-                      {c.subtitle}
-                    </span>
-                  </div>
-                </div>
-              ))}
+            <div className="flex flex-wrap gap-3">
+              {SERVICE_CATEGORIES.map((c) => {
+                const active = selectedCategory === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setSelectedCategory(active ? null : c.value)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border font-label-md text-label-md transition ${
+                      active
+                        ? "bg-primary text-on-primary border-primary"
+                        : "bg-surface border-border-subtle text-on-surface hover:border-primary"
+                    }`}
+                  >
+                    <Icon name={CATEGORY_ICONS[c.value]} className="text-[18px]" />
+                    {CATEGORY_LABELS[c.value]}
+                  </button>
+                );
+              })}
             </div>
           </section>
+
 
           {/* Featured shops */}
           <section id="featured-shops" className="flex flex-col gap-8 scroll-mt-24">
