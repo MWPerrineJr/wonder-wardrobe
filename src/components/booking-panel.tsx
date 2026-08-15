@@ -4,12 +4,14 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
+import { categoryLabel } from "@/lib/categories";
 import {
   createBooking,
   getAvailableSlots,
   type BookingContext,
   type SavedBooking,
 } from "@/lib/booking.functions";
+
 
 function formatPrice(cents: number) {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
