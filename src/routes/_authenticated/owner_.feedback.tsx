@@ -14,11 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getMyShops } from "@/lib/shops.functions";
-import {
-  listFeedback,
-  updateFeedbackStatus,
-  type FeedbackRow,
-} from "@/lib/feedback.functions";
+import { listFeedback, updateFeedbackStatus, type FeedbackRow } from "@/lib/feedback.functions";
+import { createCheckoutSession, createPortalSession } from "@/lib/billing.functions";
 
 const myShopsQuery = queryOptions({
   queryKey: ["owner", "shops"],
@@ -52,7 +49,7 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
 );
 
-const SOURCES = ["all", "google", "yelp", "instagram", "walk_in"] as const;
+const SOURCES = ["all", "web", "email_survey", "google", "yelp", "instagram", "walk_in"] as const;
 const SENTIMENTS = [
   "all",
   "very_positive",
@@ -193,6 +190,10 @@ function FeedbackContent({
 
   const { aggregates, rows } = data;
 
+  if (data.locked) {
+    return <UpgradePanel shopId={shopId} />;
+  }
+
   return (
     <>
       <section className="grid grid-cols-2 md:grid-cols-4 gap-gutter">
@@ -200,11 +201,7 @@ function FeedbackContent({
         <StatCard
           icon="sentiment_satisfied"
           label="Avg sentiment"
-          value={
-            aggregates.avgSentiment === null
-              ? "—"
-              : aggregates.avgSentiment.toFixed(2)
-          }
+          value={aggregates.avgSentiment === null ? "—" : aggregates.avgSentiment.toFixed(2)}
           tone={
             aggregates.avgSentiment === null
               ? "neutral"
@@ -230,10 +227,30 @@ function FeedbackContent({
       </section>
 
       <section className="bg-surface border border-border-subtle rounded-xl p-4 flex flex-wrap gap-3 items-end shadow-sm">
-        <FilterSelect label="Source" value={filters.source} onChange={setSource} options={[...SOURCES]} />
-        <FilterSelect label="Sentiment" value={filters.sentiment} onChange={setSentiment} options={[...SENTIMENTS]} />
-        <FilterSelect label="Urgency" value={filters.urgency} onChange={setUrgency} options={[...URGENCIES]} />
-        <FilterSelect label="Status" value={filters.status} onChange={setStatus} options={[...STATUSES]} />
+        <FilterSelect
+          label="Source"
+          value={filters.source}
+          onChange={setSource}
+          options={[...SOURCES]}
+        />
+        <FilterSelect
+          label="Sentiment"
+          value={filters.sentiment}
+          onChange={setSentiment}
+          options={[...SENTIMENTS]}
+        />
+        <FilterSelect
+          label="Urgency"
+          value={filters.urgency}
+          onChange={setUrgency}
+          options={[...URGENCIES]}
+        />
+        <FilterSelect
+          label="Status"
+          value={filters.status}
+          onChange={setStatus}
+          options={[...STATUSES]}
+        />
       </section>
 
       {rows.length === 0 ? (
@@ -247,15 +264,76 @@ function FeedbackContent({
             <FeedbackCard
               key={row.id}
               row={row}
-              onUpdateStatus={(next) =>
-                statusMutation.mutate({ id: row.id, status: next })
-              }
+              onUpdateStatus={(next) => statusMutation.mutate({ id: row.id, status: next })}
               pending={statusMutation.isPending}
             />
           ))}
         </ul>
       )}
+
+      <div className="flex justify-end">
+        <ManageBillingButton shopId={shopId} />
+      </div>
     </>
+  );
+}
+
+function UpgradePanel({ shopId }: { shopId: string }) {
+  const checkout = useMutation({
+    mutationFn: () => createCheckoutSession({ data: { shopId } }),
+    onSuccess: ({ url }) => {
+      window.location.href = url;
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <section className="bg-surface border border-border-subtle rounded-xl p-10 text-center flex flex-col items-center gap-4 shadow-sm">
+      <Icon name="query_stats" className="text-[40px] text-primary" />
+      <h2 className="font-headline-md text-headline-md text-on-surface">
+        Unlock analytics for this shop
+      </h2>
+      <p className="text-on-surface-variant text-body-md max-w-lg">
+        Automated post-visit email surveys, AI sentiment and urgency analysis, summaries, and
+        recommended responses — everything you need to know what your customers really think.
+        Calendar, services, and bookings stay free.
+      </p>
+      <Button
+        onClick={() => checkout.mutate()}
+        disabled={checkout.isPending}
+        className="px-8 font-bold"
+      >
+        {checkout.isPending ? "Redirecting…" : "Upgrade to Analytics"}
+      </Button>
+      <ManageBillingButton shopId={shopId} label="Already subscribed? Manage billing" />
+    </section>
+  );
+}
+
+function ManageBillingButton({
+  shopId,
+  label = "Manage billing",
+}: {
+  shopId: string;
+  label?: string;
+}) {
+  const portal = useMutation({
+    mutationFn: () => createPortalSession({ data: { shopId } }),
+    onSuccess: ({ url }) => {
+      window.location.href = url;
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={() => portal.mutate()}
+      disabled={portal.isPending}
+      className="text-label-md text-on-surface-variant hover:text-primary underline-offset-2 hover:underline disabled:opacity-50"
+    >
+      {portal.isPending ? "Opening…" : label}
+    </button>
   );
 }
 
@@ -271,11 +349,7 @@ function StatCard({
   tone?: "good" | "bad" | "neutral";
 }) {
   const toneCls =
-    tone === "good"
-      ? "text-green-600"
-      : tone === "bad"
-        ? "text-destructive"
-        : "text-on-surface";
+    tone === "good" ? "text-green-600" : tone === "bad" ? "text-destructive" : "text-on-surface";
   return (
     <div className="bg-surface border border-border-subtle rounded-xl p-5 flex flex-col gap-2 shadow-sm">
       <div className="flex items-center gap-2 text-on-surface-variant">
@@ -360,9 +434,7 @@ function FeedbackCard({
         )}
         {row.emotion && <Badge variant="secondary">{humanize(row.emotion)}</Badge>}
         {row.urgency && (
-          <Badge className={urgencyBadgeCls(row.urgency)}>
-            {humanize(row.urgency)} urgency
-          </Badge>
+          <Badge className={urgencyBadgeCls(row.urgency)}>{humanize(row.urgency)} urgency</Badge>
         )}
       </div>
 

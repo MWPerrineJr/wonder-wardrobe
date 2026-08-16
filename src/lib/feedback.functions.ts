@@ -39,6 +39,27 @@ export const listFeedback = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => filtersSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+
+    // Analytics is the paid plan: without an active subscription the page
+    // renders an upgrade prompt instead of data. Checked server-side so the
+    // gate can't be bypassed by calling the function directly.
+    const { data: hasAnalytics, error: gateErr } = await supabase.rpc("shop_has_active_analytics", {
+      _shop_id: data.shopId,
+    });
+    if (gateErr) throw new Error(gateErr.message);
+    if (!hasAnalytics) {
+      return {
+        locked: true,
+        rows: [] as FeedbackRow[],
+        aggregates: {
+          total: 0,
+          avgSentiment: null as number | null,
+          negativeCount: 0,
+          highUrgencyCount: 0,
+        },
+      };
+    }
+
     let query = supabase
       .from("customer_feedback")
       .select("*")
@@ -47,7 +68,8 @@ export const listFeedback = createServerFn({ method: "GET" })
       .limit(200);
 
     if (data.source && data.source !== FILTER_ALL) query = query.eq("source", data.source);
-    if (data.sentiment && data.sentiment !== FILTER_ALL) query = query.eq("sentiment_label", data.sentiment);
+    if (data.sentiment && data.sentiment !== FILTER_ALL)
+      query = query.eq("sentiment_label", data.sentiment);
     if (data.urgency && data.urgency !== FILTER_ALL) query = query.eq("urgency", data.urgency);
     if (data.status && data.status !== FILTER_ALL) query = query.eq("status", data.status);
 
@@ -73,6 +95,7 @@ export const listFeedback = createServerFn({ method: "GET" })
     const highUrgencyCount = (allRows ?? []).filter((r) => r.urgency === "high").length;
 
     return {
+      locked: false,
       rows: (rows ?? []) as FeedbackRow[],
       aggregates: {
         total,
@@ -109,7 +132,14 @@ const SubmitFeedbackInput = z.object({
   rating: z.number().int().min(1).max(5),
   message: z.string().trim().min(5, "Tell us a little more").max(2000),
   customerName: z.string().trim().max(80).optional().nullable(),
-  customerEmail: z.string().trim().email("Enter a valid email").max(120).optional().nullable().or(z.literal("")),
+  customerEmail: z
+    .string()
+    .trim()
+    .email("Enter a valid email")
+    .max(120)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
 });
 
 export const submitFeedback = createServerFn({ method: "POST" })

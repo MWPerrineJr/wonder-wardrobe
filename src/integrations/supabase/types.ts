@@ -94,6 +94,9 @@ export type Database = {
           customer_id: string | null
           customer_name: string | null
           emotion: string | null
+          enriched_at: string | null
+          enrichment_model: string | null
+          enrichment_raw: Json | null
           explanation: string | null
           id: string
           key_phrases: string[]
@@ -115,6 +118,9 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string | null
           emotion?: string | null
+          enriched_at?: string | null
+          enrichment_model?: string | null
+          enrichment_raw?: Json | null
           explanation?: string | null
           id?: string
           key_phrases?: string[]
@@ -136,6 +142,9 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string | null
           emotion?: string | null
+          enriched_at?: string | null
+          enrichment_model?: string | null
+          enrichment_raw?: Json | null
           explanation?: string | null
           id?: string
           key_phrases?: string[]
@@ -154,6 +163,136 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "customer_feedback_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: string
+          price_id: string | null
+          shop_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          price_id?: string | null
+          shop_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          price_id?: string | null
+          shop_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_invites: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          customer_email: string
+          customer_id: string | null
+          customer_name: string | null
+          expires_at: string
+          feedback_id: string | null
+          id: string
+          provider_id: string | null
+          responded_at: string | null
+          sent_at: string
+          shop_id: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          customer_email: string
+          customer_id?: string | null
+          customer_name?: string | null
+          expires_at?: string
+          feedback_id?: string | null
+          id?: string
+          provider_id?: string | null
+          responded_at?: string | null
+          sent_at?: string
+          shop_id: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          expires_at?: string
+          feedback_id?: string | null
+          id?: string
+          provider_id?: string | null
+          responded_at?: string | null
+          sent_at?: string
+          shop_id?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_invites_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_invites_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "customer_feedback"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_invites_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_invites_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -391,6 +530,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      shop_has_active_analytics: {
+        Args: {
+          _shop_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
