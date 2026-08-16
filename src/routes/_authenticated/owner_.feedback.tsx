@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { getMyShops } from "@/lib/shops.functions";
 import { listFeedback, updateFeedbackStatus, type FeedbackRow } from "@/lib/feedback.functions";
+import { createCheckoutSession, createPortalSession } from "@/lib/billing.functions";
 
 const myShopsQuery = queryOptions({
   queryKey: ["owner", "shops"],
@@ -189,6 +190,10 @@ function FeedbackContent({
 
   const { aggregates, rows } = data;
 
+  if (data.locked) {
+    return <UpgradePanel shopId={shopId} />;
+  }
+
   return (
     <>
       <section className="grid grid-cols-2 md:grid-cols-4 gap-gutter">
@@ -265,7 +270,70 @@ function FeedbackContent({
           ))}
         </ul>
       )}
+
+      <div className="flex justify-end">
+        <ManageBillingButton shopId={shopId} />
+      </div>
     </>
+  );
+}
+
+function UpgradePanel({ shopId }: { shopId: string }) {
+  const checkout = useMutation({
+    mutationFn: () => createCheckoutSession({ data: { shopId } }),
+    onSuccess: ({ url }) => {
+      window.location.href = url;
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <section className="bg-surface border border-border-subtle rounded-xl p-10 text-center flex flex-col items-center gap-4 shadow-sm">
+      <Icon name="query_stats" className="text-[40px] text-primary" />
+      <h2 className="font-headline-md text-headline-md text-on-surface">
+        Unlock analytics for this shop
+      </h2>
+      <p className="text-on-surface-variant text-body-md max-w-lg">
+        Automated post-visit email surveys, AI sentiment and urgency analysis, summaries, and
+        recommended responses — everything you need to know what your customers really think.
+        Calendar, services, and bookings stay free.
+      </p>
+      <Button
+        onClick={() => checkout.mutate()}
+        disabled={checkout.isPending}
+        className="px-8 font-bold"
+      >
+        {checkout.isPending ? "Redirecting…" : "Upgrade to Analytics"}
+      </Button>
+      <ManageBillingButton shopId={shopId} label="Already subscribed? Manage billing" />
+    </section>
+  );
+}
+
+function ManageBillingButton({
+  shopId,
+  label = "Manage billing",
+}: {
+  shopId: string;
+  label?: string;
+}) {
+  const portal = useMutation({
+    mutationFn: () => createPortalSession({ data: { shopId } }),
+    onSuccess: ({ url }) => {
+      window.location.href = url;
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={() => portal.mutate()}
+      disabled={portal.isPending}
+      className="text-label-md text-on-surface-variant hover:text-primary underline-offset-2 hover:underline disabled:opacity-50"
+    >
+      {portal.isPending ? "Opening…" : label}
+    </button>
   );
 }
 
