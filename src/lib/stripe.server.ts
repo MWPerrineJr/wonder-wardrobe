@@ -1,139 +1,125 @@
-// Minimal Stripe REST client + webhook signature verification.
-//
-// Deliberately dependency-free: the official `stripe` package assumes a Node
-// runtime and would add lockfile churn; the three API calls billing needs are
-// simple form-encoded POSTs, and signature verification is one HMAC. Web
-// Crypto keeps this portable to the Cloudflare/Nitro deploy target.
-//
-// Server-only: import from server handlers / *.server modules, never from
-// client code.
+// Server-only Stripe access. All calls are routed through the Lovable
+// connector gateway, which holds the real Stripe secret key — the
+// STRIPE_*_API_KEY values in this project are gateway connection ids.
+import Stripe from "stripe";
 
-const STRIPE_API = "https://api.stripe.com/v1";
+const getEnv = (key: string): string => {
+  const value = process.env[key];
+  if (!value) throw new Error(`${key} is not configured`);
+  return value;
+};
 
-function stripeKey(): string {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("Missing STRIPE_SECRET_KEY environment variable");
-  return key;
+export type StripeEnv = "sandbox" | "live";
+
+const GATEWAY_STRIPE_BASE = "https://connector-gateway.lovable.dev/stripe";
+
+export function getConnectionApiKey(env: StripeEnv): string {
+  return env === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
 }
 
-/** Flatten nested params into Stripe's form encoding, e.g. subscription_data[metadata][shop_id]. */
-function encodeForm(params: Record<string, unknown>, prefix = ""): string[] {
-  const pairs: string[] = [];
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null) continue;
-    const key = prefix ? `${prefix}[${k}]` : k;
-    if (Array.isArray(v)) {
-      v.forEach((item, i) => {
-        if (typeof item === "object" && item !== null) {
-          pairs.push(...encodeForm(item as Record<string, unknown>, `${key}[${i}]`));
-        } else {
-          pairs.push(`${encodeURIComponent(`${key}[${i}]`)}=${encodeURIComponent(String(item))}`);
-        }
+export function createStripeClient(env: StripeEnv): Stripe {
+  const connectionApiKey = getConnectionApiKey(env);
+  const lovableApiKey = getEnv("LOVABLE_API_KEY");
+
+  return new Stripe(connectionApiKey, {
+    apiVersion: "2026-03-25.dahlia",
+    httpClient: Stripe.createFetchHttpClient((input, init) => {
+      const stripeUrl = input instanceof Request ? input.url : input.toString();
+      const gatewayUrl = stripeUrl.replace("https://api.stripe.com", GATEWAY_STRIPE_BASE);
+      return fetch(gatewayUrl, {
+        ...init,
+        headers: {
+          ...Object.fromEntries(
+            new Headers(
+              init?.headers ?? (input instanceof Request ? input.headers : undefined),
+            ).entries(),
+          ),
+          "X-Connection-Api-Key": connectionApiKey,
+          "Lovable-API-Key": lovableApiKey,
+        },
       });
-    } else if (typeof v === "object") {
-      pairs.push(...encodeForm(v as Record<string, unknown>, key));
-    } else {
-      pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(v))}`);
+    }),
+  });
+}
+
+export function getStripeErrorMessage(error: unknown): string {
+  if (error && typeof error === "object") {
+    const stripeError = error as {
+      message?: string;
+      type?: string;
+      code?: string;
+      decline_code?: string;
+      param?: string;
+      requestId?: string;
+      raw?: {
+        message?: string;
+        type?: string;
+        code?: string;
+        decline_code?: string;
+        param?: string;
+        requestId?: string;
+      };
+    };
+
+    const message = stripeError.raw?.message ?? stripeError.message;
+    if (message) {
+      const details = [
+        stripeError.raw?.type ?? stripeError.type,
+        stripeError.raw?.code ?? stripeError.code,
+        stripeError.raw?.decline_code ?? stripeError.decline_code,
+        stripeError.raw?.param ?? stripeError.param,
+        stripeError.raw?.requestId ?? stripeError.requestId,
+      ].filter(Boolean);
+      return details.length ? `${message} (${details.join(", ")})` : message;
     }
   }
-  return pairs;
+
+  return "Stripe request failed";
 }
 
-export async function stripeRequest<T = Record<string, unknown>>(
-  method: "GET" | "POST",
-  path: string,
-  params?: Record<string, unknown>,
-): Promise<T> {
-  const body = params ? encodeForm(params).join("&") : undefined;
-  const url = method === "GET" && body ? `${STRIPE_API}${path}?${body}` : `${STRIPE_API}${path}`;
-  const res = await fetch(url, {
-    method,
-    headers: {
-      Authorization: `Bearer ${stripeKey()}`,
-      ...(method === "POST" ? { "Content-Type": "application/x-www-form-urlencoded" } : {}),
-    },
-    body: method === "POST" ? body : undefined,
-  });
-  const json = (await res.json()) as T & { error?: { message?: string } };
-  if (!res.ok) {
-    throw new Error(json?.error?.message ?? `Stripe ${method} ${path} failed (${res.status})`);
-  }
-  return json;
-}
+/** Verify a webhook signature (HMAC-SHA256 over "<timestamp>.<body>"). */
+export async function verifyWebhook(
+  req: Request,
+  env: StripeEnv,
+): Promise<{ type: string; data: { object: any } }> {
+  const signature = req.headers.get("stripe-signature");
+  const body = await req.text();
+  const secret =
+    env === "sandbox"
+      ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
+      : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
 
-/**
- * Verify a Stripe webhook signature (v1 scheme: HMAC-SHA256 of
- * "<timestamp>.<raw payload>"). Returns the parsed event or null if invalid.
- */
-export async function verifyStripeEvent(
-  rawBody: string,
-  signatureHeader: string | null,
-  toleranceSeconds = 300,
-): Promise<Record<string, unknown> | null> {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret || !signatureHeader) return null;
+  if (!signature || !body) throw new Error("Missing signature or body");
 
-  const parts = new Map<string, string[]>();
-  for (const kv of signatureHeader.split(",")) {
-    const [k, v] = kv.split("=", 2);
-    if (!k || !v) continue;
-    const list = parts.get(k.trim()) ?? [];
-    list.push(v.trim());
-    parts.set(k.trim(), list);
+  let timestamp: string | undefined;
+  const v1Signatures: string[] = [];
+  for (const part of signature.split(",")) {
+    const [key, value] = part.split("=", 2);
+    if (key === "t") timestamp = value;
+    if (key === "v1" && value) v1Signatures.push(value);
   }
-  const timestamp = parts.get("t")?.[0];
-  const signatures = parts.get("v1") ?? [];
-  if (!timestamp || signatures.length === 0) return null;
+  if (!timestamp || v1Signatures.length === 0) throw new Error("Invalid signature format");
 
   const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (!Number.isFinite(age) || age > toleranceSeconds) return null;
+  if (!Number.isFinite(age) || age > 300) throw new Error("Webhook timestamp too old");
 
-  const encoder = new TextEncoder();
-  const cryptoKey = await crypto.subtle.importKey(
+  const key = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(secret),
+    new TextEncoder().encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
   );
-  const mac = await crypto.subtle.sign(
+  const signed = await crypto.subtle.sign(
     "HMAC",
-    cryptoKey,
-    encoder.encode(`${timestamp}.${rawBody}`),
+    key,
+    new TextEncoder().encode(`${timestamp}.${body}`),
   );
-  const expected = Array.from(new Uint8Array(mac))
+  const expected = Array.from(new Uint8Array(signed))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  // Constant-time comparison across all provided v1 signatures.
-  let valid = false;
-  for (const sig of signatures) {
-    if (sig.length !== expected.length) continue;
-    let diff = 0;
-    for (let i = 0; i < expected.length; i++) diff |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
-    if (diff === 0) valid = true;
-  }
-  if (!valid) return null;
+  if (!v1Signatures.includes(expected)) throw new Error("Invalid webhook signature");
 
-  try {
-    return JSON.parse(rawBody) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-export type StripeSubscription = {
-  id: string;
-  status: string;
-  customer: string;
-  cancel_at_period_end: boolean;
-  metadata?: Record<string, string>;
-  items: { data: Array<{ price: { id: string }; current_period_end?: number }> };
-  /** Present on older API versions; newer versions carry it on items. */
-  current_period_end?: number;
-};
-
-export function subscriptionPeriodEnd(sub: StripeSubscription): string | null {
-  const unix = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;
-  return unix ? new Date(unix * 1000).toISOString() : null;
+  return JSON.parse(body);
 }
