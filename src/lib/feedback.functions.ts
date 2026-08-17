@@ -7,6 +7,7 @@ const FILTER_ALL = "all";
 
 const filtersSchema = z.object({
   shopId: z.string().uuid(),
+  environment: z.enum(["sandbox", "live"]).default("live"),
   source: z.string().optional(),
   sentiment: z.string().optional(),
   urgency: z.string().optional(),
@@ -45,6 +46,7 @@ export const listFeedback = createServerFn({ method: "GET" })
     // gate can't be bypassed by calling the function directly.
     const { data: hasAnalytics, error: gateErr } = await supabase.rpc("shop_has_active_analytics", {
       _shop_id: data.shopId,
+      _env: data.environment,
     });
     if (gateErr) throw new Error(gateErr.message);
     if (!hasAnalytics) {

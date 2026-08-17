@@ -379,6 +379,7 @@ export type Database = {
           cancel_at_period_end: boolean
           created_at: string
           current_period_end: string | null
+          environment: string
           id: string
           plan: string
           price_id: string | null
@@ -392,6 +393,7 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          environment?: string
           id?: string
           plan?: string
           price_id?: string | null
@@ -405,6 +407,7 @@ export type Database = {
           cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          environment?: string
           id?: string
           plan?: string
           price_id?: string | null
@@ -418,7 +421,7 @@ export type Database = {
           {
             foreignKeyName: "subscriptions_shop_id_fkey"
             columns: ["shop_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
@@ -553,7 +556,7 @@ export type Database = {
         }[]
       }
       shop_has_active_analytics: {
-        Args: { _shop_id: string }
+        Args: { _env?: string; _shop_id: string }
         Returns: boolean
       }
     }
