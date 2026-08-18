@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { categorySchema, type ServiceCategory } from "@/lib/categories";
@@ -41,7 +42,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       .from("user_roles")
       .insert({ user_id: context.userId, role: "owner" });
     if (roleError && !roleError.message.includes("duplicate")) {
-      throw new Error(`Could not grant owner role: ${roleError.message}`);
+      throw dbError(roleError, "owner");
     }
 
     // Ensure slug is unique
@@ -66,7 +67,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       })
       .select("id, slug, name")
       .single();
-    if (shopError) throw new Error(shopError.message);
+    if (shopError) throw dbError(shopError, "owner");
 
     if (data.services && data.services.length > 0) {
       const { data: savedServices, error: servicesError } = await supabaseAdmin
@@ -81,7 +82,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
           })),
         )
         .select("id, name, duration_minutes, price_cents, category");
-      if (servicesError) throw new Error(`Shop created but services failed: ${servicesError.message}`);
+      if (servicesError) throw dbError(servicesError, "owner");
       return { ...shop, services: savedServices ?? [] };
     }
 
@@ -133,7 +134,7 @@ export const updateShop = createServerFn({ method: "POST" })
       .eq("id", data.shopId)
       .select("id, name, description, address, cover_image_url, google_review_url, updated_at")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "owner");
     return saved;
   });
 
@@ -151,7 +152,7 @@ export const listSurveyInvites = createServerFn({ method: "GET" })
       .eq("shop_id", data.shopId)
       .order("sent_at", { ascending: false })
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "owner");
     return rows ?? [];
   });
 
@@ -177,7 +178,7 @@ export const createService = createServerFn({ method: "POST" })
       .insert({ shop_id: data.shopId, ...data.fields })
       .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "owner");
     return saved;
   });
 
@@ -194,7 +195,7 @@ export const updateService = createServerFn({ method: "POST" })
       .eq("id", data.serviceId)
       .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "owner");
     return saved;
   });
 
@@ -209,7 +210,7 @@ export const deleteService = createServerFn({ method: "POST" })
       .eq("id", data.serviceId)
       .select("id")
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "owner");
     if (!deleted) throw new Error("Service could not be deleted");
     return deleted;
   });
@@ -235,7 +236,7 @@ export const getShopHours = createServerFn({ method: "GET" })
       .from("shop_hours")
       .select("weekday, open_time, close_time, is_closed")
       .eq("shop_id", data.shopId);
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "owner");
     return rows ?? [];
   });
 
@@ -250,6 +251,6 @@ export const upsertShopHours = createServerFn({ method: "POST" })
       .from("shop_hours")
       .upsert(payload, { onConflict: "shop_id,weekday" })
       .select("weekday, open_time, close_time, is_closed");
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "owner");
     return saved ?? [];
   });

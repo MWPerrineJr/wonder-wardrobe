@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
@@ -59,8 +60,8 @@ export const getBillingStatus = createServerFn({ method: "GET" })
         .limit(1)
         .maybeSingle(),
     ]);
-    if (fnErr) throw new Error(fnErr.message);
-    if (subErr) throw new Error(subErr.message);
+    if (fnErr) throw dbError(fnErr, "billing");
+    if (subErr) throw dbError(subErr, "billing");
 
     return {
       hasAnalytics: Boolean(active),
@@ -82,7 +83,7 @@ async function requireOwnedShop(
     .select("id, name, owner_id")
     .eq("id", shopId)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw dbError(error, "billing");
   if (!shop || shop.owner_id !== userId) throw new Error("You don't own this shop.");
   return { id: shop.id, name: shop.name };
 }
@@ -139,7 +140,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       .eq("shop_id", shop.id)
       .eq("environment", environment)
       .maybeSingle();
-    if (exErr) throw new Error(exErr.message);
+    if (exErr) throw dbError(exErr, "billing");
     if (existing && ["trialing", "active", "past_due"].includes(existing.status)) {
       throw new Error(
         "This shop already has an analytics subscription. Use Manage billing to change or cancel it.",
@@ -201,7 +202,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "billing");
     if (!sub?.stripe_customer_id) throw new Error("No billing record for this shop yet.");
 
     try {

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
@@ -54,7 +55,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
       .select("id, slug, name, prepay_mode, deposit_percent")
       .eq("slug", data.slug)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "booking");
     if (!shop) return null;
 
     const [providersRes, servicesRes, hoursRes] = await Promise.all([
@@ -75,9 +76,9 @@ export const getBookingContext = createServerFn({ method: "GET" })
         .select("weekday, open_time, close_time, is_closed")
         .eq("shop_id", shop.id),
     ]);
-    if (providersRes.error) throw new Error(providersRes.error.message);
-    if (servicesRes.error) throw new Error(servicesRes.error.message);
-    if (hoursRes.error) throw new Error(hoursRes.error.message);
+    if (providersRes.error) throw dbError(providersRes.error, "booking");
+    if (servicesRes.error) throw dbError(servicesRes.error, "booking");
+    if (hoursRes.error) throw dbError(hoursRes.error, "booking");
 
     const mode = (shop.prepay_mode ?? "off") as "off" | "deposit" | "full";
     let chargesEnabled = false;
@@ -129,7 +130,7 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
       .select("id, duration_minutes, shop_id")
       .eq("id", data.serviceId)
       .maybeSingle();
-    if (svcErr) throw new Error(svcErr.message);
+    if (svcErr) throw dbError(svcErr, "booking");
     if (!service || service.shop_id !== data.shopId) throw new Error("Service not found for this shop");
 
     const [y, m, d] = data.date.split("-").map(Number);
@@ -141,7 +142,7 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
       .eq("shop_id", data.shopId)
       .eq("weekday", weekday)
       .maybeSingle();
-    if (hoursErr) throw new Error(hoursErr.message);
+    if (hoursErr) throw dbError(hoursErr, "booking");
     if (hours?.is_closed) return { slots: [], closed: true };
 
     const open = (hours?.open_time ?? DEFAULT_OPEN).slice(0, 5);
@@ -167,7 +168,7 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
         .in("status", ["pending", "confirmed"])
         .gte("starts_at", dayStart.toISOString())
         .lt("starts_at", dayEnd.toISOString());
-      if (error) throw new Error(error.message);
+      if (error) throw dbError(error, "booking");
       busy = (rows ?? []).map((r) => ({
         start: new Date(r.starts_at).getTime(),
         end: new Date(r.ends_at).getTime(),
@@ -240,7 +241,7 @@ export const createBooking = createServerFn({ method: "POST" })
       .select("id, shop_id, duration_minutes, price_cents, is_active")
       .eq("id", data.serviceId)
       .maybeSingle();
-    if (svcErr) throw new Error(svcErr.message);
+    if (svcErr) throw dbError(svcErr, "booking");
     if (!service || service.shop_id !== data.shopId || !service.is_active) {
       throw new Error("That service is not available at this shop");
     }
@@ -250,7 +251,7 @@ export const createBooking = createServerFn({ method: "POST" })
       .select("id, name, prepay_mode, deposit_percent")
       .eq("id", data.shopId)
       .maybeSingle();
-    if (shopErr) throw new Error(shopErr.message);
+    if (shopErr) throw dbError(shopErr, "booking");
     if (!shopRow) throw new Error("Shop not found");
 
     const env = paymentEnv();
@@ -297,7 +298,7 @@ export const createBooking = createServerFn({ method: "POST" })
          shop:shops(id, name, slug)`,
       )
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "booking");
     const booking = saved as unknown as SavedBooking;
 
     if (due <= 0 || !payoutAccountId) {

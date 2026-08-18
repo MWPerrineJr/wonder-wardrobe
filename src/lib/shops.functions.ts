@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { categorySchema } from "@/lib/categories";
@@ -22,7 +23,7 @@ export const listPublicShops = createServerFn({ method: "GET" }).handler(async (
     .select("id, slug, name, description, address, cover_image_url, categories")
     .order("created_at", { ascending: false })
     .limit(24);
-  if (error) throw new Error(error.message);
+  if (error) throw dbError(error, "shops");
   return data ?? [];
 });
 
@@ -35,7 +36,7 @@ export const getPublicShopBySlug = createServerFn({ method: "GET" })
       .select("id, slug, name, description, address, cover_image_url, categories")
       .eq("slug", data.slug)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "shops");
     if (!shop) return null;
 
     const { data: services, error: sErr } = await supabase
@@ -44,7 +45,7 @@ export const getPublicShopBySlug = createServerFn({ method: "GET" })
       .eq("shop_id", shop.id)
       .eq("is_active", true)
       .order("price_cents", { ascending: true });
-    if (sErr) throw new Error(sErr.message);
+    if (sErr) throw dbError(sErr, "shops");
 
     const { data: providers, error: pErr } = await supabase
       .from("providers")
@@ -52,7 +53,7 @@ export const getPublicShopBySlug = createServerFn({ method: "GET" })
       .eq("shop_id", shop.id)
       .eq("is_active", true)
       .order("created_at", { ascending: true });
-    if (pErr) throw new Error(pErr.message);
+    if (pErr) throw dbError(pErr, "shops");
 
     return { shop, services: services ?? [], providers: providers ?? [] };
   });
@@ -68,7 +69,7 @@ export const getMyShops = createServerFn({ method: "GET" })
       )
       .eq("owner_id", userId)
       .order("created_at", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "shops");
 
     const today = new Date();
     const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
@@ -115,7 +116,7 @@ export const getShopDetail = createServerFn({ method: "GET" })
       .select("id, slug, name, description, address, cover_image_url, categories")
       .eq("id", data.shopId)
       .maybeSingle();
-    if (shopError) throw new Error(shopError.message);
+    if (shopError) throw dbError(shopError, "shops");
     if (!shop) throw new Error("Shop not found");
 
     const { data: services, error: servicesError } = await supabase
@@ -123,7 +124,7 @@ export const getShopDetail = createServerFn({ method: "GET" })
       .select("id, name, description, duration_minutes, price_cents, is_active, category")
       .eq("shop_id", data.shopId)
       .order("created_at", { ascending: true });
-    if (servicesError) throw new Error(servicesError.message);
+    if (servicesError) throw dbError(servicesError, "shops");
 
     return { shop, services: services ?? [] };
   });
@@ -147,7 +148,7 @@ export const updateShopCategories = createServerFn({ method: "POST" })
       .eq("owner_id", context.userId)
       .select("id, categories")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "shops");
     return updated;
   });
 

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -41,7 +42,7 @@ export const getMyProviderProfile = createServerFn({ method: "GET" })
       .select("display_name, avatar_url, shop:shops(name, slug)")
       .eq("user_id", context.userId)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "provider");
     const shop = (data as any)?.shop as { name: string; slug: string } | null | undefined;
     if (!data || !shop) return null;
     return {
@@ -62,7 +63,7 @@ export const getMyProviderDay = createServerFn({ method: "POST" })
       .select("id, display_name, shop_id, shop:shops(name)")
       .eq("user_id", userId)
       .maybeSingle();
-    if (bErr) throw new Error(bErr.message);
+    if (bErr) throw dbError(bErr, "provider");
     if (!provider) return { provider: null, bookings: [] };
 
     const [y, m, d] = data.date.split("-").map(Number);
@@ -79,7 +80,7 @@ export const getMyProviderDay = createServerFn({ method: "POST" })
       .gte("starts_at", dayStart.toISOString())
       .lt("starts_at", dayEnd.toISOString())
       .order("starts_at");
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "provider");
 
     return {
       provider: {
@@ -109,6 +110,6 @@ export const setBookingStatus = createServerFn({ method: "POST" })
       .eq("id", data.bookingId)
       .select("id, status, starts_at")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "provider");
     return saved;
   });

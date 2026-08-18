@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 // Public, tokenized survey submission — the email-survey path.
 //
@@ -32,7 +33,7 @@ export const getSurveyInvite = createServerFn({ method: "GET" })
       .select("id, shop_id, provider_id, customer_name, expires_at, responded_at, rating_hint")
       .eq("token", data.token)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "survey");
     if (!invite) return { status: "invalid" };
     if (invite.responded_at) return { status: "used" };
     if (new Date(invite.expires_at) < new Date()) return { status: "expired" };
@@ -78,7 +79,7 @@ export const submitSurveyFeedback = createServerFn({ method: "POST" })
       .gt("expires_at", new Date().toISOString())
       .select("id, shop_id, customer_id, customer_name, customer_email")
       .maybeSingle();
-    if (claimErr) throw new Error(claimErr.message);
+    if (claimErr) throw dbError(claimErr, "survey");
     if (!invite) throw new Error("This survey link is invalid, expired, or already used.");
 
     const { data: saved, error: insErr } = await supabaseAdmin
@@ -99,7 +100,7 @@ export const submitSurveyFeedback = createServerFn({ method: "POST" })
       // Roll the claim back so the customer can retry rather than losing
       // their one shot at the token.
       await supabaseAdmin.from("survey_invites").update({ responded_at: null }).eq("id", invite.id);
-      throw new Error(insErr.message);
+      throw dbError(insErr, "survey");
     }
 
     await supabaseAdmin
