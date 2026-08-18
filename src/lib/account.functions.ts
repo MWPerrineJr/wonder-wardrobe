@@ -17,6 +17,8 @@ export type MyBooking = {
   ends_at: string;
   status: string;
   price_cents: number | null;
+  payment_status: string | null;
+  amount_paid_cents: number | null;
   notes: string | null;
   shop: { id: string; name: string; slug: string | null } | null;
   service: { id: string; name: string; duration_minutes: number | null } | null;
@@ -100,7 +102,7 @@ export const listMyBookings = createServerFn({ method: "GET" })
     const { data, error } = await supabase
       .from("bookings")
       .select(
-        `id, starts_at, ends_at, status, price_cents, notes,
+        `id, starts_at, ends_at, status, price_cents, payment_status, amount_paid_cents, notes,
          shop:shops(id, name, slug),
          service:services(id, name, duration_minutes),
          provider:providers(id, display_name)`,

@@ -8,6 +8,7 @@ import { categoryLabel } from "@/lib/categories";
 import {
   createBooking,
   getAvailableSlots,
+  amountDueCents,
   type BookingContext,
   type SavedBooking,
 } from "@/lib/booking.functions";
@@ -79,17 +80,28 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim(),
           notes: notes.trim() || null,
+          returnUrl: `${window.location.origin}/account`,
         },
       }),
-    onSuccess: (saved) => {
+    onSuccess: (result) => {
+      // Prepay shops send the client to secure checkout before we celebrate.
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
       // Success is only shown after the database returns the saved row.
-      setConfirmed(saved);
+      setConfirmed(result.booking);
       setTime(null);
       slotsQuery.refetch();
       toast.success("Appointment confirmed.");
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Could not save booking"),
   });
+
+  const dueCents = service
+    ? amountDueCents(service.price_cents, ctx.prepay.mode, ctx.prepay.depositPercent)
+    : 0;
+  const prepayActive = ctx.prepay.enabled && dueCents > 0;
 
   const nameValid = customerName.trim().length >= 2;
   const phoneValid = /^[+()\d\s.-]{7,30}$/.test(customerPhone.trim());
@@ -320,6 +332,16 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
                     }`
                   : "Pick a time slot"}
               </div>
+              {prepayActive && (
+                <div className="flex justify-between text-body-md text-on-surface">
+                  <span>
+                    {ctx.prepay.mode === "deposit"
+                      ? `Deposit due now (${ctx.prepay.depositPercent}%)`
+                      : "Due now"}
+                  </span>
+                  <span className="font-bold">{formatPrice(dueCents)}</span>
+                </div>
+              )}
             </div>
 
             <button
@@ -327,10 +349,16 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               disabled={!canSubmit}
               className="w-full bg-primary text-on-primary font-headline-md text-headline-md py-4 rounded-lg font-bold hover:bg-primary/90 transition-all disabled:opacity-50"
             >
-              {mutation.isPending ? "Saving…" : "Confirm booking"}
+              {mutation.isPending
+                ? "Saving…"
+                : prepayActive
+                  ? `Pay ${formatPrice(dueCents)} & book`
+                  : "Confirm booking"}
             </button>
             <p className="font-label-sm text-label-sm text-center text-on-surface-variant">
-              By booking, you agree to our cancellation policy.
+              {prepayActive
+                ? "You'll be taken to secure checkout to pay this shop. By booking, you agree to our cancellation policy."
+                : "By booking, you agree to our cancellation policy."}
             </p>
           </form>
         )}

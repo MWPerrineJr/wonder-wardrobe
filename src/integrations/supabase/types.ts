@@ -43,6 +43,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          amount_paid_cents: number
           created_at: string
           customer_id: string
           customer_name: string | null
@@ -50,15 +51,19 @@ export type Database = {
           ends_at: string
           id: string
           notes: string | null
+          payment_status: string
           price_cents: number
           provider_id: string | null
           service_id: string
           shop_id: string
           starts_at: string
           status: Database["public"]["Enums"]["booking_status"]
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
           updated_at: string
         }
         Insert: {
+          amount_paid_cents?: number
           created_at?: string
           customer_id: string
           customer_name?: string | null
@@ -66,15 +71,19 @@ export type Database = {
           ends_at: string
           id?: string
           notes?: string | null
+          payment_status?: string
           price_cents: number
           provider_id?: string | null
           service_id: string
           shop_id: string
           starts_at: string
           status?: Database["public"]["Enums"]["booking_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           updated_at?: string
         }
         Update: {
+          amount_paid_cents?: number
           created_at?: string
           customer_id?: string
           customer_name?: string | null
@@ -82,12 +91,15 @@ export type Database = {
           ends_at?: string
           id?: string
           notes?: string | null
+          payment_status?: string
           price_cents?: number
           provider_id?: string | null
           service_id?: string
           shop_id?: string
           starts_at?: string
           status?: Database["public"]["Enums"]["booking_status"]
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -412,18 +424,64 @@ export type Database = {
           },
         ]
       }
+      shop_payout_accounts: {
+        Row: {
+          charges_enabled: boolean
+          created_at: string
+          details_submitted: boolean
+          environment: string
+          id: string
+          payouts_enabled: boolean
+          shop_id: string
+          stripe_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          environment?: string
+          id?: string
+          payouts_enabled?: boolean
+          shop_id: string
+          stripe_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          environment?: string
+          id?: string
+          payouts_enabled?: boolean
+          shop_id?: string
+          stripe_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_payout_accounts_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           address: string | null
           categories: Database["public"]["Enums"]["service_category"][]
           cover_image_url: string | null
           created_at: string
+          deposit_percent: number
           description: string | null
           google_review_url: string | null
           id: string
           logo_url: string | null
           name: string
           owner_id: string
+          prepay_mode: string
           slug: string
           updated_at: string
         }
@@ -432,12 +490,14 @@ export type Database = {
           categories?: Database["public"]["Enums"]["service_category"][]
           cover_image_url?: string | null
           created_at?: string
+          deposit_percent?: number
           description?: string | null
           google_review_url?: string | null
           id?: string
           logo_url?: string | null
           name: string
           owner_id: string
+          prepay_mode?: string
           slug: string
           updated_at?: string
         }
@@ -446,12 +506,14 @@ export type Database = {
           categories?: Database["public"]["Enums"]["service_category"][]
           cover_image_url?: string | null
           created_at?: string
+          deposit_percent?: number
           description?: string | null
           google_review_url?: string | null
           id?: string
           logo_url?: string | null
           name?: string
           owner_id?: string
+          prepay_mode?: string
           slug?: string
           updated_at?: string
         }

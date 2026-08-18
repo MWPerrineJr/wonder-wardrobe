@@ -25,6 +25,33 @@ const DayInput = z.object({
   tzOffsetMinutes: z.number().int().min(-900).max(900),
 });
 
+export type ProviderProfile = {
+  displayName: string;
+  avatarUrl: string | null;
+  shopName: string;
+  shopSlug: string;
+} | null;
+
+/** Identity strip for the provider terminal — no hardcoded shop names. */
+export const getMyProviderProfile = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ProviderProfile> => {
+    const { data, error } = await context.supabase
+      .from("providers")
+      .select("display_name, avatar_url, shop:shops(name, slug)")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const shop = (data as any)?.shop as { name: string; slug: string } | null | undefined;
+    if (!data || !shop) return null;
+    return {
+      displayName: data.display_name,
+      avatarUrl: data.avatar_url,
+      shopName: shop.name,
+      shopSlug: shop.slug,
+    };
+  });
+
 export const getMyProviderDay = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => DayInput.parse(input))

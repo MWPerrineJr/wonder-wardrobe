@@ -64,7 +64,7 @@ export const getMyShops = createServerFn({ method: "GET" })
     const { data: shops, error } = await supabase
       .from("shops")
       .select(
-        "id, slug, name, description, address, cover_image_url, google_review_url, categories, created_at",
+        "id, slug, name, description, address, cover_image_url, google_review_url, categories, prepay_mode, deposit_percent, created_at",
       )
       .eq("owner_id", userId)
       .order("created_at", { ascending: true });

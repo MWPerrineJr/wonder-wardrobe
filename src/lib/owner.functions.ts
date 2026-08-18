@@ -101,6 +101,8 @@ const UpdateShopInput = z.object({
     address: z.string().max(200).nullable().optional(),
     cover_image_url: z.string().url().max(500).nullable().optional(),
     categories: categorySchema.optional(),
+    prepay_mode: z.enum(["off", "deposit", "full"]).optional(),
+    deposit_percent: z.number().int().min(5).max(100).optional(),
     google_review_url: z
       .string()
       .trim()

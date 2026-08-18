@@ -55,6 +55,53 @@ async function markCanceled(subscription: any, env: StripeEnv) {
   if (error) console.error("[payments-webhook] cancel update failed", error.message);
 }
 
+/** Client prepaid a booking through the shop's own connected account. */
+async function markBookingPaid(session: any) {
+  const bookingId = session.metadata?.booking_id;
+  if (!bookingId) return;
+  const supabase = await getSupabase();
+  const { error } = await supabase
+    .from("bookings")
+    .update({
+      payment_status: "paid",
+      amount_paid_cents: session.amount_total ?? 0,
+      stripe_payment_intent_id:
+        typeof session.payment_intent === "string" ? session.payment_intent : null,
+      status: "confirmed",
+    })
+    .eq("id", bookingId);
+  if (error) console.error("[payments-webhook] booking paid update failed", error.message);
+}
+
+/** Checkout abandoned or expired — release the held slot. */
+async function releaseBooking(session: any) {
+  const bookingId = session.metadata?.booking_id;
+  if (!bookingId) return;
+  const supabase = await getSupabase();
+  const { error } = await supabase
+    .from("bookings")
+    .update({ payment_status: "failed", status: "cancelled" })
+    .eq("id", bookingId)
+    .eq("payment_status", "awaiting_payment");
+  if (error) console.error("[payments-webhook] booking release failed", error.message);
+}
+
+/** Connected shop account finished (or changed) onboarding. */
+async function syncPayoutAccount(account: any, env: StripeEnv) {
+  const supabase = await getSupabase();
+  const { error } = await supabase
+    .from("shop_payout_accounts")
+    .update({
+      charges_enabled: account.charges_enabled ?? false,
+      payouts_enabled: account.payouts_enabled ?? false,
+      details_submitted: account.details_submitted ?? false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("stripe_account_id", account.id)
+    .eq("environment", env);
+  if (error) console.error("[payments-webhook] payout account sync failed", error.message);
+}
+
 export const Route = createFileRoute("/api/public/payments/webhook")({
   server: {
     handlers: {
@@ -75,6 +122,17 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
               break;
             case "customer.subscription.deleted":
               await markCanceled(event.data.object, env);
+              break;
+            case "checkout.session.completed":
+            case "checkout.session.async_payment_succeeded":
+              await markBookingPaid(event.data.object);
+              break;
+            case "checkout.session.expired":
+            case "checkout.session.async_payment_failed":
+              await releaseBooking(event.data.object);
+              break;
+            case "account.updated":
+              await syncPayoutAccount(event.data.object, env);
               break;
             default:
               console.log("[payments-webhook] unhandled event", event.type);
