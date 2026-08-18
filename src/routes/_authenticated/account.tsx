@@ -269,6 +269,16 @@ function BookingRow({ b }: { b: MyBooking }) {
           >
             {b.status.replace("_", " ")}
           </span>
+          {b.payment_status === "paid" && (
+            <span className="text-label-sm font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900">
+              Paid ${((b.amount_paid_cents ?? 0) / 100).toFixed(2)}
+            </span>
+          )}
+          {b.payment_status === "awaiting_payment" && (
+            <span className="text-label-sm font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
+              Payment pending
+            </span>
+          )}
         </div>
         <div className="text-body-sm text-on-surface-variant mt-1">
           {dateStr} · {timeStr}
