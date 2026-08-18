@@ -46,15 +46,18 @@ export const Route = createFileRoute("/api/public/jobs/send-surveys")({
             if (insErr || !invite) continue;
             invited += 1;
 
-            const outcome = await sendSurveyInviteEmail({
-              token: invite.token,
-              shopName: t.shop_name,
-              providerName: t.provider_name,
-              customerName: t.customer_name,
-              customerEmail: t.customer_email,
-              serviceName: t.service_name,
-              shopAddress: t.shop_address,
-            });
+            const outcome = await sendSurveyInviteEmail(
+              {
+                token: invite.token,
+                shopName: t.shop_name,
+                providerName: t.provider_name,
+                customerName: t.customer_name,
+                customerEmail: t.customer_email,
+                serviceName: t.service_name,
+                shopAddress: t.shop_address,
+              },
+              process.env["APP_URL"] ?? new URL(request.url).origin,
+            );
 
             await supabaseAdmin
               .from("survey_invites")
