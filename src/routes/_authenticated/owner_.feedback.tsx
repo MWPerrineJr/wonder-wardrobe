@@ -350,19 +350,19 @@ function ShopReportPanel({ shopId }: { shopId: string }) {
             <ThemeList
               icon="thumb_up"
               title="What people love"
-              items={report.praise_themes}
+              items={report.praise_themes.map((t) => `${t.theme} (${t.mentions})`)}
               tone="good"
             />
             <ThemeList
               icon="report"
               title="Common complaints"
-              items={report.complaint_themes}
+              items={report.complaint_themes.map((t) => `${t.theme} (${t.mentions})`)}
               tone="bad"
             />
             <ThemeList
               icon="lightbulb"
               title="Suggested improvements"
-              items={report.suggestions}
+              items={report.suggestions.map((s) => `${s.title} — ${s.detail}`)}
               tone="neutral"
             />
           </div>
