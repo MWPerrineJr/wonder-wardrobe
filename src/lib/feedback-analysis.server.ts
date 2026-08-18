@@ -1,4 +1,4 @@
-import { generateText, Output, NoObjectGeneratedError } from "ai";
+import { streamText, Output, NoObjectGeneratedError } from "ai";
 import { z } from "zod";
 
 import { createGateway, FEEDBACK_MODEL } from "./ai.server";
@@ -45,14 +45,16 @@ export async function analyzeReview(
     `Feedback: ${input.message}`,
   ].join("\n");
 
-  const result = await generateText({
+  // Streamed on the wire (consumed server-side) so a slow reasoning call is not
+  // severed and re-billed by the hosting platform's idle-request timeout.
+  const result = streamText({
     model: gateway(FEEDBACK_MODEL),
     system: REVIEW_SYSTEM,
     prompt,
     output: Output.object({ schema: reviewSchema }),
   });
 
-  const parsed = result.output;
+  const parsed = await result.output;
   return {
     ...parsed,
     sentiment_score: clampScore(parsed.sentiment_score),
@@ -106,13 +108,13 @@ export async function analyzeShopReport(
     .join("\n");
 
   try {
-    const result = await generateText({
+    const result = streamText({
       model: gateway(FEEDBACK_MODEL),
       system: REPORT_SYSTEM,
       prompt: `Here are ${rows.length} recent customer reviews, newest last:\n\n${body}`,
       output: Output.object({ schema: reportSchema }),
     });
-    const out = result.output;
+    const out = await result.output;
     return {
       summary: out.summary,
       praise_themes: out.praise_themes.slice(0, 4),
