@@ -266,11 +266,7 @@ function FeedbackContent({
         />
       </section>
 
-      {rows.length === 0 ? (
-        <ShopReportPanel shopId={shopId} />
-      ) : (
-        <ShopReportPanel shopId={shopId} />
-      )}
+      <ShopReportPanel shopId={shopId} />
 
       {rows.length === 0 ? (
         <div className="bg-surface border border-border-subtle rounded-xl p-10 text-center">
