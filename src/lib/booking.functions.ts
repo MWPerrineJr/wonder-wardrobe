@@ -25,7 +25,24 @@ export type BookingContext = {
   providers: Array<{ id: string; display_name: string; avatar_url: string | null; specialties: string[] }>;
   services: Array<{ id: string; name: string; description: string | null; duration_minutes: number; price_cents: number; category: string | null }>;
   hours: Array<{ weekday: number; open_time: string; close_time: string; is_closed: boolean }>;
+  prepay: { mode: "off" | "deposit" | "full"; depositPercent: number; enabled: boolean };
 };
+
+/** Which payments environment this deployment charges in. */
+function paymentEnv(): "sandbox" | "live" {
+  return process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
+}
+
+/** Amount the client must pay up front, in cents (0 when prepay is off). */
+export function amountDueCents(
+  priceCents: number,
+  mode: "off" | "deposit" | "full",
+  depositPercent: number,
+): number {
+  if (mode === "full") return priceCents;
+  if (mode === "deposit") return Math.max(50, Math.round((priceCents * depositPercent) / 100));
+  return 0;
+}
 
 
 export const getBookingContext = createServerFn({ method: "GET" })
@@ -34,7 +51,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
     const supabase = publicClient();
     const { data: shop, error } = await supabase
       .from("shops")
-      .select("id, slug, name")
+      .select("id, slug, name, prepay_mode, deposit_percent")
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -62,11 +79,29 @@ export const getBookingContext = createServerFn({ method: "GET" })
     if (servicesRes.error) throw new Error(servicesRes.error.message);
     if (hoursRes.error) throw new Error(hoursRes.error.message);
 
+    const mode = (shop.prepay_mode ?? "off") as "off" | "deposit" | "full";
+    let chargesEnabled = false;
+    if (mode !== "off") {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: acct } = await supabaseAdmin
+        .from("shop_payout_accounts")
+        .select("charges_enabled")
+        .eq("shop_id", shop.id)
+        .eq("environment", paymentEnv())
+        .maybeSingle();
+      chargesEnabled = acct?.charges_enabled ?? false;
+    }
+
     return {
-      shop,
+      shop: { id: shop.id, slug: shop.slug, name: shop.name },
       providers: providersRes.data ?? [],
       services: servicesRes.data ?? [],
       hours: hoursRes.data ?? [],
+      prepay: {
+        mode,
+        depositPercent: shop.deposit_percent ?? 25,
+        enabled: mode !== "off" && chargesEnabled,
+      },
     };
 
   });
@@ -169,6 +204,7 @@ const CreateBookingInput = z.object({
     .max(30)
     .regex(/^[+()\d\s.-]+$/, "Phone can only contain digits and + ( ) - . spaces"),
   notes: z.string().trim().max(500).optional().nullable(),
+  returnUrl: z.string().url().optional(),
 });
 
 export type SavedBooking = {
@@ -185,11 +221,17 @@ export type SavedBooking = {
   shop: { id: string; name: string; slug: string } | null;
 };
 
+export type CreateBookingResult = {
+  booking: SavedBooking;
+  checkoutUrl: string | null;
+  amountDueCents: number;
+};
+
 
 export const createBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => CreateBookingInput.parse(input))
-  .handler(async ({ data, context }): Promise<SavedBooking> => {
+  .handler(async ({ data, context }): Promise<CreateBookingResult> => {
     const { supabase, userId } = context;
 
     // Price and duration are always recomputed server-side from the service row.
@@ -202,6 +244,31 @@ export const createBooking = createServerFn({ method: "POST" })
     if (!service || service.shop_id !== data.shopId || !service.is_active) {
       throw new Error("That service is not available at this shop");
     }
+
+    const { data: shopRow, error: shopErr } = await supabase
+      .from("shops")
+      .select("id, name, prepay_mode, deposit_percent")
+      .eq("id", data.shopId)
+      .maybeSingle();
+    if (shopErr) throw new Error(shopErr.message);
+    if (!shopRow) throw new Error("Shop not found");
+
+    const env = paymentEnv();
+    const mode = (shopRow.prepay_mode ?? "off") as "off" | "deposit" | "full";
+    let payoutAccountId: string | null = null;
+    if (mode !== "off") {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: acct } = await supabaseAdmin
+        .from("shop_payout_accounts")
+        .select("stripe_account_id, charges_enabled")
+        .eq("shop_id", shopRow.id)
+        .eq("environment", env)
+        .maybeSingle();
+      if (acct?.charges_enabled) payoutAccountId = acct.stripe_account_id;
+    }
+    const due = payoutAccountId
+      ? amountDueCents(service.price_cents, mode, shopRow.deposit_percent ?? 25)
+      : 0;
 
     const startsAt = toInstant(data.date, data.time, data.tzOffsetMinutes);
     if (startsAt.getTime() <= Date.now()) throw new Error("Pick a time in the future");
@@ -221,6 +288,7 @@ export const createBooking = createServerFn({ method: "POST" })
         customer_phone: data.customerPhone,
         notes: data.notes || null,
         status: "pending",
+        payment_status: due > 0 ? "awaiting_payment" : "not_required",
       })
       .select(
         `id, starts_at, ends_at, status, price_cents, customer_name, customer_phone, notes,
@@ -230,5 +298,45 @@ export const createBooking = createServerFn({ method: "POST" })
       )
       .single();
     if (error) throw new Error(error.message);
-    return saved as unknown as SavedBooking;
+    const booking = saved as unknown as SavedBooking;
+
+    if (due <= 0 || !payoutAccountId) {
+      return { booking, checkoutUrl: null, amountDueCents: 0 };
+    }
+
+    const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
+    try {
+      const stripe = createStripeClient(env);
+      const label = mode === "deposit" ? "Booking deposit" : "Appointment";
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: "usd",
+              unit_amount: due,
+              product_data: { name: `${label} — ${shopRow.name}` },
+            },
+          },
+        ],
+        payment_intent_data: {
+          transfer_data: { destination: payoutAccountId },
+          metadata: { booking_id: booking.id, shop_id: shopRow.id },
+        },
+        metadata: { booking_id: booking.id, shop_id: shopRow.id },
+        success_url: `${data.returnUrl ?? "https://example.com"}?paid=1&booking=${booking.id}`,
+        cancel_url: `${data.returnUrl ?? "https://example.com"}?paid=0&booking=${booking.id}`,
+      } as any);
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("bookings")
+        .update({ stripe_checkout_session_id: session.id })
+        .eq("id", booking.id);
+
+      return { booking, checkoutUrl: session.url ?? null, amountDueCents: due };
+    } catch (e) {
+      throw new Error(getStripeErrorMessage(e));
+    }
   });
