@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { AccountNav } from "@/components/account-nav";
 import { PublicLinkCard } from "@/components/public-link-card";
+import { PaymentsPanel } from "@/components/payments-panel";
 import { getMyShops, getShopDetail } from "@/lib/shops.functions";
 import {
   createService,
@@ -143,6 +144,7 @@ function OwnerPage() {
             <TabsTrigger value="details">Shop details</TabsTrigger>
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="hours">Hours</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 flex flex-col gap-6">
@@ -181,6 +183,14 @@ function OwnerPage() {
           <TabsContent value="hours" className="mt-6">
             <HoursPanel shopId={selected.id} />
           </TabsContent>
+
+          <TabsContent value="payments" className="mt-6">
+            <PaymentsPanel
+              shopId={selected.id}
+              prepayMode={(selected.prepay_mode ?? "off") as "off" | "deposit" | "full"}
+              depositPercent={selected.deposit_percent ?? 25}
+            />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
@@ -210,6 +220,8 @@ type ShopSummary = {
   cover_image_url: string | null;
   google_review_url?: string | null;
   categories: ServiceCategory[] | null;
+  prepay_mode?: string | null;
+  deposit_percent?: number | null;
 };
 
 
