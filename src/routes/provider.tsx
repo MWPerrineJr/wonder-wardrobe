@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 
 import { ProviderSchedule } from "@/components/provider-schedule";
+import { useAuth } from "@/hooks/use-auth";
+import { getMyProviderProfile } from "@/lib/provider.functions";
 
 export const Route = createFileRoute("/provider")({
   head: () => ({
@@ -25,57 +28,73 @@ const Icon = ({ name, className = "", filled = false, style }: { name: string; c
   </span>
 );
 
-const SideLink = ({ icon, label, active = false, filled = false }: { icon: string; label: string; active?: boolean; filled?: boolean }) => (
-  <a
-    href="#"
-    className={
-      active
-        ? "flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-fixed bg-primary-container font-bold font-label-md text-label-md"
-        : "flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-md text-label-md group"
-    }
-  >
-    <Icon name={icon} className="text-[20px]" filled={filled} />
-    {label}
-  </a>
-);
+const sideClass = (active: boolean) =>
+  active
+    ? "flex items-center gap-3 px-4 py-3 rounded-lg text-on-primary-fixed bg-primary-container font-bold font-label-md text-label-md"
+    : "flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-md text-label-md";
 
 function ProviderPage() {
+  const { user } = useAuth();
+  const profileQuery = useQuery({
+    queryKey: ["my-provider-profile"],
+    enabled: !!user,
+    queryFn: () => getMyProviderProfile(),
+  });
+  const profile = profileQuery.data ?? null;
+  const initial = (profile?.displayName ?? user?.email ?? "?").charAt(0).toUpperCase();
+
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex">
       {/* Side nav */}
       <nav className="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface border-r border-border-subtle p-4 gap-baseline z-50">
         <div className="mb-8 flex items-center gap-4">
-          <img
-            className="w-10 h-10 rounded-full object-cover border border-border-subtle"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlnMVdrsWXoratmz9Gxt6KnfXi0FZJCjMgDwTDgKr6NXEPTIaGlz3_-nbmTlhenHAbo6cTKPzFSV1iJqn-q_C_To_RV2eQ2ysyyU4_UT7JStafC7UjHvFBvcjm_QkZl4ja-f6erRRyZkU16Pz-aHa2aLXZ471Z4kWsYPTlC858QXczSdUiBIXuh3GitSngVLx5uzs-SYGutTVB_Dy7ONETFqWlTUW1AECwUs19niZwhCGqVKQLhkCZ"
-            alt="Logo"
-          />
-          <div>
-            <h1 className="font-headline-md text-headline-md text-primary tracking-tight">The Sharp Edge</h1>
-            <p className="font-label-sm text-label-sm text-text-muted">Provider Terminal</p>
+          {profile?.avatarUrl ? (
+            <img
+              className="w-10 h-10 rounded-full object-cover border border-border-subtle"
+              src={profile.avatarUrl}
+              alt={profile.displayName}
+            />
+          ) : (
+            <span className="w-10 h-10 rounded-full border border-border-subtle bg-surface-container flex items-center justify-center text-primary font-bold">
+              {initial}
+            </span>
+          )}
+          <div className="min-w-0">
+            <h1 className="font-headline-md text-headline-md text-primary tracking-tight truncate">
+              {profile?.shopName ?? "Provider Terminal"}
+            </h1>
+            <p className="font-label-sm text-label-sm text-text-muted truncate">
+              {profile?.displayName ?? "My schedule"}
+            </p>
           </div>
         </div>
         <div className="flex-1 flex flex-col gap-2">
-          <SideLink icon="dashboard" label="Dashboard" />
-          <SideLink icon="calendar_today" label="Schedule" active filled />
-          <SideLink icon="groups" label="Clients" />
-          <SideLink icon="content_cut" label="Services" />
-          <SideLink icon="bar_chart" label="Analytics" />
+          <Link to="/provider" className={sideClass(true)}>
+            <Icon name="calendar_today" className="text-[20px]" filled />
+            Schedule
+          </Link>
+          <Link to="/account" className={sideClass(false)}>
+            <Icon name="person" className="text-[20px]" />
+            My account
+          </Link>
+          <Link to="/" className={sideClass(false)}>
+            <Icon name="search" className="text-[20px]" />
+            Explore shops
+          </Link>
+          <Link to="/owner" className={sideClass(false)}>
+            <Icon name="dashboard" className="text-[20px]" />
+            Owner dashboard
+          </Link>
         </div>
-        <Link
-          to="/"
-          className="w-full py-3 mb-4 rounded border border-border-subtle text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md flex justify-center items-center gap-2"
-        >
-          View Shop Page <Icon name="open_in_new" className="text-[16px]" />
-        </Link>
-        <div className="flex flex-col gap-2 mt-auto border-t border-border-subtle pt-4">
-          <a href="#" className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-sm text-label-sm">
-            <Icon name="settings" className="text-[18px]" /> Settings
-          </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors font-label-sm text-label-sm">
-            <Icon name="help_outline" className="text-[18px]" /> Support
-          </a>
-        </div>
+        {profile?.shopSlug && (
+          <Link
+            to="/shop/$slug"
+            params={{ slug: profile.shopSlug }}
+            className="w-full py-3 mb-4 mt-auto rounded border border-border-subtle text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md flex justify-center items-center gap-2"
+          >
+            View shop page <Icon name="open_in_new" className="text-[16px]" />
+          </Link>
+        )}
       </nav>
 
       <main className="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full min-h-screen pb-24 md:pb-margin-desktop">
