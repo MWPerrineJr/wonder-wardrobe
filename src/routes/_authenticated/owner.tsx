@@ -208,6 +208,7 @@ type ShopSummary = {
   description: string | null;
   address: string | null;
   cover_image_url: string | null;
+  google_review_url?: string | null;
   categories: ServiceCategory[] | null;
 };
 
@@ -218,6 +219,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
   const [address, setAddress] = useState(shop.address ?? "");
   const [description, setDescription] = useState(shop.description ?? "");
   const [coverUrl, setCoverUrl] = useState(shop.cover_image_url ?? "");
+  const [reviewUrl, setReviewUrl] = useState(shop.google_review_url ?? "");
   const [categories, setCategories] = useState<ServiceCategory[]>(shop.categories ?? []);
 
   // Reset local state when the selected shop changes
@@ -226,8 +228,17 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     setAddress(shop.address ?? "");
     setDescription(shop.description ?? "");
     setCoverUrl(shop.cover_image_url ?? "");
+    setReviewUrl(shop.google_review_url ?? "");
     setCategories(shop.categories ?? []);
-  }, [shop.id, shop.name, shop.address, shop.description, shop.cover_image_url, shop.categories]);
+  }, [
+    shop.id,
+    shop.name,
+    shop.address,
+    shop.description,
+    shop.cover_image_url,
+    shop.google_review_url,
+    shop.categories,
+  ]);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -239,6 +250,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
             address: address || null,
             description: description || null,
             cover_image_url: coverUrl || null,
+            google_review_url: reviewUrl.trim() || null,
             categories,
           },
         },
@@ -321,6 +333,18 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
               onError={(e) => ((e.currentTarget.style.display = "none"))}
             />
           )}
+        </Field>
+        <Field label="Google review link">
+          <input
+            value={reviewUrl}
+            placeholder="https://g.page/r/…/review"
+            onChange={(e) => setReviewUrl(e.target.value)}
+            className={inputCls}
+          />
+          <p className="text-on-surface-variant text-body-sm mt-1">
+            Paste your Google "write a review" link. Customers who rate you 4 or 5 stars in the
+            follow-up survey are invited to post it publicly here.
+          </p>
         </Field>
         <button
           type="submit"
