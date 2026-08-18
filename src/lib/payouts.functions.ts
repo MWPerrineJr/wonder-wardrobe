@@ -117,7 +117,14 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
       });
       return { url: link.url };
     } catch (error) {
-      return { error: getStripeErrorMessage(error) };
+      const message = getStripeErrorMessage(error);
+      if (message.includes("signed up for Connect")) {
+        return {
+          error:
+            "Connect isn't enabled on your Stripe account yet. Enable Connect (Express accounts) in your Stripe dashboard, then try again.",
+        };
+      }
+      return { error: message };
     }
   });
 
