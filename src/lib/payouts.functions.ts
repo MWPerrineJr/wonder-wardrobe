@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -28,7 +29,7 @@ export const getPayoutAccount = createServerFn({ method: "GET" })
       .eq("shop_id", data.shopId)
       .eq("environment", data.environment)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "payouts");
     return {
       connected: Boolean(row?.stripe_account_id),
       accountId: row?.stripe_account_id ?? null,
@@ -48,7 +49,7 @@ async function requireOwnedShop(
     .select("id, name, owner_id")
     .eq("id", shopId)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw dbError(error, "payouts");
   if (!shop || shop.owner_id !== userId) throw new Error("You don't own this shop.");
   return { id: shop.id, name: shop.name };
 }
@@ -106,7 +107,7 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
           },
           { onConflict: "shop_id,environment" },
         );
-        if (error) throw new Error(error.message);
+        if (error) throw dbError(error, "payouts");
       }
 
       const link = await stripe.accountLinks.create({
@@ -144,7 +145,7 @@ export const refreshPayoutAccount = createServerFn({ method: "POST" })
       .eq("shop_id", data.shopId)
       .eq("environment", data.environment)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "payouts");
     if (!row?.stripe_account_id) {
       return {
         connected: false,
@@ -193,7 +194,7 @@ export const createPayoutLoginLink = createServerFn({ method: "POST" })
       .eq("shop_id", data.shopId)
       .eq("environment", data.environment)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "payouts");
     if (!row?.stripe_account_id) return { error: "Connect a payout account first." };
 
     try {

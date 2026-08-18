@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -91,7 +92,7 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       .eq("id", data.bookingId)
       .select("id, status")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "account");
     return saved;
   });
 

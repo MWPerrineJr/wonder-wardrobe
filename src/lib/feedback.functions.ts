@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -48,7 +49,7 @@ export const listFeedback = createServerFn({ method: "GET" })
       _shop_id: data.shopId,
       _env: data.environment,
     });
-    if (gateErr) throw new Error(gateErr.message);
+    if (gateErr) throw dbError(gateErr, "feedback");
     if (!hasAnalytics) {
       return {
         locked: true,
@@ -76,14 +77,14 @@ export const listFeedback = createServerFn({ method: "GET" })
     if (data.status && data.status !== FILTER_ALL) query = query.eq("status", data.status);
 
     const { data: rows, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "feedback");
 
     // Aggregates across ALL feedback for the shop (unfiltered) so KPIs stay stable
     const { data: allRows, error: aggErr } = await supabase
       .from("customer_feedback")
       .select("sentiment_label, sentiment_score, urgency")
       .eq("shop_id", data.shopId);
-    if (aggErr) throw new Error(aggErr.message);
+    if (aggErr) throw dbError(aggErr, "feedback");
 
     const total = allRows?.length ?? 0;
     const scored = (allRows ?? []).filter((r) => r.sentiment_score !== null);
@@ -125,7 +126,7 @@ export const updateFeedbackStatus = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .select("id, status, updated_at")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "feedback");
     return saved;
   });
 
@@ -181,7 +182,7 @@ export const getShopReport = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "feedback");
     if (!report) return { report: null };
     return {
       report: {
@@ -212,14 +213,14 @@ export const regenerateShopReport = createServerFn({ method: "POST" })
       .select("id, owner_id")
       .eq("id", data.shopId)
       .maybeSingle();
-    if (shopErr) throw new Error(shopErr.message);
+    if (shopErr) throw dbError(shopErr, "feedback");
     if (!shop || shop.owner_id !== userId) throw new Error("Not your shop");
 
     const { data: hasAnalytics, error: gateErr } = await supabase.rpc(
       "shop_has_active_analytics",
       { _shop_id: data.shopId, _env: data.environment },
     );
-    if (gateErr) throw new Error(gateErr.message);
+    if (gateErr) throw dbError(gateErr, "feedback");
     if (!hasAnalytics) throw new Error("The analytics plan is required to generate reports.");
 
     const apiKey = process.env["LOVABLE_API_KEY"];
@@ -271,6 +272,6 @@ export const submitFeedback = createServerFn({ method: "POST" })
       })
       .select("id, rating, message, created_at")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) throw dbError(error, "feedback");
     return saved;
   });
