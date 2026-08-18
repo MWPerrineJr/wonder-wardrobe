@@ -30,6 +30,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicJobsSendSurveysRouteImport } from './routes/api/public/jobs/send-surveys'
+import { Route as ApiPublicJobsEnrichFeedbackRouteImport } from './routes/api/public/jobs/enrich-feedback'
 import { Route as ApiPublicEmailsSurveyInviteRouteImport } from './routes/api/public/emails/survey-invite'
 
 const ShopRoute = ShopRouteImport.update({
@@ -143,6 +144,12 @@ const ApiPublicJobsSendSurveysRoute =
     path: '/api/public/jobs/send-surveys',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsEnrichFeedbackRoute =
+  ApiPublicJobsEnrichFeedbackRouteImport.update({
+    id: '/api/public/jobs/enrich-feedback',
+    path: '/api/public/jobs/enrich-feedback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEmailsSurveyInviteRoute =
   ApiPublicEmailsSurveyInviteRouteImport.update({
     id: '/api/public/emails/survey-invite',
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -192,6 +200,7 @@ export interface FileRoutesByTo {
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -217,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/onboarding/owner'
     | '/owner/feedback'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/onboarding/owner'
     | '/owner/feedback'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
     | '/api/public/payments/webhook'
   id:
@@ -288,6 +300,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding/owner'
     | '/_authenticated/owner_/feedback'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -306,6 +319,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
+  ApiPublicJobsEnrichFeedbackRoute: typeof ApiPublicJobsEnrichFeedbackRoute
   ApiPublicJobsSendSurveysRoute: typeof ApiPublicJobsSendSurveysRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -459,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsSendSurveysRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/enrich-feedback': {
+      id: '/api/public/jobs/enrich-feedback'
+      path: '/api/public/jobs/enrich-feedback'
+      fullPath: '/api/public/jobs/enrich-feedback'
+      preLoaderRoute: typeof ApiPublicJobsEnrichFeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/emails/survey-invite': {
       id: '/api/public/emails/survey-invite'
       path: '/api/public/emails/survey-invite'
@@ -523,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,
+  ApiPublicJobsEnrichFeedbackRoute: ApiPublicJobsEnrichFeedbackRoute,
   ApiPublicJobsSendSurveysRoute: ApiPublicJobsSendSurveysRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
