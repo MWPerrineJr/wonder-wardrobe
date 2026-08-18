@@ -146,16 +146,24 @@ const SubmitFeedbackInput = z.object({
 
 // ---------- AI shop report ----------
 
+export type ReportTheme = { theme: string; mentions: number; evidence: string[] };
+export type ReportSuggestion = {
+  title: string;
+  detail: string;
+  impact: "high" | "medium" | "low";
+  evidence: string[];
+};
+
 export type ShopReport = {
   id: string;
   created_at: string;
   window_start: string;
   window_end: string;
   overall_sentiment: number | null;
-  summary: string;
-  praise_themes: string[];
-  complaint_themes: string[];
-  suggestions: string[];
+  summary: string | null;
+  praise_themes: ReportTheme[];
+  complaint_themes: ReportTheme[];
+  suggestions: ReportSuggestion[];
   feedback_count: number;
   model: string | null;
 };
@@ -174,7 +182,15 @@ export const getShopReport = createServerFn({ method: "GET" })
       .limit(1)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return { report: (report as ShopReport | null) ?? null };
+    if (!report) return { report: null };
+    return {
+      report: {
+        ...report,
+        praise_themes: (report.praise_themes ?? []) as ReportTheme[],
+        complaint_themes: (report.complaint_themes ?? []) as ReportTheme[],
+        suggestions: (report.suggestions ?? []) as ReportSuggestion[],
+      } as ShopReport,
+    };
   });
 
 export const regenerateShopReport = createServerFn({ method: "POST" })
