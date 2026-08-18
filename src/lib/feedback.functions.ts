@@ -230,20 +230,6 @@ export const regenerateShopReport = createServerFn({ method: "POST" })
     }
   });
 
-const _LegacySubmitFeedbackInput = z.object({
-  shopId: z.string().uuid(),
-  rating: z.number().int().min(1).max(5),
-  message: z.string().trim().min(5, "Tell us a little more").max(2000),
-  customerName: z.string().trim().max(80).optional().nullable(),
-  customerEmail: z
-    .string()
-    .trim()
-    .email("Enter a valid email")
-    .max(120)
-    .optional()
-    .nullable()
-    .or(z.literal("")),
-});
 
 export const submitFeedback = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
