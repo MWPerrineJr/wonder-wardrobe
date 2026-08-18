@@ -14,7 +14,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getMyShops } from "@/lib/shops.functions";
-import { listFeedback, updateFeedbackStatus, type FeedbackRow } from "@/lib/feedback.functions";
+import {
+  getShopReport,
+  listFeedback,
+  regenerateShopReport,
+  updateFeedbackStatus,
+  type FeedbackRow,
+} from "@/lib/feedback.functions";
 import {
   AnalyticsUpgradePanel,
   ManageBillingButton,
@@ -260,6 +266,8 @@ function FeedbackContent({
         />
       </section>
 
+      <ShopReportPanel shopId={shopId} />
+
       {rows.length === 0 ? (
         <div className="bg-surface border border-border-subtle rounded-xl p-10 text-center">
           <Icon name="inbox" className="text-[32px] text-on-surface-variant" />
@@ -282,6 +290,120 @@ function FeedbackContent({
         <ManageBillingButton shopId={shopId} />
       </div>
     </>
+  );
+}
+
+function ShopReportPanel({ shopId }: { shopId: string }) {
+  const qc = useQueryClient();
+  const { data } = useSuspenseQuery(
+    queryOptions({
+      queryKey: ["owner", "feedback", "report", shopId],
+      queryFn: () => getShopReport({ data: { shopId } }),
+    }),
+  );
+
+  const regenerate = useMutation({
+    mutationFn: () =>
+      regenerateShopReport({ data: { shopId, environment: getStripeEnvironment() } }),
+    onSuccess: () => {
+      toast.success("Report refreshed.");
+      qc.invalidateQueries({ queryKey: ["owner", "feedback", "report", shopId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const report = data.report;
+
+  return (
+    <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="font-headline-md text-[20px] font-semibold text-on-surface flex items-center gap-2">
+            <Icon name="insights" className="text-[20px] text-primary" />
+            Shop report
+          </h2>
+          <p className="text-on-surface-variant text-body-sm mt-1">
+            {report
+              ? `${report.feedback_count} review${report.feedback_count === 1 ? "" : "s"} · updated ${new Date(report.created_at).toLocaleDateString()}`
+              : "Generated automatically once you have a few written reviews."}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => regenerate.mutate()}
+          disabled={regenerate.isPending}
+        >
+          {regenerate.isPending ? "Analyzing…" : report ? "Refresh report" : "Generate report"}
+        </Button>
+      </div>
+
+      {!report ? (
+        <p className="text-on-surface-variant text-body-md">
+          No report yet. Once at least 3 customers leave written feedback, you'll see a summary of
+          what people praise, what they complain about, and what to improve.
+        </p>
+      ) : (
+        <>
+          {report.summary && <p className="text-on-surface text-body-md">{report.summary}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+            <ThemeList
+              icon="thumb_up"
+              title="What people love"
+              items={report.praise_themes.map((t) => `${t.theme} (${t.mentions})`)}
+              tone="good"
+            />
+            <ThemeList
+              icon="report"
+              title="Common complaints"
+              items={report.complaint_themes.map((t) => `${t.theme} (${t.mentions})`)}
+              tone="bad"
+            />
+            <ThemeList
+              icon="lightbulb"
+              title="Suggested improvements"
+              items={report.suggestions.map((s) => `${s.title} — ${s.detail}`)}
+              tone="neutral"
+            />
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function ThemeList({
+  icon,
+  title,
+  items,
+  tone,
+}: {
+  icon: string;
+  title: string;
+  items: string[];
+  tone: "good" | "bad" | "neutral";
+}) {
+  const toneCls =
+    tone === "good" ? "text-green-600" : tone === "bad" ? "text-destructive" : "text-primary";
+  return (
+    <div className="border border-border-subtle rounded-lg p-4">
+      <h3 className={`font-label-md text-label-md flex items-center gap-1.5 mb-2 ${toneCls}`}>
+        <Icon name={icon} className="text-[18px]" />
+        {title}
+      </h3>
+      {items.length === 0 ? (
+        <p className="text-on-surface-variant text-body-sm">Nothing notable yet.</p>
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {items.map((item) => (
+            <li key={item} className="text-on-surface text-body-sm flex gap-2">
+              <span className="text-on-surface-variant">•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

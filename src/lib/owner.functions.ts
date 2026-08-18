@@ -101,6 +101,15 @@ const UpdateShopInput = z.object({
     address: z.string().max(200).nullable().optional(),
     cover_image_url: z.string().url().max(500).nullable().optional(),
     categories: categorySchema.optional(),
+    google_review_url: z
+      .string()
+      .trim()
+      .url("Enter a full link starting with https://")
+      .startsWith("https://", "The review link must start with https://")
+      .max(500)
+      .nullable()
+      .optional()
+      .or(z.literal("")),
   }),
 });
 
@@ -110,14 +119,38 @@ export const updateShop = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => UpdateShopInput.parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const patch = {
+      ...data.patch,
+      ...(data.patch.google_review_url !== undefined
+        ? { google_review_url: data.patch.google_review_url || null }
+        : {}),
+    };
     const { data: saved, error } = await supabase
       .from("shops")
-      .update(data.patch)
+      .update(patch)
       .eq("id", data.shopId)
-      .select("id, name, description, address, cover_image_url, updated_at")
+      .select("id, name, description, address, cover_image_url, google_review_url, updated_at")
       .single();
     if (error) throw new Error(error.message);
     return saved;
+  });
+
+// ---------- Survey invite delivery log ----------
+
+export const listSurveyInvites = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ shopId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("survey_invites")
+      .select(
+        "id, customer_name, customer_email, sent_at, emailed_at, email_status, email_error, responded_at, expires_at",
+      )
+      .eq("shop_id", data.shopId)
+      .order("sent_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
   });
 
 // ---------- Services CRUD ----------

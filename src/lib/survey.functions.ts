@@ -19,6 +19,7 @@ export type SurveyInviteView = {
   shopName?: string;
   providerName?: string | null;
   customerName?: string | null;
+  ratingHint?: number | null;
 };
 
 export const getSurveyInvite = createServerFn({ method: "GET" })
@@ -28,7 +29,7 @@ export const getSurveyInvite = createServerFn({ method: "GET" })
 
     const { data: invite, error } = await supabaseAdmin
       .from("survey_invites")
-      .select("id, shop_id, provider_id, customer_name, expires_at, responded_at")
+      .select("id, shop_id, provider_id, customer_name, expires_at, responded_at, rating_hint")
       .eq("token", data.token)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -52,6 +53,7 @@ export const getSurveyInvite = createServerFn({ method: "GET" })
       shopName: shop?.name ?? "this shop",
       providerName: provider?.data?.display_name ?? null,
       customerName: invite.customer_name,
+      ratingHint: invite.rating_hint,
     };
   });
 
@@ -70,7 +72,7 @@ export const submitSurveyFeedback = createServerFn({ method: "POST" })
     // from NULL, so a double-click or a replayed link can't create duplicates.
     const { data: invite, error: claimErr } = await supabaseAdmin
       .from("survey_invites")
-      .update({ responded_at: new Date().toISOString() })
+      .update({ responded_at: new Date().toISOString(), rating_hint: data.rating })
       .eq("token", data.token)
       .is("responded_at", null)
       .gt("expires_at", new Date().toISOString())
@@ -105,5 +107,18 @@ export const submitSurveyFeedback = createServerFn({ method: "POST" })
       .update({ feedback_id: saved.id })
       .eq("id", invite.id);
 
-    return saved;
+    // Happy customers get the public Google ask; unhappy ones stay private so
+    // the owner can follow up before the rating is public.
+    const { data: shop } = await supabaseAdmin
+      .from("shops")
+      .select("google_review_url")
+      .eq("id", invite.shop_id)
+      .maybeSingle();
+
+    const googleReviewUrl = shop?.google_review_url ?? null;
+    return {
+      ...saved,
+      googleReviewUrl,
+      promptGoogle: data.rating >= 4 && Boolean(googleReviewUrl),
+    };
   });
