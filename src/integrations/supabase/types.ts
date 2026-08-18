@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_job_state: {
+        Row: {
+          job_name: string
+          last_run_at: string | null
+          lease_until: string | null
+          paused_reason: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          job_name: string
+          last_run_at?: string | null
+          lease_until?: string | null
+          paused_reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          job_name?: string
+          last_run_at?: string | null
+          lease_until?: string | null
+          paused_reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           created_at: string
@@ -163,6 +190,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "customer_feedback_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_reports: {
+        Row: {
+          complaint_themes: Json
+          created_at: string
+          feedback_count: number
+          id: string
+          model: string | null
+          overall_sentiment: number | null
+          praise_themes: Json
+          shop_id: string
+          suggestions: Json
+          summary: string | null
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          complaint_themes?: Json
+          created_at?: string
+          feedback_count?: number
+          id?: string
+          model?: string | null
+          overall_sentiment?: number | null
+          praise_themes?: Json
+          shop_id: string
+          suggestions?: Json
+          summary?: string | null
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          complaint_themes?: Json
+          created_at?: string
+          feedback_count?: number
+          id?: string
+          model?: string | null
+          overall_sentiment?: number | null
+          praise_themes?: Json
+          shop_id?: string
+          suggestions?: Json
+          summary?: string | null
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_reports_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
@@ -339,6 +419,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           description: string | null
+          google_review_url: string | null
           id: string
           logo_url: string | null
           name: string
@@ -352,6 +433,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          google_review_url?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -365,6 +447,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
+          google_review_url?: string | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -434,10 +517,14 @@ export type Database = {
           customer_email: string
           customer_id: string | null
           customer_name: string | null
+          email_error: string | null
+          email_status: string
+          emailed_at: string | null
           expires_at: string
           feedback_id: string | null
           id: string
           provider_id: string | null
+          rating_hint: number | null
           responded_at: string | null
           sent_at: string
           shop_id: string
@@ -450,10 +537,14 @@ export type Database = {
           customer_email: string
           customer_id?: string | null
           customer_name?: string | null
+          email_error?: string | null
+          email_status?: string
+          emailed_at?: string | null
           expires_at?: string
           feedback_id?: string | null
           id?: string
           provider_id?: string | null
+          rating_hint?: number | null
           responded_at?: string | null
           sent_at?: string
           shop_id: string
@@ -466,10 +557,14 @@ export type Database = {
           customer_email?: string
           customer_id?: string | null
           customer_name?: string | null
+          email_error?: string | null
+          email_status?: string
+          emailed_at?: string | null
           expires_at?: string
           feedback_id?: string | null
           id?: string
           provider_id?: string | null
+          rating_hint?: number | null
           responded_at?: string | null
           sent_at?: string
           shop_id?: string
@@ -541,16 +636,18 @@ export type Database = {
         Returns: boolean
       }
       pending_survey_targets: {
-        Args: { lookback_days?: number }
+        Args: never
         Returns: {
           booking_id: string
           customer_email: string
           customer_id: string
           customer_name: string
           ends_at: string
+          google_review_url: string
           provider_id: string
           provider_name: string
           service_name: string
+          shop_address: string
           shop_id: string
           shop_name: string
         }[]
