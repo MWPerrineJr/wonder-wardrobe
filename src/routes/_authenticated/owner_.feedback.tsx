@@ -345,7 +345,7 @@ function ShopReportPanel({ shopId }: { shopId: string }) {
         </p>
       ) : (
         <>
-          <p className="text-on-surface text-body-md">{report.summary}</p>
+          {report.summary && <p className="text-on-surface text-body-md">{report.summary}</p>}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
             <ThemeList
               icon="thumb_up"
