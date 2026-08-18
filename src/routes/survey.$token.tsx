@@ -46,13 +46,17 @@ function SurveyPage() {
   const { token } = Route.useParams();
   const { data: invite } = useSuspenseQuery(inviteQuery(token));
 
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(invite.ratingHint ?? 0);
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [googleAsk, setGoogleAsk] = useState<{ url: string } | null>(null);
 
   const mutation = useMutation({
     mutationFn: () => submitSurveyFeedback({ data: { token, rating, message: message.trim() } }),
-    onSuccess: () => setSent(true),
+    onSuccess: (result) => {
+      setSent(true);
+      if (result.promptGoogle && result.googleReviewUrl) setGoogleAsk({ url: result.googleReviewUrl });
+    },
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Could not save your feedback"),
   });
@@ -81,9 +85,30 @@ function SurveyPage() {
     return (
       <Shell>
         <h1 className="font-headline-md text-headline-md text-on-surface">Thank you!</h1>
-        <p className="text-on-surface-variant text-body-md">
-          Your feedback is on its way to {invite.shopName}. They read every response.
-        </p>
+        {googleAsk ? (
+          <>
+            <p className="text-on-surface-variant text-body-md">
+              So glad you had a good visit. Would you share it publicly? A Google review helps{" "}
+              {invite.shopName} more than anything else.
+            </p>
+            <a
+              href={googleAsk.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="self-start bg-primary text-on-primary px-6 py-3 rounded font-bold text-label-md"
+            >
+              Review on Google
+            </a>
+            <p className="text-on-surface-variant text-body-sm">
+              No pressure — your feedback already reached the shop.
+            </p>
+          </>
+        ) : (
+          <p className="text-on-surface-variant text-body-md">
+            Your feedback is on its way to {invite.shopName}. They read every response, and someone
+            will follow up if anything needs fixing.
+          </p>
+        )}
       </Shell>
     );
   }
