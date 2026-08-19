@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useHydrated, useNavigate, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { session, user, loading, signOut } = useAuth();
+  const hydrated = useHydrated();
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -104,10 +105,14 @@ function AuthPage() {
             The Standing Chair
           </Link>
           <h1 className="mt-6 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
-            {session ? "You're already signed in" : mode === "sign_in" ? "Welcome back" : "Create your account"}
+            {hydrated && session
+              ? "You're already signed in"
+              : mode === "sign_in"
+                ? "Welcome back"
+                : "Create your account"}
           </h1>
           <p className="mt-2 text-on-surface-variant text-body-md">
-            {session
+            {hydrated && session
               ? "Continue where you left off, or sign out to use a different account."
               : mode === "sign_in"
                 ? "Sign in to book your next cut."
@@ -115,7 +120,7 @@ function AuthPage() {
           </p>
         </div>
 
-        {loading ? (
+        {!hydrated || loading ? (
           <div className="glass-panel rounded-xl p-8 text-center text-on-surface-variant">Loading…</div>
         ) : session ? (
           <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
