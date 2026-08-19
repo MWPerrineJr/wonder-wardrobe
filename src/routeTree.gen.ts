@@ -24,6 +24,7 @@ import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
 import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -110,6 +111,12 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedOwnerSubscribeRoute =
+  AuthenticatedOwnerSubscribeRouteImport.update({
+    id: '/owner_/subscribe',
+    path: '/owner/subscribe',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOwnerFeedbackRoute =
   AuthenticatedOwnerFeedbackRouteImport.update({
     id: '/owner_/feedback',
@@ -183,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
+  '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
@@ -207,6 +215,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
+  '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
@@ -234,6 +243,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
+  '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/onboarding/owner'
     | '/owner/feedback'
+    | '/owner/subscribe'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/onboarding/owner'
     | '/owner/feedback'
+    | '/owner/subscribe'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
@@ -311,6 +323,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/onboarding/owner'
     | '/_authenticated/owner_/feedback'
+    | '/_authenticated/owner_/subscribe'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
@@ -445,6 +458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/owner_/subscribe': {
+      id: '/_authenticated/owner_/subscribe'
+      path: '/owner/subscribe'
+      fullPath: '/owner/subscribe'
+      preLoaderRoute: typeof AuthenticatedOwnerSubscribeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/owner_/feedback': {
       id: '/_authenticated/owner_/feedback'
       path: '/owner/feedback'
@@ -516,6 +536,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
   AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
   AuthenticatedOwnerFeedbackRoute: typeof AuthenticatedOwnerFeedbackRoute
+  AuthenticatedOwnerSubscribeRoute: typeof AuthenticatedOwnerSubscribeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -523,6 +544,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
   AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
   AuthenticatedOwnerFeedbackRoute: AuthenticatedOwnerFeedbackRoute,
+  AuthenticatedOwnerSubscribeRoute: AuthenticatedOwnerSubscribeRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
