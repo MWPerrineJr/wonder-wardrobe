@@ -369,7 +369,7 @@ type ShopSummary = {
   categories: ServiceCategory[] | null;
   prepay_mode?: string | null;
   deposit_percent?: number | null;
-};
+} & ShopLinkValues;
 
 
 function DetailsPanel({ shop }: { shop: ShopSummary }) {
