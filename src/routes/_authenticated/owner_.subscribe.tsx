@@ -88,7 +88,7 @@ function SubscribePage() {
             </h1>
             <p className="text-on-surface-variant text-body-md mt-1">
               {selected.name} is live and taking bookings for free. Add surveys and AI analytics
-              whenever you're ready.
+              whenever you're ready — or redeem a comp code if you have one.
             </p>
           </div>
           {shops.length > 1 && (
@@ -114,7 +114,7 @@ function SubscribePage() {
             onClick={() => navigate({ to: "/owner" })}
             className="text-label-md text-on-surface-variant hover:text-primary underline-offset-2 hover:underline"
           >
-            Continue on the free plan
+            Continue to dashboard
           </button>
         </div>
       </main>
