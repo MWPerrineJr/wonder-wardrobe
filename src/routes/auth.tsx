@@ -105,10 +105,14 @@ function AuthPage() {
             The Standing Chair
           </Link>
           <h1 className="mt-6 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
-            {session ? "You're already signed in" : mode === "sign_in" ? "Welcome back" : "Create your account"}
+            {hydrated && session
+              ? "You're already signed in"
+              : mode === "sign_in"
+                ? "Welcome back"
+                : "Create your account"}
           </h1>
           <p className="mt-2 text-on-surface-variant text-body-md">
-            {session
+            {hydrated && session
               ? "Continue where you left off, or sign out to use a different account."
               : mode === "sign_in"
                 ? "Sign in to book your next cut."
