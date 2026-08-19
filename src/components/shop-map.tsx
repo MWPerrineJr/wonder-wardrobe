@@ -33,38 +33,13 @@ export function ShopMap({ address, className = "" }: Props) {
     );
   }
 
-  if (query.isError) {
-    return (
-      <div
-        className={`rounded-xl border border-error bg-error-container p-6 text-on-error-container text-body-md flex flex-col gap-2 ${className}`}
-      >
-        <span className="font-label-md text-label-md text-on-error-container">
-          Unable to load map
-        </span>
-        <span>Something went wrong while preparing the map. Please try again.</span>
-      </div>
-    );
-  }
-
   const result = query.data;
 
-  if (result && !result.ok) {
-    return (
-      <div
-        className={`rounded-xl border border-error bg-error-container p-6 text-on-error-container text-body-md flex flex-col gap-2 ${className}`}
-      >
-        <span className="font-label-md text-label-md text-on-error-container">
-          Google Maps API key is missing
-        </span>
-        <span>
-          Set the <code className="font-semibold">GOOGLE_MAPS_API_KEY</code> secret in your
-          backend to display the map.
-        </span>
-      </div>
-    );
+  // Any failure (missing key, key restrictions, network) falls back to a clean
+  // address card so a broken Google error frame is never shown to customers.
+  if (query.isError || !result?.ok) {
+    return <MapFallback address={address} className={className} />;
   }
-
-  if (!result?.ok) return null;
 
   return (
     <div className={`rounded-xl overflow-hidden border border-border-subtle ${className}`}>
@@ -78,6 +53,30 @@ export function ShopMap({ address, className = "" }: Props) {
         referrerPolicy="no-referrer-when-downgrade"
         allowFullScreen
       />
+    </div>
+  );
+}
+
+function MapFallback({ address, className }: { address: string; className: string }) {
+  return (
+    <div
+      className={`rounded-xl border border-border-subtle bg-surface-container p-6 flex flex-col gap-3 ${className}`}
+    >
+      <div className="flex items-start gap-3">
+        <span className="material-symbols-outlined text-primary">location_on</span>
+        <div className="flex flex-col">
+          <span className="font-label-md text-label-md text-on-surface-variant">Location</span>
+          <span className="text-body-md text-on-surface">{address}</span>
+        </div>
+      </div>
+      <a
+        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+        target="_blank"
+        rel="noreferrer"
+        className="self-start bg-primary text-on-primary rounded-lg px-4 py-2 font-label-md text-label-md font-bold hover:opacity-90 transition-opacity"
+      >
+        View on Google Maps
+      </a>
     </div>
   );
 }
