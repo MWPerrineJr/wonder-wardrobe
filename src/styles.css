@@ -64,6 +64,17 @@
   --color-electric-blue: #4c6b63;
   --color-classic-gold: #8a7a5c;
 
+  /* Data-visualisation palette (warm stone + muted accents) */
+  --color-chart-1: #8a7a5c;
+  --color-chart-2: #4c6b63;
+  --color-chart-3: #b08968;
+  --color-chart-4: #7d8a9c;
+  --color-chart-5: #a3866f;
+  --color-chart-6: #c2b8a3;
+  --color-positive: #4c7a5a;
+  --color-negative: #b3261e;
+  --color-caution: #b98230;
+
   /* Fonts */
   --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-body-md: "Figtree", ui-sans-serif, system-ui, sans-serif;
