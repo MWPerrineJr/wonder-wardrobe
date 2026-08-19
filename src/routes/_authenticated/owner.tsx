@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { AccountNav } from "@/components/account-nav";
 import { PublicLinkCard } from "@/components/public-link-card";
 import { PaymentsPanel } from "@/components/payments-panel";
-import { ShopLinksPanel } from "@/components/shop-links-panel";
+import { ShopLinksPanel, type ShopLinkValues } from "@/components/shop-links-panel";
 import { SetupTour, useSetupTour, type TourStep } from "@/components/setup-tour";
 import { parseCustomLinks } from "@/lib/social-links";
 import { getMyShops, getShopDetail } from "@/lib/shops.functions";
