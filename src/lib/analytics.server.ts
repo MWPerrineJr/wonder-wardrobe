@@ -118,23 +118,45 @@ export async function buildShopAnalytics(
         .order("starts_at", { ascending: true })
         .limit(5000)
         .returns<BookingRow[]>(),
-      supabase.from("services").select(sel("id, name")).eq("shop_id", shopId),
-      supabase.from("providers").select(sel("id, display_name")).eq("shop_id", shopId),
+      supabase
+        .from("services")
+        .select(sel("id, name"))
+        .eq("shop_id", shopId)
+        .returns<{ id: string; name: string }[]>(),
+      supabase
+        .from("providers")
+        .select(sel("id, display_name"))
+        .eq("shop_id", shopId)
+        .returns<{ id: string; display_name: string }[]>(),
       supabase
         .from("shop_hours")
         .select(sel("weekday, open_time, close_time, is_closed"))
-        .eq("shop_id", shopId),
+        .eq("shop_id", shopId)
+        .returns<
+          { weekday: number; open_time: string; close_time: string; is_closed: boolean }[]
+        >(),
       supabase
         .from("survey_invites")
         .select(sel("id, provider_id, sent_at, responded_at, feedback_id, rating_hint"))
         .eq("shop_id", shopId)
-        .gte("sent_at", start.toISOString()),
+        .gte("sent_at", start.toISOString())
+        .returns<
+          {
+            id: string;
+            provider_id: string | null;
+            sent_at: string;
+            responded_at: string | null;
+            feedback_id: string | null;
+            rating_hint: number | null;
+          }[]
+        >(),
       supabase
         .from("bookings")
         .select(sel("customer_id"))
         .eq("shop_id", shopId)
         .lt("starts_at", start.toISOString())
-        .limit(5000),
+        .limit(5000)
+        .returns<{ customer_id: string }[]>(),
     ]);
 
   for (const res of [bookingsRes, servicesRes, providersRes, hoursRes, invitesRes, priorRes]) {
@@ -146,13 +168,10 @@ export async function buildShopAnalytics(
   const previous = all.filter((b) => new Date(b.starts_at) < start);
 
   const serviceNames = new Map(
-    ((servicesRes.data ?? []) as { id: string; name: string }[]).map((s) => [s.id, s.name]),
+    (servicesRes.data ?? []).map((s) => [s.id, s.name] as const),
   );
   const providerNames = new Map(
-    ((providersRes.data ?? []) as { id: string; display_name: string }[]).map((p) => [
-      p.id,
-      p.display_name,
-    ]),
+    (providersRes.data ?? []).map((p) => [p.id, p.display_name] as const),
   );
 
   // ---------- feedback (ratings + sentiment) ----------
@@ -177,7 +196,7 @@ export async function buildShopAnalytics(
   }
 
   const priorCustomers = new Set(
-    ((priorRes.data ?? []) as { customer_id: string }[]).map((r) => r.customer_id),
+    (priorRes.data ?? []).map((r) => r.customer_id),
   );
   const seenCustomers = new Set(priorCustomers);
 
@@ -228,11 +247,7 @@ export async function buildShopAnalytics(
 
   // ---------- per-provider ----------
   const providerRatings = new Map<string, number[]>();
-  for (const invite of (invitesRes.data ?? []) as {
-    provider_id: string | null;
-    feedback_id: string | null;
-    rating_hint: number | null;
-  }[]) {
+  for (const invite of invitesRes.data ?? []) {
     if (!invite.provider_id) continue;
     const rating =
       (invite.feedback_id ? feedbackRating.get(invite.feedback_id) : null) ?? invite.rating_hint;
@@ -267,7 +282,7 @@ export async function buildShopAnalytics(
     .sort((a, b) => b.revenueCents - a.revenueCents);
 
   // ---------- surveys ----------
-  const invites = (invitesRes.data ?? []) as { responded_at: string | null }[];
+  const invites = invitesRes.data ?? [];
   const rated = feedback.filter((f) => typeof f.rating === "number") as { rating: number }[];
   const ratingCounts = [1, 2, 3, 4, 5].map((rating) => ({
     rating,
@@ -293,12 +308,7 @@ export async function buildShopAnalytics(
 
   // ---------- utilization ----------
   const openHours = Array.from({ length: 7 }, (_, weekday) => {
-    const row = ((hoursRes.data ?? []) as {
-      weekday: number;
-      open_time: string;
-      close_time: string;
-      is_closed: boolean;
-    }[]).find((h) => h.weekday === weekday);
+    const row = (hoursRes.data ?? []).find((h) => h.weekday === weekday);
     if (!row || row.is_closed) return { weekday, openHour: 9, closeHour: 17, closed: true };
     return {
       weekday,
