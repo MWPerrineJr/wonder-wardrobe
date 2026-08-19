@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useHydrated, useNavigate, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { session, user, loading, signOut } = useAuth();
+  const hydrated = useHydrated();
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -115,7 +116,7 @@ function AuthPage() {
           </p>
         </div>
 
-        {loading ? (
+        {!hydrated || loading ? (
           <div className="glass-panel rounded-xl p-8 text-center text-on-surface-variant">Loading…</div>
         ) : session ? (
           <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
