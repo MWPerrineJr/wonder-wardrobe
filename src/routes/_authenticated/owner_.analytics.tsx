@@ -213,8 +213,14 @@ function AnalyticsContent({ shopId, days }: { shopId: string; days: number }) {
         <KpiCard
           label="Avg rating"
           value={kpis.avgRating.current === 0 ? "—" : kpis.avgRating.current.toFixed(2)}
-          trend={kpis.avgRating}
-          hint="No ratings yet"
+          // No survey responses in a period isn't a rating drop, so only compare
+          // when both periods actually have ratings.
+          trend={
+            kpis.avgRating.current > 0 && kpis.avgRating.previous > 0 ? kpis.avgRating : undefined
+          }
+          hint={
+            kpis.avgRating.current === 0 ? "No ratings yet" : "No ratings in the previous period"
+          }
         />
       </section>
 
