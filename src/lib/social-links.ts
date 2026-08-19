@@ -172,8 +172,10 @@ export function parseCustomLinks(value: unknown): CustomLink[] {
 }
 
 /** Absolute profile URLs suitable for JSON-LD sameAs. */
-export function sameAsUrls(links: Partial<ShopLinks> | null | undefined): string[] {
+export function sameAsUrls(
+  links: Partial<Omit<ShopLinks, "social_links">> | null | undefined,
+): string[] {
   if (!links) return [];
-  return PLATFORMS.map((p) => links[p.column as keyof ShopLinks])
+  return PLATFORMS.map((p) => links[p.column as keyof typeof links])
     .filter((v): v is string => typeof v === "string" && v.startsWith("https://"));
 }
