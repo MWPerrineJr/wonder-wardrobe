@@ -193,6 +193,18 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
     const shop = await requireOwnedShop(supabase, userId, data.shopId);
 
+    const { data: grant, error: grantErr } = await (supabase as any)
+      .from("comp_grants")
+      .select("shop_id")
+      .eq("shop_id", shop.id)
+      .maybeSingle();
+    if (grantErr) throw dbError(grantErr, "billing");
+    if (grant) {
+      throw new Error(
+        "This shop already has lifetime complimentary access — no subscription needed.",
+      );
+    }
+
     const { data: existing, error: exErr } = await supabase
       .from("subscriptions")
       .select("status")
