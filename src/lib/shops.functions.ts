@@ -33,7 +33,9 @@ export const getPublicShopBySlug = createServerFn({ method: "GET" })
     const supabase = publicClient();
     const { data: shop, error } = await supabase
       .from("shops")
-      .select("id, slug, name, description, address, cover_image_url, categories")
+      .select(
+        "id, slug, name, description, address, cover_image_url, categories, instagram_url, facebook_url, tiktok_url, x_url, youtube_url, website_url, contact_phone, whatsapp, social_links",
+      )
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw dbError(error, "shops");
@@ -65,7 +67,7 @@ export const getMyShops = createServerFn({ method: "GET" })
     const { data: shops, error } = await supabase
       .from("shops")
       .select(
-        "id, slug, name, description, address, cover_image_url, google_review_url, categories, prepay_mode, deposit_percent, created_at",
+        "id, slug, name, description, address, cover_image_url, google_review_url, categories, prepay_mode, deposit_percent, instagram_url, facebook_url, tiktok_url, x_url, youtube_url, website_url, contact_phone, whatsapp, social_links, created_at",
       )
       .eq("owner_id", userId)
       .order("created_at", { ascending: true });

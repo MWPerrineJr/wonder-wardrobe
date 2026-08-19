@@ -3,6 +3,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { getPublicShopBySlug } from "@/lib/shops.functions";
 import { ShopMap } from "@/components/shop-map";
+import { SocialLinks } from "@/components/social-links";
+import { sameAsUrls } from "@/lib/social-links";
 import { BookingPanel } from "@/components/booking-panel";
 import { FeedbackForm } from "@/components/feedback-form";
 import { getBookingContext } from "@/lib/booking.functions";
@@ -164,6 +166,27 @@ function ShopPage() {
             </div>
           </div>
         </section>
+
+        <SocialLinks shop={shop} shopName={shop.name} />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "HealthAndBeautyBusiness",
+              name: shop.name,
+              ...(shop.description ? { description: shop.description } : {}),
+              ...(shop.address ? { address: shop.address } : {}),
+              ...(shop.cover_image_url?.startsWith("https://")
+                ? { image: shop.cover_image_url }
+                : {}),
+              ...(shop.contact_phone ? { telephone: shop.contact_phone } : {}),
+              ...(shop.website_url ? { url: shop.website_url } : {}),
+              sameAs: sameAsUrls(shop),
+            }),
+          }}
+        />
 
         {shop.address && (
           <section className="flex flex-col gap-3">

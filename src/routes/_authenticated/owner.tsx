@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { AccountNav } from "@/components/account-nav";
 import { PublicLinkCard } from "@/components/public-link-card";
 import { PaymentsPanel } from "@/components/payments-panel";
+import { ShopLinksPanel, type ShopLinkValues } from "@/components/shop-links-panel";
+import { SetupTour, useSetupTour, type TourStep } from "@/components/setup-tour";
+import { parseCustomLinks } from "@/lib/social-links";
 import { getMyShops, getShopDetail } from "@/lib/shops.functions";
 import {
   createService,
@@ -65,6 +68,7 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 function OwnerPage() {
   const { data: shops } = useSuspenseQuery(myShopsQuery);
   const [selectedId, setSelectedId] = useState<string | null>(shops[0]?.id ?? null);
+  const [tab, setTab] = useState("overview");
 
   if (shops.length === 0) {
     return (
@@ -88,6 +92,12 @@ function OwnerPage() {
   }
 
   const selected = shops.find((s) => s.id === selectedId) ?? shops[0];
+  const tour = useSetupTour(selected?.id ?? "none");
+  const steps = buildTourSteps(selected);
+
+  useEffect(() => {
+    if (tour.active) setTab(steps[Math.min(tour.step, steps.length - 1)].tab);
+  }, [tour.active, tour.step, steps]);
 
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen">
@@ -142,15 +152,25 @@ function OwnerPage() {
               ))}
             </select>
           )}
+
+          <button
+            type="button"
+            onClick={tour.start}
+            className="bg-surface border border-border-subtle text-on-surface rounded-lg px-4 py-2 hover:border-primary transition-colors font-label-md self-start"
+          >
+            <Icon name="school" className="text-[16px] mr-1 align-middle" />
+            Take the setup tour
+          </button>
         </div>
 
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="bg-surface border border-border-subtle">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="details">Shop details</TabsTrigger>
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="hours">Hours</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="links">Links</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 flex flex-col gap-6">
@@ -159,7 +179,26 @@ function OwnerPage() {
               <StatCard icon="content_cut" label="Active services" value={selected.services_count} />
               <StatCard icon="groups" label="Team providers" value={selected.providers_count} />
             </section>
-            <PublicLinkCard slug={selected.slug} shopName={selected.name} />
+            <div data-tour="public-link">
+              <PublicLinkCard slug={selected.slug} shopName={selected.name} />
+            </div>
+            <div data-tour="growth" className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-wrap items-center gap-3 shadow-sm">
+              <span className="text-on-surface-variant text-body-md flex-grow">
+                Analytics and AI feedback reports live on the paid plan.
+              </span>
+              <Link
+                to="/owner/analytics"
+                className="bg-surface border border-border-subtle text-on-surface rounded-lg px-4 py-2 hover:border-primary transition-colors font-label-md"
+              >
+                Analytics
+              </Link>
+              <Link
+                to="/owner/feedback"
+                className="bg-surface border border-border-subtle text-on-surface rounded-lg px-4 py-2 hover:border-primary transition-colors font-label-md"
+              >
+                Feedback
+              </Link>
+            </div>
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/shop/$slug"
@@ -179,28 +218,130 @@ function OwnerPage() {
           </TabsContent>
 
           <TabsContent value="details" className="mt-6">
-            <DetailsPanel shop={selected} />
+            <div data-tour="details">
+              <DetailsPanel shop={selected} />
+            </div>
           </TabsContent>
 
           <TabsContent value="services" className="mt-6">
-            <ServicesPanel shopId={selected.id} />
+            <div data-tour="services">
+              <ServicesPanel shopId={selected.id} />
+            </div>
           </TabsContent>
 
           <TabsContent value="hours" className="mt-6">
-            <HoursPanel shopId={selected.id} />
+            <div data-tour="hours">
+              <HoursPanel shopId={selected.id} />
+            </div>
           </TabsContent>
 
           <TabsContent value="payments" className="mt-6">
-            <PaymentsPanel
-              shopId={selected.id}
-              prepayMode={(selected.prepay_mode ?? "off") as "off" | "deposit" | "full"}
-              depositPercent={selected.deposit_percent ?? 25}
-            />
+            <div data-tour="payments">
+              <PaymentsPanel
+                shopId={selected.id}
+                prepayMode={(selected.prepay_mode ?? "off") as "off" | "deposit" | "full"}
+                depositPercent={selected.deposit_percent ?? 25}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="links" className="mt-6">
+            <div data-tour="links">
+              <ShopLinksPanel shopId={selected.id} shopName={selected.name} shop={selected} />
+            </div>
           </TabsContent>
         </Tabs>
       </main>
+
+      {tour.active && (
+        <SetupTour
+          steps={steps}
+          step={tour.step}
+          onStep={tour.goTo}
+          onDismiss={tour.dismiss}
+          onComplete={tour.complete}
+        />
+      )}
     </div>
   );
+}
+
+function buildTourSteps(shop: ShopSummary & { services_count?: number }): TourStep[] {
+  const detailsDone = !!shop.description && !!shop.address && !!shop.cover_image_url;
+  const categoriesDone = (shop.categories ?? []).length > 0;
+  const servicesDone = (shop.services_count ?? 0) > 0;
+  const prepayDone = (shop.prepay_mode ?? "off") !== "off";
+  const linksDone =
+    !!shop.instagram_url ||
+    !!shop.facebook_url ||
+    !!shop.tiktok_url ||
+    !!shop.x_url ||
+    !!shop.youtube_url ||
+    !!shop.website_url ||
+    !!shop.contact_phone ||
+    !!shop.whatsapp ||
+    parseCustomLinks(shop.social_links).length > 0;
+
+  return [
+    {
+      id: "details",
+      tab: "details",
+      title: "Start with your shop details",
+      body: "Your name, a short description, your address and a cover photo. This is the first thing clients see.",
+      status: detailsDone ? "Details look complete" : "Description, address or cover photo still missing",
+      done: detailsDone,
+    },
+    {
+      id: "details",
+      tab: "details",
+      title: "Pick your categories",
+      body: "Tick every service type you offer — hair, nails, waxing, massage and more. Categories are how clients find you in the marketplace.",
+      status: categoriesDone ? "Categories selected" : "No categories selected yet",
+      done: categoriesDone,
+    },
+    {
+      id: "services",
+      tab: "services",
+      title: "Add your service menu",
+      body: "Each service needs a name, how long it takes and what it costs. Durations drive the booking slots clients can pick.",
+      status: servicesDone ? `${shop.services_count} active service(s)` : "No active services yet",
+      done: servicesDone,
+    },
+    {
+      id: "hours",
+      tab: "hours",
+      title: "Set your weekly hours",
+      body: "Opening and closing times per day, and mark the days you're closed. Clients can only book inside these hours.",
+    },
+    {
+      id: "payments",
+      tab: "payments",
+      title: "Get paid up front",
+      body: "Connect payouts, then choose whether clients pay a deposit or the full amount when they book. It cuts no-shows dramatically.",
+      status: prepayDone ? "Prepayment is on" : "Prepayment is off",
+      done: prepayDone,
+    },
+    {
+      id: "links",
+      tab: "links",
+      title: "Add your social and contact links",
+      body: "Instagram, Facebook, TikTok, X, YouTube, your website, phone and WhatsApp — plus up to 5 custom links. They show as buttons on your public page.",
+      status: linksDone ? "Links added" : "No links added yet",
+      done: linksDone,
+    },
+    {
+      id: "public-link",
+      tab: "overview",
+      title: "Share your page",
+      body: "This is the link you hand to clients. Copy it into your bio, or download the QR code to print on a window decal or a card.",
+    },
+    {
+      id: "growth",
+      tab: "overview",
+      title: "Then watch it grow",
+      body: "Analytics shows sales per service and provider, busiest hours and repeat clients. Feedback collects reviews after every appointment and summarises what clients love or want fixed.",
+    },
+  ];
 }
 
 function StatCard({ icon, label, value }: { icon: string; label: string; value: number }) {
@@ -228,7 +369,7 @@ type ShopSummary = {
   categories: ServiceCategory[] | null;
   prepay_mode?: string | null;
   deposit_percent?: number | null;
-};
+} & ShopLinkValues;
 
 
 function DetailsPanel({ shop }: { shop: ShopSummary }) {

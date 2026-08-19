@@ -4,6 +4,12 @@ import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { categorySchema, type ServiceCategory } from "@/lib/categories";
+import {
+  normalizeCustomLinks,
+  normalizePhone,
+  normalizeSocial,
+  normalizeWhatsapp,
+} from "@/lib/social-links";
 
 const CreateShopInput = z.object({
   name: z.string().min(2).max(80),
@@ -115,6 +121,53 @@ const UpdateShopInput = z.object({
       .or(z.literal("")),
   }),
 });
+
+const ShopLinksInput = z.object({
+  shopId: z.string().uuid(),
+  links: z.object({
+    instagram: z.string().max(300).default(""),
+    facebook: z.string().max(300).default(""),
+    tiktok: z.string().max(300).default(""),
+    x: z.string().max(300).default(""),
+    youtube: z.string().max(300).default(""),
+    website: z.string().max(300).default(""),
+    contact_phone: z.string().max(30).default(""),
+    whatsapp: z.string().max(30).default(""),
+    custom: z
+      .array(z.object({ label: z.string().max(30), url: z.string().max(300) }))
+      .max(5)
+      .default([]),
+  }),
+});
+
+export const updateShopLinks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => ShopLinksInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const l = data.links;
+    const patch = {
+      instagram_url: normalizeSocial("instagram", l.instagram),
+      facebook_url: normalizeSocial("facebook", l.facebook),
+      tiktok_url: normalizeSocial("tiktok", l.tiktok),
+      x_url: normalizeSocial("x", l.x),
+      youtube_url: normalizeSocial("youtube", l.youtube),
+      website_url: normalizeSocial("website", l.website),
+      contact_phone: normalizePhone(l.contact_phone),
+      whatsapp: normalizeWhatsapp(l.whatsapp),
+      social_links: normalizeCustomLinks(l.custom.filter((c) => c.label.trim() || c.url.trim())),
+    };
+    const { data: saved, error } = await context.supabase
+      .from("shops")
+      .update(patch)
+      .eq("id", data.shopId)
+      .eq("owner_id", context.userId)
+      .select(
+        "id, instagram_url, facebook_url, tiktok_url, x_url, youtube_url, website_url, contact_phone, whatsapp, social_links, updated_at",
+      )
+      .single();
+    if (error) throw dbError(error, "owner");
+    return saved;
+  });
 
 
 export const updateShop = createServerFn({ method: "POST" })
