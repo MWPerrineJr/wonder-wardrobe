@@ -37,10 +37,17 @@ const portalInput = z.object({
   returnUrl: z.string().url().optional(),
 });
 
+const redeemInput = z.object({
+  shopId: z.string().uuid(),
+  code: z.string().trim().min(3).max(64),
+});
+
 export const TRIAL_DAYS = 30;
 
 export type BillingStatus = {
   hasAnalytics: boolean;
+  lifetime: boolean;
+  lifetimeSince: string | null;
   status: string | null;
   priceId: string | null;
   currentPeriodEnd: string | null;
@@ -58,6 +65,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
       { data: active, error: fnErr },
       { data: sub, error: subErr },
       { count: providerCount, error: provErr },
+      { data: grant, error: grantErr },
     ] = await Promise.all([
       supabase.rpc("shop_has_active_analytics", {
         _shop_id: data.shopId,
@@ -76,19 +84,51 @@ export const getBillingStatus = createServerFn({ method: "GET" })
         .select("id", { count: "exact", head: true })
         .eq("shop_id", data.shopId)
         .eq("is_active", true),
+      (supabase as any)
+        .from("comp_grants")
+        .select("redeemed_at")
+        .eq("shop_id", data.shopId)
+        .maybeSingle(),
     ]);
     if (fnErr) throw dbError(fnErr, "billing");
     if (subErr) throw dbError(subErr, "billing");
     if (provErr) throw dbError(provErr, "billing");
+    if (grantErr) throw dbError(grantErr, "billing");
 
     return {
       hasAnalytics: Boolean(active),
+      lifetime: Boolean(grant),
+      lifetimeSince: (grant as { redeemed_at?: string } | null)?.redeemed_at ?? null,
       status: sub?.status ?? null,
       priceId: sub?.price_id ?? null,
       currentPeriodEnd: sub?.current_period_end ?? null,
       cancelAtPeriodEnd: sub?.cancel_at_period_end ?? false,
       providerCount: providerCount ?? 0,
     };
+  });
+
+/** Redeem a complimentary lifetime-access code for a shop the caller owns. */
+export const redeemCompCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => redeemInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true } | { error: string }> => {
+    const { userId, supabase } = context;
+
+    await requireOwnedShop(supabase, userId, data.shopId);
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: outcome, error } = await (supabaseAdmin as any).rpc("redeem_comp_code", {
+      _shop_id: data.shopId,
+      _code: data.code.toUpperCase(),
+      _user_id: userId,
+    });
+    if (error) throw dbError(error, "billing");
+
+    if (outcome === "ok") return { ok: true };
+    if (outcome === "already_granted")
+      return { error: "This shop already has lifetime complimentary access." };
+    if (outcome === "not_owner") return { error: "You don't own this shop." };
+    return { error: "That code isn't valid or has already been used." };
   });
 
 /** Owner check through the caller's own RLS-scoped client. */
