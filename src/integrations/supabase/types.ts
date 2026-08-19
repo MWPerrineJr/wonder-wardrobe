@@ -547,50 +547,77 @@ export type Database = {
         Row: {
           address: string | null
           categories: Database["public"]["Enums"]["service_category"][]
+          contact_phone: string | null
           cover_image_url: string | null
           created_at: string
           deposit_percent: number
           description: string | null
+          facebook_url: string | null
           google_review_url: string | null
           id: string
+          instagram_url: string | null
           logo_url: string | null
           name: string
           owner_id: string
           prepay_mode: string
           slug: string
+          social_links: Json
+          tiktok_url: string | null
           updated_at: string
+          website_url: string | null
+          whatsapp: string | null
+          x_url: string | null
+          youtube_url: string | null
         }
         Insert: {
           address?: string | null
           categories?: Database["public"]["Enums"]["service_category"][]
+          contact_phone?: string | null
           cover_image_url?: string | null
           created_at?: string
           deposit_percent?: number
           description?: string | null
+          facebook_url?: string | null
           google_review_url?: string | null
           id?: string
+          instagram_url?: string | null
           logo_url?: string | null
           name: string
           owner_id: string
           prepay_mode?: string
           slug: string
+          social_links?: Json
+          tiktok_url?: string | null
           updated_at?: string
+          website_url?: string | null
+          whatsapp?: string | null
+          x_url?: string | null
+          youtube_url?: string | null
         }
         Update: {
           address?: string | null
           categories?: Database["public"]["Enums"]["service_category"][]
+          contact_phone?: string | null
           cover_image_url?: string | null
           created_at?: string
           deposit_percent?: number
           description?: string | null
+          facebook_url?: string | null
           google_review_url?: string | null
           id?: string
+          instagram_url?: string | null
           logo_url?: string | null
           name?: string
           owner_id?: string
           prepay_mode?: string
           slug?: string
+          social_links?: Json
+          tiktok_url?: string | null
           updated_at?: string
+          website_url?: string | null
+          whatsapp?: string | null
+          x_url?: string | null
+          youtube_url?: string | null
         }
         Relationships: []
       }
