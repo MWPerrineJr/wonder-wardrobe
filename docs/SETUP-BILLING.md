@@ -16,6 +16,34 @@
 One subscription per shop. Gate any future analytics feature with the same
 `shop_has_active_analytics()` check.
 
+## Lifetime complimentary access (comp codes)
+
+Some shops get paid features free forever — no subscription, no expiry, no
+provider limit.
+
+- `public.comp_codes` — the codes you hand out (`code`, `note`,
+  `max_redemptions`, `redeemed_count`, `expires_at`, `is_active`). Not readable
+  or writable from the client at all; RLS is on with no policies.
+- `public.comp_grants` — one row per shop that has lifetime access. Owners can
+  read their own row; only server code writes it.
+- `shop_has_active_analytics()` returns true whenever a `comp_grants` row
+  exists, so comp access works in test and live mode and every gated surface
+  (Feedback Intelligence, Analytics, surveys) honours it automatically.
+- `redeem_comp_code(shop_id, code, user_id)` is a security-definer function
+  granted only to `service_role`; `redeemCompCode` in
+  `src/lib/billing.functions.ts` calls it after verifying shop ownership.
+- Owners redeem in the "Have a comp code?" field on `/owner/subscribe` and in
+  the upgrade panel.
+
+To create a code, ask for one and it gets inserted:
+
+```sql
+INSERT INTO public.comp_codes (code, note, max_redemptions, expires_at)
+VALUES ('FOUNDER-7QK2M9', 'Beta partner', 1, NULL);
+```
+
+Revoke access by deleting the shop's `comp_grants` row.
+
 ## How it is wired
 
 - Products/prices live in the built-in payments catalog with stable ids

@@ -1,10 +1,15 @@
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { createCheckoutSession, createPortalSession, getBillingStatus } from "@/lib/billing.functions";
+import {
+  createCheckoutSession,
+  createPortalSession,
+  getBillingStatus,
+  redeemCompCode,
+} from "@/lib/billing.functions";
 import {
   PLAN_TIERS,
   getStripe,
@@ -47,6 +52,10 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
   const providerCount = status?.providerCount ?? 0;
   const recommended = tierForProviderCount(providerCount);
   const selectedTier = PLAN_TIERS.find((t) => t.id === (tierId ?? recommended)) ?? PLAN_TIERS[0];
+
+  if (status?.lifetime) {
+    return <LifetimeAccessPanel since={status.lifetimeSince} hasSubscription={Boolean(status.status)} shopId={shopId} />;
+  }
 
   return (
     <section className="flex flex-col gap-6">
@@ -133,12 +142,95 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
         <ManageBillingButton shopId={shopId} label="Already subscribed? Manage billing" />
       </div>
 
+      <CompCodeForm shopId={shopId} />
+
       {checkoutPriceId && (
         <div className="bg-surface border border-border-subtle rounded-xl p-4 shadow-sm">
           <CheckoutForm shopId={shopId} priceId={checkoutPriceId} />
         </div>
       )}
     </section>
+  );
+}
+
+function LifetimeAccessPanel({
+  since,
+  hasSubscription,
+  shopId,
+}: {
+  since: string | null;
+  hasSubscription: boolean;
+  shopId: string;
+}) {
+  return (
+    <section className="flex flex-col gap-6">
+      <div className="bg-surface border-2 border-primary rounded-xl p-8 shadow-sm flex flex-col items-center text-center gap-3">
+        <Icon name="workspace_premium" className="text-[40px] text-primary" />
+        <h2 className="font-headline-md text-headline-md text-on-surface">
+          Lifetime access — complimentary
+        </h2>
+        <p className="text-on-surface-variant text-body-md max-w-xl">
+          Every paid feature is unlocked for this shop, for any number of providers, with nothing to
+          pay and no renewal date
+          {since ? ` (active since ${new Date(since).toLocaleDateString()}).` : "."}
+        </p>
+        <div className="text-left">
+          <FeatureList items={PAID_FEATURES} />
+        </div>
+      </div>
+      {hasSubscription && (
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-label-md text-on-surface-variant text-center">
+            You still have a paid subscription on file. Cancel it so you're not charged — your access
+            stays either way.
+          </p>
+          <ManageBillingButton shopId={shopId} label="Manage billing" />
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function CompCodeForm({ shopId }: { shopId: string }) {
+  const [code, setCode] = useState("");
+  const queryClient = useQueryClient();
+
+  const redeem = useMutation({
+    mutationFn: async () => {
+      const result = await redeemCompCode({ data: { shopId, code: code.trim() } });
+      if ("error" in result) throw new Error(result.error);
+      return result;
+    },
+    onSuccess: () => {
+      toast.success("Lifetime access unlocked.");
+      setCode("");
+      void queryClient.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <form
+      className="flex flex-col sm:flex-row items-center justify-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (code.trim()) redeem.mutate();
+      }}
+    >
+      <label htmlFor="comp-code" className="text-label-md text-on-surface-variant">
+        Have a comp code?
+      </label>
+      <input
+        id="comp-code"
+        value={code}
+        onChange={(e) => setCode(e.target.value.toUpperCase())}
+        placeholder="FOUNDER-XXXXXX"
+        className="bg-surface border border-border-subtle rounded-lg px-3 py-2 text-on-surface focus:border-primary focus:outline-none uppercase tracking-wide"
+      />
+      <Button type="submit" variant="outline" disabled={redeem.isPending || !code.trim()}>
+        {redeem.isPending ? "Checking…" : "Redeem"}
+      </Button>
+    </form>
   );
 }
 

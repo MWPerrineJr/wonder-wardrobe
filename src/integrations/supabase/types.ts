@@ -126,6 +126,81 @@ export type Database = {
           },
         ]
       }
+      comp_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_redemptions: number
+          note: string | null
+          redeemed_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_redemptions?: number
+          note?: string | null
+          redeemed_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_redemptions?: number
+          note?: string | null
+          redeemed_count?: number
+        }
+        Relationships: []
+      }
+      comp_grants: {
+        Row: {
+          code_id: string | null
+          created_at: string
+          id: string
+          redeemed_at: string
+          redeemed_by: string | null
+          shop_id: string
+        }
+        Insert: {
+          code_id?: string | null
+          created_at?: string
+          id?: string
+          redeemed_at?: string
+          redeemed_by?: string | null
+          shop_id: string
+        }
+        Update: {
+          code_id?: string | null
+          created_at?: string
+          id?: string
+          redeemed_at?: string
+          redeemed_by?: string | null
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_grants_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "comp_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comp_grants_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_feedback: {
         Row: {
           created_at: string
@@ -713,6 +788,10 @@ export type Database = {
           shop_id: string
           shop_name: string
         }[]
+      }
+      redeem_comp_code: {
+        Args: { _code: string; _shop_id: string; _user_id: string }
+        Returns: string
       }
       shop_has_active_analytics: {
         Args: { _env?: string; _shop_id: string }
