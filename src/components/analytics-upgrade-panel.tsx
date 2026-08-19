@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { createCheckoutSession, createPortalSession, getBillingStatus } from "@/lib/billing.functions";
 import {
   PLAN_TIERS,
-  TRIAL_DAYS,
   getStripe,
   getStripeEnvironment,
   tierForProviderCount,
