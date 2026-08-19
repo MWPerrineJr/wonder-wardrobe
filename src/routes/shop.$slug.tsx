@@ -3,6 +3,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { getPublicShopBySlug } from "@/lib/shops.functions";
 import { ShopMap } from "@/components/shop-map";
+import { SocialLinks } from "@/components/social-links";
+import { sameAsLinks } from "@/lib/social-links";
 import { BookingPanel } from "@/components/booking-panel";
 import { FeedbackForm } from "@/components/feedback-form";
 import { getBookingContext } from "@/lib/booking.functions";
@@ -164,6 +166,8 @@ function ShopPage() {
             </div>
           </div>
         </section>
+
+        <SocialLinks shop={shop} shopName={shop.name} />
 
         {shop.address && (
           <section className="flex flex-col gap-3">
