@@ -20,7 +20,14 @@ const statusInput = z.object({
 const checkoutInput = z.object({
   shopId: z.string().uuid(),
   environment: envSchema,
-  priceId: z.enum(["analytics_monthly", "analytics_yearly"]),
+  priceId: z.enum([
+    "analytics_monthly",
+    "analytics_yearly",
+    "analytics_team_monthly",
+    "analytics_team_yearly",
+    "analytics_enterprise_monthly",
+    "analytics_enterprise_yearly",
+  ]),
   returnUrl: z.string().url(),
 });
 
@@ -38,6 +45,7 @@ export type BillingStatus = {
   priceId: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  providerCount: number;
 };
 
 export const getBillingStatus = createServerFn({ method: "GET" })
@@ -46,7 +54,11 @@ export const getBillingStatus = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<BillingStatus> => {
     const { supabase } = context;
 
-    const [{ data: active, error: fnErr }, { data: sub, error: subErr }] = await Promise.all([
+    const [
+      { data: active, error: fnErr },
+      { data: sub, error: subErr },
+      { count: providerCount, error: provErr },
+    ] = await Promise.all([
       supabase.rpc("shop_has_active_analytics", {
         _shop_id: data.shopId,
         _env: data.environment,
@@ -59,9 +71,15 @@ export const getBillingStatus = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      supabase
+        .from("providers")
+        .select("id", { count: "exact", head: true })
+        .eq("shop_id", data.shopId)
+        .eq("is_active", true),
     ]);
     if (fnErr) throw dbError(fnErr, "billing");
     if (subErr) throw dbError(subErr, "billing");
+    if (provErr) throw dbError(provErr, "billing");
 
     return {
       hasAnalytics: Boolean(active),
@@ -69,6 +87,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
       priceId: sub?.price_id ?? null,
       currentPeriodEnd: sub?.current_period_end ?? null,
       cancelAtPeriodEnd: sub?.cancel_at_period_end ?? false,
+      providerCount: providerCount ?? 0,
     };
   });
 

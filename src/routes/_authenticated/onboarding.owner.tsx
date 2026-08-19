@@ -91,7 +91,7 @@ function OnboardingOwnerPage() {
         },
       });
       toast.success(`${shop.name} is live. Welcome, owner.`);
-      navigate({ to: "/owner" });
+      navigate({ to: "/owner/subscribe" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not create shop");
     } finally {
