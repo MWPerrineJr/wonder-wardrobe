@@ -101,6 +101,9 @@ function OwnerPage() {
               <Link to="/owner" className="text-primary font-semibold">
                 Dashboard
               </Link>
+              <Link to="/owner/analytics" className="text-on-surface-variant hover:text-on-surface">
+                Analytics
+              </Link>
               <Link to="/owner/feedback" className="text-on-surface-variant hover:text-on-surface">
                 Feedback
               </Link>
