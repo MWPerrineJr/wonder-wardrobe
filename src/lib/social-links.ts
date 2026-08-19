@@ -82,6 +82,9 @@ export const PLATFORMS: {
 
 const stripAt = (value: string) => value.replace(/^@+/, "").replace(/^\/+|\/+$/g, "");
 
+/** "a Facebook" / "an Instagram" — keeps validation messages readable. */
+const article = (label: string) => (/^[AEIOU]/i.test(label) ? "an" : "a");
+
 function hostOf(url: string): string | null {
   try {
     return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
@@ -122,7 +125,7 @@ export function normalizeSocial(platform: SocialPlatform, raw: string): string |
   const host = hostOf(withScheme);
   if (!host) throw new Error("That link isn't a valid web address.");
   if (meta.hosts.length > 0 && !meta.hosts.some((h) => host === h || host.endsWith(`.${h}`))) {
-    throw new Error(`That link isn't a ${meta.label} address.`);
+    throw new Error(`That link isn't ${article(meta.label)} ${meta.label} address.`);
   }
   return withScheme;
 }
