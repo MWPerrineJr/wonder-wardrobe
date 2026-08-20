@@ -40,14 +40,6 @@ export function SubscriptionStatusCard({
   const [confirming, setConfirming] = useState(false);
   const queryClient = useQueryClient();
 
-  const cancellable = ["trialing", "active", "past_due"].includes(status.status ?? "");
-  if (!status.status || (!cancellable && !status.cancelAtPeriodEnd)) return null;
-
-  const tierId = tierForPriceId(status.priceId);
-  const tier = PLAN_TIERS.find((t) => t.id === tierId);
-  const yearly = status.priceId?.endsWith("_yearly");
-  const endsOn = formatDate(status.currentPeriodEnd);
-
   const mutate = useMutation({
     mutationFn: async (resume: boolean) => {
       const result = await cancelSubscription({
@@ -66,6 +58,15 @@ export function SubscriptionStatusCard({
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const cancellable = ["trialing", "active", "past_due"].includes(status.status ?? "");
+  if (!status.status || (!cancellable && !status.cancelAtPeriodEnd)) return null;
+
+  const tierId = tierForPriceId(status.priceId);
+  const tier = PLAN_TIERS.find((t) => t.id === tierId);
+  const yearly = status.priceId?.endsWith("_yearly");
+  const endsOn = formatDate(status.currentPeriodEnd);
+
 
   return (
     <div className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col gap-4">
@@ -149,7 +150,7 @@ export function SubscriptionStatusCard({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep my plan</AlertDialogCancel>
-            <AlertDialogAction onClick={() => mutate.mutate(true === false)}>
+            <AlertDialogAction onClick={() => mutate.mutate(false)}>
               Cancel subscription
             </AlertDialogAction>
           </AlertDialogFooter>
