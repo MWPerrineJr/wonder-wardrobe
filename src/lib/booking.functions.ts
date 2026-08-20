@@ -5,6 +5,7 @@ import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+import type { CancellationPolicy } from "@/lib/cancellation";
 
 function publicClient() {
   return createClient<Database>(
@@ -27,6 +28,7 @@ export type BookingContext = {
   services: Array<{ id: string; name: string; description: string | null; duration_minutes: number; price_cents: number; category: string | null }>;
   hours: Array<{ weekday: number; open_time: string; close_time: string; is_closed: boolean }>;
   prepay: { mode: "off" | "deposit" | "full"; depositPercent: number; enabled: boolean };
+  cancellation: CancellationPolicy;
 };
 
 /** Which payments environment this deployment charges in. */
@@ -52,7 +54,9 @@ export const getBookingContext = createServerFn({ method: "GET" })
     const supabase = publicClient();
     const { data: shop, error } = await supabase
       .from("shops")
-      .select("id, slug, name, prepay_mode, deposit_percent")
+      .select(
+        "id, slug, name, prepay_mode, deposit_percent, cancel_free_hours, late_cancel_fee_percent, reschedule_allowed, reschedule_min_hours",
+      )
       .eq("slug", data.slug)
       .maybeSingle();
     if (error) throw dbError(error, "booking");
@@ -102,6 +106,12 @@ export const getBookingContext = createServerFn({ method: "GET" })
         mode,
         depositPercent: shop.deposit_percent ?? 25,
         enabled: mode !== "off" && chargesEnabled,
+      },
+      cancellation: {
+        freeHours: shop.cancel_free_hours ?? 24,
+        lateFeePercent: shop.late_cancel_fee_percent ?? 50,
+        rescheduleAllowed: shop.reschedule_allowed ?? true,
+        rescheduleMinHours: shop.reschedule_min_hours ?? 24,
       },
     };
 
