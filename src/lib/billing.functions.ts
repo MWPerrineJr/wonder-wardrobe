@@ -42,6 +42,12 @@ const redeemInput = z.object({
   code: z.string().trim().min(3).max(64),
 });
 
+const cancelInput = z.object({
+  shopId: z.string().uuid(),
+  environment: envSchema,
+  resume: z.boolean().optional(),
+});
+
 export const TRIAL_DAYS = 30;
 
 export type BillingStatus = {
