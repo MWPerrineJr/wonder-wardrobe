@@ -10,6 +10,7 @@ import {
   createPortalSession,
   getBillingStatus,
   redeemCompCode,
+  type BillingStatus,
 } from "@/lib/billing.functions";
 import {
   PLAN_TIERS,
