@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { SubscriptionStatusCard } from "@/components/subscription-status-card";
 import {
   createCheckoutSession,
   createPortalSession,
@@ -55,6 +56,22 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
 
   if (status?.lifetime) {
     return <LifetimeAccessPanel since={status.lifetimeSince} hasSubscription={Boolean(status.status)} shopId={shopId} />;
+  }
+
+  const hasSubscription =
+    status && ["trialing", "active", "past_due"].includes(status.status ?? "");
+  if (status && (hasSubscription || (status.status && status.cancelAtPeriodEnd))) {
+    return (
+      <section className="flex flex-col gap-6">
+        <SubscriptionStatusCard shopId={shopId} status={status} />
+        <div className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm">
+          <p className="text-label-md text-on-surface uppercase tracking-wide mb-3">
+            What's included
+          </p>
+          <FeatureList items={PAID_FEATURES} />
+        </div>
+      </section>
+    );
   }
 
   return (
