@@ -44,6 +44,8 @@ export type Database = {
       bookings: {
         Row: {
           amount_paid_cents: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string
           customer_id: string
           customer_name: string | null
@@ -54,6 +56,7 @@ export type Database = {
           payment_status: string
           price_cents: number
           provider_id: string | null
+          refunded_cents: number
           service_id: string
           shop_id: string
           starts_at: string
@@ -64,6 +67,8 @@ export type Database = {
         }
         Insert: {
           amount_paid_cents?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           customer_id: string
           customer_name?: string | null
@@ -74,6 +79,7 @@ export type Database = {
           payment_status?: string
           price_cents: number
           provider_id?: string | null
+          refunded_cents?: number
           service_id: string
           shop_id: string
           starts_at: string
@@ -84,6 +90,8 @@ export type Database = {
         }
         Update: {
           amount_paid_cents?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           customer_id?: string
           customer_name?: string | null
@@ -94,6 +102,7 @@ export type Database = {
           payment_status?: string
           price_cents?: number
           provider_id?: string | null
+          refunded_cents?: number
           service_id?: string
           shop_id?: string
           starts_at?: string
@@ -546,6 +555,7 @@ export type Database = {
       shops: {
         Row: {
           address: string | null
+          cancel_free_hours: number
           categories: Database["public"]["Enums"]["service_category"][]
           contact_phone: string | null
           cover_image_url: string | null
@@ -556,10 +566,13 @@ export type Database = {
           google_review_url: string | null
           id: string
           instagram_url: string | null
+          late_cancel_fee_percent: number
           logo_url: string | null
           name: string
           owner_id: string
           prepay_mode: string
+          reschedule_allowed: boolean
+          reschedule_min_hours: number
           slug: string
           social_links: Json
           tiktok_url: string | null
@@ -571,6 +584,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          cancel_free_hours?: number
           categories?: Database["public"]["Enums"]["service_category"][]
           contact_phone?: string | null
           cover_image_url?: string | null
@@ -581,10 +595,13 @@ export type Database = {
           google_review_url?: string | null
           id?: string
           instagram_url?: string | null
+          late_cancel_fee_percent?: number
           logo_url?: string | null
           name: string
           owner_id: string
           prepay_mode?: string
+          reschedule_allowed?: boolean
+          reschedule_min_hours?: number
           slug: string
           social_links?: Json
           tiktok_url?: string | null
@@ -596,6 +613,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          cancel_free_hours?: number
           categories?: Database["public"]["Enums"]["service_category"][]
           contact_phone?: string | null
           cover_image_url?: string | null
@@ -606,10 +624,13 @@ export type Database = {
           google_review_url?: string | null
           id?: string
           instagram_url?: string | null
+          late_cancel_fee_percent?: number
           logo_url?: string | null
           name?: string
           owner_id?: string
           prepay_mode?: string
+          reschedule_allowed?: boolean
+          reschedule_min_hours?: number
           slug?: string
           social_links?: Json
           tiktok_url?: string | null
