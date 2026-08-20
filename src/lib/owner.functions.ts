@@ -110,6 +110,10 @@ const UpdateShopInput = z.object({
     categories: categorySchema.optional(),
     prepay_mode: z.enum(["off", "deposit", "full"]).optional(),
     deposit_percent: z.number().int().min(5).max(100).optional(),
+    cancel_free_hours: z.number().int().min(0).max(168).optional(),
+    late_cancel_fee_percent: z.number().int().min(0).max(100).optional(),
+    reschedule_allowed: z.boolean().optional(),
+    reschedule_min_hours: z.number().int().min(0).max(168).optional(),
     google_review_url: z
       .string()
       .trim()

@@ -8,8 +8,25 @@ import {
   getMyProfile,
   updateMyProfile,
   listMyBookings,
+  cancelMyBooking,
   type MyBooking,
 } from "@/lib/account.functions";
+import {
+  DEFAULT_CANCELLATION_POLICY,
+  formatMoney,
+  policySentences,
+  refundForCancellation,
+} from "@/lib/cancellation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const profileQuery = queryOptions({
   queryKey: ["account", "profile"],
@@ -239,6 +256,26 @@ function AccountPage() {
 }
 
 function BookingRow({ b }: { b: MyBooking }) {
+  const queryClient = useQueryClient();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const cancelFn = useServerFn(cancelMyBooking);
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelFn({ data: { bookingId: b.id } }),
+    onSuccess: (res) => {
+      const r = res as { refundCents?: number; feeCents?: number; refundError?: string | null };
+      if (r.refundError) {
+        toast.warning(`Appointment cancelled. Refund needs attention: ${r.refundError}`);
+      } else if ((r.refundCents ?? 0) > 0) {
+        toast.success(`Appointment cancelled. ${formatMoney(r.refundCents ?? 0)} refunded.`);
+      } else {
+        toast.success("Appointment cancelled.");
+      }
+      setConfirmOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["account", "bookings"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not cancel"),
+  });
+
   const start = new Date(b.starts_at);
   const dateStr = start.toLocaleDateString(undefined, {
     weekday: "short",
@@ -248,6 +285,10 @@ function BookingRow({ b }: { b: MyBooking }) {
   });
   const timeStr = start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   const price = b.price_cents != null ? `$${(b.price_cents / 100).toFixed(2)}` : null;
+  const policy = b.cancellation ?? DEFAULT_CANCELLATION_POLICY;
+  const canCancel = (b.status === "pending" || b.status === "confirmed") && start.getTime() > Date.now();
+  const paid = b.payment_status === "paid" ? (b.amount_paid_cents ?? 0) : 0;
+  const outcome = refundForCancellation(paid, b.starts_at, policy);
 
   const statusColor: Record<string, string> = {
     pending: "bg-amber-100 text-amber-900",
@@ -279,6 +320,11 @@ function BookingRow({ b }: { b: MyBooking }) {
               Payment pending
             </span>
           )}
+          {(b.refunded_cents ?? 0) > 0 && (
+            <span className="text-label-sm font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-900">
+              Refunded {formatMoney(b.refunded_cents ?? 0)}
+            </span>
+          )}
         </div>
         <div className="text-body-sm text-on-surface-variant mt-1">
           {dateStr} · {timeStr}
@@ -300,7 +346,53 @@ function BookingRow({ b }: { b: MyBooking }) {
             View shop
           </Link>
         ) : null}
+        {canCancel && (
+          <button
+            type="button"
+            onClick={() => setConfirmOpen(true)}
+            className="text-label-md text-on-surface-variant hover:text-error font-bold underline"
+          >
+            Cancel
+          </button>
+        )}
       </div>
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel this appointment?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="flex flex-col gap-2 text-left">
+                <span>
+                  {b.service?.name ?? "Service"} at {b.shop?.name ?? "the shop"} — {dateStr} ·{" "}
+                  {timeStr}
+                </span>
+                {paid > 0 ? (
+                  <span>
+                    {outcome.free
+                      ? `You're inside the free-cancellation window, so ${formatMoney(outcome.refundCents)} will be refunded in full.`
+                      : `This is a late cancellation: the shop keeps ${formatMoney(outcome.feeCents)} and ${formatMoney(outcome.refundCents)} will be refunded.`}
+                  </span>
+                ) : (
+                  <span>No prepayment was taken, so there is nothing to refund.</span>
+                )}
+                <span className="text-on-surface-variant">{policySentences(policy).join(" ")}</span>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep appointment</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                cancelMutation.mutate();
+              }}
+              disabled={cancelMutation.isPending}
+            >
+              {cancelMutation.isPending ? "Cancelling…" : "Cancel appointment"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </li>
   );
 }

@@ -240,7 +240,11 @@ function OwnerPage() {
               <PaymentsPanel
                 shopId={selected.id}
                 prepayMode={(selected.prepay_mode ?? "off") as "off" | "deposit" | "full"}
-                depositPercent={selected.deposit_percent ?? 25}
+                depositPercent={selected.deposit_percent ?? 50}
+                cancelFreeHours={selected.cancel_free_hours ?? 24}
+                lateCancelFeePercent={selected.late_cancel_fee_percent ?? 50}
+                rescheduleAllowed={selected.reschedule_allowed ?? true}
+                rescheduleMinHours={selected.reschedule_min_hours ?? 24}
               />
             </div>
           </TabsContent>
@@ -369,6 +373,10 @@ type ShopSummary = {
   categories: ServiceCategory[] | null;
   prepay_mode?: string | null;
   deposit_percent?: number | null;
+  cancel_free_hours?: number | null;
+  late_cancel_fee_percent?: number | null;
+  reschedule_allowed?: boolean | null;
+  reschedule_min_hours?: number | null;
 } & ShopLinkValues;
 
 

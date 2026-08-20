@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
 import { categoryLabel } from "@/lib/categories";
+import { DEFAULT_CANCELLATION_POLICY, policySentences } from "@/lib/cancellation";
 import {
   createBooking,
   getAvailableSlots,
@@ -360,6 +361,16 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
                 ? "You'll be taken to secure checkout to pay this shop. By booking, you agree to our cancellation policy."
                 : "By booking, you agree to our cancellation policy."}
             </p>
+            <div className="border border-border-subtle rounded-lg p-3 flex flex-col gap-1">
+              <span className="font-label-md text-label-md text-on-surface">
+                Cancellation policy
+              </span>
+              {policySentences(ctx.cancellation ?? DEFAULT_CANCELLATION_POLICY).map((line) => (
+                <span key={line} className="font-label-sm text-label-sm text-on-surface-variant">
+                  {line}
+                </span>
+              ))}
+            </div>
           </form>
         )}
       </section>
