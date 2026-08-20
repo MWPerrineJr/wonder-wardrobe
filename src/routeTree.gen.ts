@@ -26,6 +26,7 @@ import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
 import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
 import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
 import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authenticated/owner_.analytics'
@@ -124,6 +125,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCalendarEventRoute = ApiPublicCalendarEventRouteImport.update({
+  id: '/api/public/calendar-event',
+  path: '/api/public/calendar-event',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedOwnerSubscribeRoute =
   AuthenticatedOwnerSubscribeRouteImport.update({
     id: '/owner_/subscribe',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
+  '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
+  '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/_authenticated/owner_/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
+  '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
@@ -303,6 +312,7 @@ export interface FileRouteTypes {
     | '/owner/analytics'
     | '/owner/feedback'
     | '/owner/subscribe'
+    | '/api/public/calendar-event'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/owner/analytics'
     | '/owner/feedback'
     | '/owner/subscribe'
+    | '/api/public/calendar-event'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner_/analytics'
     | '/_authenticated/owner_/feedback'
     | '/_authenticated/owner_/subscribe'
+    | '/api/public/calendar-event'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
@@ -383,6 +395,7 @@ export interface RootRouteChildren {
   DemoIndexRoute: typeof DemoIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicCalendarEventRoute: typeof ApiPublicCalendarEventRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
   ApiPublicJobsBuildReportsRoute: typeof ApiPublicJobsBuildReportsRoute
   ApiPublicJobsEnrichFeedbackRoute: typeof ApiPublicJobsEnrichFeedbackRoute
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       path: '/.mcp/list-tools'
       fullPath: '/.mcp/list-tools'
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/calendar-event': {
+      id: '/api/public/calendar-event'
+      path: '/api/public/calendar-event'
+      fullPath: '/api/public/calendar-event'
+      preLoaderRoute: typeof ApiPublicCalendarEventRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/owner_/subscribe': {
@@ -650,6 +670,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoIndexRoute: DemoIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicCalendarEventRoute: ApiPublicCalendarEventRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,
   ApiPublicJobsBuildReportsRoute: ApiPublicJobsBuildReportsRoute,
   ApiPublicJobsEnrichFeedbackRoute: ApiPublicJobsEnrichFeedbackRoute,
