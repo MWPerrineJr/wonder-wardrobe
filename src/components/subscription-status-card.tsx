@@ -116,7 +116,7 @@ export function SubscriptionStatusCard({
           <Button
             className="font-bold"
             disabled={mutate.isPending}
-            onClick={() => mutate.mutate(false)}
+            onClick={() => mutate.mutate(true)}
           >
             {mutate.isPending ? "Working…" : "Resume subscription"}
           </Button>
