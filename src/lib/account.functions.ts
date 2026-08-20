@@ -3,6 +3,7 @@ import { z } from "zod";
 import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { refundForCancellation, type CancellationPolicy } from "@/lib/cancellation";
 
 export type MyProfile = {
   id: string;
@@ -20,10 +21,12 @@ export type MyBooking = {
   price_cents: number | null;
   payment_status: string | null;
   amount_paid_cents: number | null;
+  refunded_cents?: number | null;
   notes: string | null;
   shop: { id: string; name: string; slug: string | null } | null;
   service: { id: string; name: string; duration_minutes: number | null } | null;
   provider: { id: string; display_name: string | null } | null;
+  cancellation?: CancellationPolicy | null;
 };
 
 export const getMyProfile = createServerFn({ method: "GET" })
@@ -82,6 +85,19 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ bookingId: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+
+    // Read the booking (RLS scopes this to the caller) plus the shop's policy
+    // so the refund is computed from stored values, never from client input.
+    const { data: before, error: readErr } = await supabase
+      .from("bookings")
+      .select(
+        `id, starts_at, amount_paid_cents, payment_status, stripe_payment_intent_id,
+         shop:shops(cancel_free_hours, late_cancel_fee_percent)`,
+      )
+      .eq("id", data.bookingId)
+      .single();
+    if (readErr) throw dbError(readErr, "account");
+
     // Only status is sent; the DB trigger (restrict_customer_booking_update)
     // enforces that a customer can only move their own booking to
     // "cancelled" from "pending"/"confirmed" and cannot touch any other
@@ -93,7 +109,66 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       .select("id, status")
       .single();
     if (error) throw dbError(error, "account");
-    return saved;
+
+    const shopPolicy = (before as unknown as {
+      shop?: { cancel_free_hours?: number; late_cancel_fee_percent?: number } | null;
+    }).shop;
+    const policy: CancellationPolicy = {
+      freeHours: shopPolicy?.cancel_free_hours ?? 24,
+      lateFeePercent: shopPolicy?.late_cancel_fee_percent ?? 50,
+      rescheduleAllowed: true,
+      rescheduleMinHours: 24,
+    };
+    const outcome = refundForCancellation(
+      before.amount_paid_cents ?? 0,
+      before.starts_at,
+      policy,
+    );
+
+    const paid = before.payment_status === "paid" && (before.amount_paid_cents ?? 0) > 0;
+    if (!paid || outcome.refundCents <= 0) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("bookings")
+        .update({ cancelled_at: new Date().toISOString() })
+        .eq("id", before.id);
+      return { ...saved, refundCents: 0, feeCents: outcome.feeCents, refundError: null };
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const env = process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
+    let refundError: string | null = null;
+    let refunded = 0;
+    if (before.stripe_payment_intent_id) {
+      const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
+      try {
+        const stripe = createStripeClient(env);
+        await stripe.refunds.create({
+          payment_intent: before.stripe_payment_intent_id,
+          amount: outcome.refundCents,
+        });
+        refunded = outcome.refundCents;
+      } catch (e) {
+        refundError = getStripeErrorMessage(e);
+      }
+    } else {
+      refundError = "No payment on file to refund";
+    }
+
+    await supabaseAdmin
+      .from("bookings")
+      .update({
+        cancelled_at: new Date().toISOString(),
+        refunded_cents: refunded,
+        payment_status: refundError
+          ? "refund_failed"
+          : outcome.feeCents > 0
+            ? "partially_refunded"
+            : "refunded",
+      })
+      .eq("id", before.id);
+
+    return { ...saved, refundCents: refunded, feeCents: outcome.feeCents, refundError };
   });
 
 export const listMyBookings = createServerFn({ method: "GET" })
@@ -103,13 +178,37 @@ export const listMyBookings = createServerFn({ method: "GET" })
     const { data, error } = await supabase
       .from("bookings")
       .select(
-        `id, starts_at, ends_at, status, price_cents, payment_status, amount_paid_cents, notes,
-         shop:shops(id, name, slug),
+        `id, starts_at, ends_at, status, price_cents, payment_status, amount_paid_cents, refunded_cents, notes,
+         shop:shops(id, name, slug, cancel_free_hours, late_cancel_fee_percent, reschedule_allowed, reschedule_min_hours),
          service:services(id, name, duration_minutes),
          provider:providers(id, display_name)`,
       )
       .eq("customer_id", userId)
       .order("starts_at", { ascending: false });
     if (error) throw error;
-    return (data ?? []) as unknown as MyBooking[];
+    return (data ?? []).map((row) => {
+      const shop = (row as unknown as {
+        shop?: {
+          id: string;
+          name: string;
+          slug: string | null;
+          cancel_free_hours?: number;
+          late_cancel_fee_percent?: number;
+          reschedule_allowed?: boolean;
+          reschedule_min_hours?: number;
+        } | null;
+      }).shop;
+      return {
+        ...(row as unknown as MyBooking),
+        shop: shop ? { id: shop.id, name: shop.name, slug: shop.slug } : null,
+        cancellation: shop
+          ? {
+              freeHours: shop.cancel_free_hours ?? 24,
+              lateFeePercent: shop.late_cancel_fee_percent ?? 50,
+              rescheduleAllowed: shop.reschedule_allowed ?? true,
+              rescheduleMinHours: shop.reschedule_min_hours ?? 24,
+            }
+          : null,
+      } as MyBooking;
+    });
   });
