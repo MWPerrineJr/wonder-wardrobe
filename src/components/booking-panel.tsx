@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { categoryLabel } from "@/lib/categories";
 import { DEFAULT_CANCELLATION_POLICY, policySentences } from "@/lib/cancellation";
+import { AddToCalendar } from "@/components/add-to-calendar";
+import type { CalendarEvent } from "@/lib/calendar";
 import {
   createBooking,
   getAvailableSlots,
@@ -109,6 +111,24 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
   const canSubmit = !!user && !!serviceId && !!time && nameValid && phoneValid && !mutation.isPending;
 
   if (confirmed) {
+    const policy = ctx.cancellation ?? DEFAULT_CANCELLATION_POLICY;
+    const calendarEvent: CalendarEvent = {
+      title: `${confirmed.service?.name ?? "Appointment"} — ${confirmed.shop?.name ?? ctx.shop.name}`,
+      startsAt: confirmed.starts_at,
+      endsAt: confirmed.ends_at,
+      location: ctx.shop.address ?? null,
+      uid: confirmed.id,
+      description: [
+        confirmed.provider?.display_name ? `With ${confirmed.provider.display_name}` : null,
+        ...policySentences(policy),
+      ]
+        .filter(Boolean)
+        .join("\n"),
+      url:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/shop/${confirmed.shop?.slug ?? slug}`
+          : null,
+    };
     return (
       <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
         <h2 className="font-headline-md text-headline-md text-primary">Booking confirmed</h2>
@@ -122,10 +142,11 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           {confirmed.provider?.display_name ?? "No provider preference"} • {formatPrice(confirmed.price_cents)} •{" "}
           {confirmed.status}
         </p>
-        <div className="flex gap-3 mt-2">
+        <div className="flex flex-wrap gap-3 mt-2">
           <Link to="/account" className="bg-primary text-on-primary px-4 py-2 rounded font-bold text-label-md">
             View my bookings
           </Link>
+          <AddToCalendar event={calendarEvent} />
           <button
             type="button"
             onClick={() => setConfirmed(null)}

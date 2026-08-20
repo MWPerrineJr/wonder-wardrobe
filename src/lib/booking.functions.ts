@@ -23,7 +23,7 @@ function toInstant(date: string, time: string, tzOffsetMinutes: number) {
 }
 
 export type BookingContext = {
-  shop: { id: string; slug: string; name: string };
+  shop: { id: string; slug: string; name: string; address: string | null };
   providers: Array<{ id: string; display_name: string; avatar_url: string | null; specialties: string[] }>;
   services: Array<{ id: string; name: string; description: string | null; duration_minutes: number; price_cents: number; category: string | null }>;
   hours: Array<{ weekday: number; open_time: string; close_time: string; is_closed: boolean }>;
@@ -55,7 +55,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
     const { data: shop, error } = await supabase
       .from("shops")
       .select(
-        "id, slug, name, prepay_mode, deposit_percent, cancel_free_hours, late_cancel_fee_percent, reschedule_allowed, reschedule_min_hours",
+        "id, slug, name, address, prepay_mode, deposit_percent, cancel_free_hours, late_cancel_fee_percent, reschedule_allowed, reschedule_min_hours",
       )
       .eq("slug", data.slug)
       .maybeSingle();
@@ -98,7 +98,7 @@ export const getBookingContext = createServerFn({ method: "GET" })
     }
 
     return {
-      shop: { id: shop.id, slug: shop.slug, name: shop.name },
+      shop: { id: shop.id, slug: shop.slug, name: shop.name, address: shop.address ?? null },
       providers: providersRes.data ?? [],
       services: servicesRes.data ?? [],
       hours: hoursRes.data ?? [],

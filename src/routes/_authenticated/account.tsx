@@ -27,6 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AddToCalendar } from "@/components/add-to-calendar";
+import type { CalendarEvent } from "@/lib/calendar";
 
 const profileQuery = queryOptions({
   queryKey: ["account", "profile"],
@@ -289,6 +291,24 @@ function BookingRow({ b }: { b: MyBooking }) {
   const canCancel = (b.status === "pending" || b.status === "confirmed") && start.getTime() > Date.now();
   const paid = b.payment_status === "paid" ? (b.amount_paid_cents ?? 0) : 0;
   const outcome = refundForCancellation(paid, b.starts_at, policy);
+  const upcoming = start.getTime() > Date.now() && b.status !== "cancelled";
+  const calendarEvent: CalendarEvent = {
+    title: `${b.service?.name ?? "Appointment"} — ${b.shop?.name ?? "The Standing Chair"}`,
+    startsAt: b.starts_at,
+    endsAt: b.ends_at,
+    location: b.shop?.address ?? null,
+    uid: b.id,
+    description: [
+      b.provider?.display_name ? `With ${b.provider.display_name}` : null,
+      ...policySentences(policy),
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    url:
+      typeof window !== "undefined" && b.shop?.slug
+        ? `${window.location.origin}/shop/${b.shop.slug}`
+        : null,
+  };
 
   const statusColor: Record<string, string> = {
     pending: "bg-amber-100 text-amber-900",
@@ -335,8 +355,9 @@ function BookingRow({ b }: { b: MyBooking }) {
           {b.provider?.display_name ? ` · with ${b.provider.display_name}` : ""}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         {price ? <span className="font-bold text-on-surface">{price}</span> : null}
+        {upcoming && <AddToCalendar event={calendarEvent} variant="link" />}
         {b.shop?.slug ? (
           <Link
             to="/shop"

@@ -23,7 +23,7 @@ export type MyBooking = {
   amount_paid_cents: number | null;
   refunded_cents?: number | null;
   notes: string | null;
-  shop: { id: string; name: string; slug: string | null } | null;
+  shop: { id: string; name: string; slug: string | null; address?: string | null } | null;
   service: { id: string; name: string; duration_minutes: number | null } | null;
   provider: { id: string; display_name: string | null } | null;
   cancellation?: CancellationPolicy | null;
@@ -179,7 +179,7 @@ export const listMyBookings = createServerFn({ method: "GET" })
       .from("bookings")
       .select(
         `id, starts_at, ends_at, status, price_cents, payment_status, amount_paid_cents, refunded_cents, notes,
-         shop:shops(id, name, slug, cancel_free_hours, late_cancel_fee_percent, reschedule_allowed, reschedule_min_hours),
+         shop:shops(id, name, slug, address, cancel_free_hours, late_cancel_fee_percent, reschedule_allowed, reschedule_min_hours),
          service:services(id, name, duration_minutes),
          provider:providers(id, display_name)`,
       )
@@ -192,6 +192,7 @@ export const listMyBookings = createServerFn({ method: "GET" })
           id: string;
           name: string;
           slug: string | null;
+          address?: string | null;
           cancel_free_hours?: number;
           late_cancel_fee_percent?: number;
           reschedule_allowed?: boolean;
@@ -200,7 +201,9 @@ export const listMyBookings = createServerFn({ method: "GET" })
       }).shop;
       return {
         ...(row as unknown as MyBooking),
-        shop: shop ? { id: shop.id, name: shop.name, slug: shop.slug } : null,
+        shop: shop
+          ? { id: shop.id, name: shop.name, slug: shop.slug, address: shop.address ?? null }
+          : null,
         cancellation: shop
           ? {
               freeHours: shop.cancel_free_hours ?? 24,
