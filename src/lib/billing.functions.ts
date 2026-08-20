@@ -263,6 +263,64 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
 type PortalResult = { url: string } | { error: string };
 
+type CancelResult =
+  | { ok: true; cancelAtPeriodEnd: boolean; currentPeriodEnd: string | null }
+  | { error: string };
+
+/**
+ * Cancel (or un-cancel) the shop's analytics subscription at the end of the
+ * current paid period. Access continues until `current_period_end`; the
+ * webhook keeps the local row authoritative.
+ */
+export const cancelSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => cancelInput.parse(input))
+  .handler(async ({ data, context }): Promise<CancelResult> => {
+    const { userId, supabase } = context;
+
+    await requireOwnedShop(supabase, userId, data.shopId);
+
+    const { data: sub, error } = await supabase
+      .from("subscriptions")
+      .select("stripe_subscription_id, status")
+      .eq("shop_id", data.shopId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw dbError(error, "billing");
+    if (!sub?.stripe_subscription_id)
+      return { error: "There's no active subscription for this shop." };
+    if (!["trialing", "active", "past_due"].includes(sub.status))
+      return { error: "This subscription is no longer active." };
+
+    const resume = data.resume === true;
+
+    try {
+      const stripe = createStripeClient(data.environment);
+      const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
+        cancel_at_period_end: !resume,
+      });
+
+      const periodEnd = (updated as unknown as { current_period_end?: number })
+        .current_period_end;
+      const currentPeriodEnd = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
+
+      await supabase
+        .from("subscriptions")
+        .update({
+          cancel_at_period_end: !resume,
+          ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
+        })
+        .eq("shop_id", data.shopId)
+        .eq("environment", data.environment);
+
+      return { ok: true, cancelAtPeriodEnd: !resume, currentPeriodEnd };
+    } catch (err) {
+      return { error: getStripeErrorMessage(err) };
+    }
+  });
+
 export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => portalInput.parse(input))
