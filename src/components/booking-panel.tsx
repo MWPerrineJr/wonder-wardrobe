@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
 import { categoryLabel } from "@/lib/categories";
+import { DEFAULT_CANCELLATION_POLICY, policySentences } from "@/lib/cancellation";
 import {
   createBooking,
   getAvailableSlots,
