@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AccountNav } from "@/components/account-nav";
 import { AnalyticsUpgradePanel } from "@/components/analytics-upgrade-panel";
 import { PaymentTestModeBanner } from "@/components/payment-test-banner";
+import { ShareEmbed } from "@/components/share-embed";
 import { getMyShops } from "@/lib/shops.functions";
 
 const myShopsQuery = queryOptions({
@@ -107,6 +108,11 @@ function SubscribePage() {
         </div>
 
         <AnalyticsUpgradePanel shopId={selected.id} />
+
+        <ShareEmbed
+          heading="Show clients what they get"
+          blurb="Share the guided tour of The Standing Chair, or embed it on your own website and post it to social media."
+        />
 
         <div className="flex justify-center">
           <button

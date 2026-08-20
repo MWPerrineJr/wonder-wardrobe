@@ -17,8 +17,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
+import { Route as DemoIndexRouteImport } from './routes/demo.index'
 import { Route as SurveyTokenRouteImport } from './routes/survey.$token'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as DemoEmbedRouteImport } from './routes/demo.embed'
 import { Route as AuthGoogleTestRouteImport } from './routes/auth.google-test'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
@@ -75,6 +77,11 @@ const ShopIndexRoute = ShopIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ShopRoute,
 } as any)
+const DemoIndexRoute = DemoIndexRouteImport.update({
+  id: '/demo/',
+  path: '/demo/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SurveyTokenRoute = SurveyTokenRouteImport.update({
   id: '/survey/$token',
   path: '/survey/$token',
@@ -84,6 +91,11 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ShopRoute,
+} as any)
+const DemoEmbedRoute = DemoEmbedRouteImport.update({
+  id: '/demo/embed',
+  path: '/demo/embed',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthGoogleTestRoute = AuthGoogleTestRouteImport.update({
   id: '/google-test',
@@ -190,8 +202,10 @@ export interface FileRoutesByFullPath {
   '/account': typeof AuthenticatedAccountRoute
   '/owner': typeof AuthenticatedOwnerRoute
   '/auth/google-test': typeof AuthGoogleTestRoute
+  '/demo/embed': typeof DemoEmbedRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/survey/$token': typeof SurveyTokenRoute
+  '/demo/': typeof DemoIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -216,8 +230,10 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/owner': typeof AuthenticatedOwnerRoute
   '/auth/google-test': typeof AuthGoogleTestRoute
+  '/demo/embed': typeof DemoEmbedRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/survey/$token': typeof SurveyTokenRoute
+  '/demo': typeof DemoIndexRoute
   '/shop': typeof ShopIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -245,8 +261,10 @@ export interface FileRoutesById {
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/owner': typeof AuthenticatedOwnerRoute
   '/auth/google-test': typeof AuthGoogleTestRoute
+  '/demo/embed': typeof DemoEmbedRoute
   '/shop/$slug': typeof ShopSlugRoute
   '/survey/$token': typeof SurveyTokenRoute
+  '/demo/': typeof DemoIndexRoute
   '/shop/': typeof ShopIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -274,8 +292,10 @@ export interface FileRouteTypes {
     | '/account'
     | '/owner'
     | '/auth/google-test'
+    | '/demo/embed'
     | '/shop/$slug'
     | '/survey/$token'
+    | '/demo/'
     | '/shop/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -300,8 +320,10 @@ export interface FileRouteTypes {
     | '/account'
     | '/owner'
     | '/auth/google-test'
+    | '/demo/embed'
     | '/shop/$slug'
     | '/survey/$token'
+    | '/demo'
     | '/shop'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -328,8 +350,10 @@ export interface FileRouteTypes {
     | '/_authenticated/account'
     | '/_authenticated/owner'
     | '/auth/google-test'
+    | '/demo/embed'
     | '/shop/$slug'
     | '/survey/$token'
+    | '/demo/'
     | '/shop/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -354,7 +378,9 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRouteWithChildren
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DemoEmbedRoute: typeof DemoEmbedRoute
   SurveyTokenRoute: typeof SurveyTokenRoute
+  DemoIndexRoute: typeof DemoIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
@@ -422,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopIndexRouteImport
       parentRoute: typeof ShopRoute
     }
+    '/demo/': {
+      id: '/demo/'
+      path: '/demo'
+      fullPath: '/demo/'
+      preLoaderRoute: typeof DemoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/survey/$token': {
       id: '/survey/$token'
       path: '/survey/$token'
@@ -435,6 +468,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/shop/$slug'
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof ShopRoute
+    }
+    '/demo/embed': {
+      id: '/demo/embed'
+      path: '/demo/embed'
+      fullPath: '/demo/embed'
+      preLoaderRoute: typeof DemoEmbedRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/google-test': {
       id: '/auth/google-test'
@@ -605,7 +645,9 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DemoEmbedRoute: DemoEmbedRoute,
   SurveyTokenRoute: SurveyTokenRoute,
+  DemoIndexRoute: DemoIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,

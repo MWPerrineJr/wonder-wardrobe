@@ -153,6 +153,9 @@ function MarketplacePage() {
             <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Shops
             </Link>
+            <Link to="/demo" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
+              Demo
+            </Link>
             <Link to="/provider" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
               Provider
             </Link>
@@ -399,9 +402,9 @@ function MarketplacePage() {
             <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Terms of Service
             </a>
-            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
-              For Providers
-            </a>
+            <Link to="/demo" className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm">
+              See the demo
+            </Link>
 
             <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
               Contact

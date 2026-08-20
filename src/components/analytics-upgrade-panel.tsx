@@ -4,11 +4,13 @@ import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { SubscriptionStatusCard } from "@/components/subscription-status-card";
 import {
   createCheckoutSession,
   createPortalSession,
   getBillingStatus,
   redeemCompCode,
+  type BillingStatus,
 } from "@/lib/billing.functions";
 import {
   PLAN_TIERS,
@@ -54,7 +56,23 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
   const selectedTier = PLAN_TIERS.find((t) => t.id === (tierId ?? recommended)) ?? PLAN_TIERS[0];
 
   if (status?.lifetime) {
-    return <LifetimeAccessPanel since={status.lifetimeSince} hasSubscription={Boolean(status.status)} shopId={shopId} />;
+    return <LifetimeAccessPanel status={status} shopId={shopId} />;
+  }
+
+  const hasSubscription =
+    status && ["trialing", "active", "past_due"].includes(status.status ?? "");
+  if (status && (hasSubscription || (status.status && status.cancelAtPeriodEnd))) {
+    return (
+      <section className="flex flex-col gap-6">
+        <SubscriptionStatusCard shopId={shopId} status={status} />
+        <div className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm">
+          <p className="text-label-md text-on-surface uppercase tracking-wide mb-3">
+            What's included
+          </p>
+          <FeatureList items={PAID_FEATURES} />
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -154,14 +172,13 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
 }
 
 function LifetimeAccessPanel({
-  since,
-  hasSubscription,
+  status,
   shopId,
 }: {
-  since: string | null;
-  hasSubscription: boolean;
+  status: BillingStatus;
   shopId: string;
 }) {
+  const since = status.lifetimeSince;
   return (
     <section className="flex flex-col gap-6">
       <div className="bg-surface border-2 border-primary rounded-xl p-8 shadow-sm flex flex-col items-center text-center gap-3">
@@ -178,13 +195,13 @@ function LifetimeAccessPanel({
           <FeatureList items={PAID_FEATURES} />
         </div>
       </div>
-      {hasSubscription && (
-        <div className="flex flex-col items-center gap-2">
+      {status.status && (
+        <div className="flex flex-col gap-2">
           <p className="text-label-md text-on-surface-variant text-center">
             You still have a paid subscription on file. Cancel it so you're not charged — your access
             stays either way.
           </p>
-          <ManageBillingButton shopId={shopId} label="Manage billing" />
+          <SubscriptionStatusCard shopId={shopId} status={status} />
         </div>
       )}
     </section>
