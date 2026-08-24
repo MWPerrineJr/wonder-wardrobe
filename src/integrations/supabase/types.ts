@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      app_user_connections: {
+        Row: {
+          account_email: string | null
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_email?: string | null
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_email?: string | null
+          connection_key_ciphertext?: string
+          connector_id?: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           amount_paid_cents: number
@@ -51,6 +84,7 @@ export type Database = {
           customer_name: string | null
           customer_phone: string | null
           ends_at: string
+          google_event_id: string | null
           id: string
           notes: string | null
           payment_status: string
@@ -74,6 +108,7 @@ export type Database = {
           customer_name?: string | null
           customer_phone?: string | null
           ends_at: string
+          google_event_id?: string | null
           id?: string
           notes?: string | null
           payment_status?: string
@@ -97,6 +132,7 @@ export type Database = {
           customer_name?: string | null
           customer_phone?: string | null
           ends_at?: string
+          google_event_id?: string | null
           id?: string
           notes?: string | null
           payment_status?: string
