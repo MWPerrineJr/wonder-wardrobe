@@ -183,7 +183,16 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
         start: new Date(r.starts_at).getTime(),
         end: new Date(r.ends_at).getTime(),
       }));
+
+      // Personal commitments already on the provider's own Google Calendar also
+      // block slots. Returns [] when Google is unreachable or not connected, so
+      // availability keeps working from shop hours plus existing bookings.
+      const { listGoogleBusy } = await import("@/server/googleCalendar.server");
+      busy = busy.concat(
+        await listGoogleBusy(data.providerId, dayStart.toISOString(), dayEnd.toISOString()),
+      );
     }
+
 
     const now = Date.now();
     const slots: string[] = [];
