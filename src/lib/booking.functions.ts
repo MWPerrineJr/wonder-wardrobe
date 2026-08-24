@@ -320,9 +320,31 @@ export const createBooking = createServerFn({ method: "POST" })
     if (error) throw dbError(error, "booking");
     const booking = saved as unknown as SavedBooking;
 
+    // Mirror onto the provider's Google Calendar when they've connected it.
+    // Never let a Google failure fail the booking.
+    try {
+      const { syncBookingToCalendar } = await import("@/server/googleCalendar.server");
+      await syncBookingToCalendar(booking.id, data.providerId ?? null, {
+        summary: `${booking.service?.name ?? "Appointment"} — ${shopRow.name}`,
+        description: [
+          data.customerName ? `Client: ${data.customerName}` : null,
+          data.customerPhone ? `Phone: ${data.customerPhone}` : null,
+          data.notes ? `Notes: ${data.notes}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        location: null,
+        startsAt: booking.starts_at,
+        endsAt: booking.ends_at,
+      });
+    } catch (e) {
+      console.error("[booking] calendar sync skipped", e);
+    }
+
     if (due <= 0 || !payoutAccountId) {
       return { booking, checkoutUrl: null, amountDueCents: 0 };
     }
+
 
     const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
     try {
