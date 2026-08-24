@@ -256,7 +256,12 @@ function OwnerPage() {
               <ShopLinksPanel shopId={selected.id} shopName={selected.name} shop={selected} />
             </div>
           </TabsContent>
+
+          <TabsContent value="calendar" className="mt-6">
+            <CalendarPanel />
+          </TabsContent>
         </Tabs>
+
       </main>
 
       {tour.active && (
