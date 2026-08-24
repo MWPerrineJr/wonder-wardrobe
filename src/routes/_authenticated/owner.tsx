@@ -171,7 +171,9 @@ function OwnerPage() {
             <TabsTrigger value="hours">Hours</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="links">Links</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="overview" className="mt-6 flex flex-col gap-6">
             <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
