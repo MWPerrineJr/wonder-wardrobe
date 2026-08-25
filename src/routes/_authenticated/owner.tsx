@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { AccountNav } from "@/components/account-nav";
 import { PublicLinkCard } from "@/components/public-link-card";
 import { PaymentsPanel } from "@/components/payments-panel";
+import { CalendarPanel } from "@/components/calendar-panel";
+
 import { ShopLinksPanel, type ShopLinkValues } from "@/components/shop-links-panel";
 import { SetupTour, useSetupTour, type TourStep } from "@/components/setup-tour";
 import { parseCustomLinks } from "@/lib/social-links";
@@ -171,7 +173,9 @@ function OwnerPage() {
             <TabsTrigger value="hours">Hours</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="links">Links</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="overview" className="mt-6 flex flex-col gap-6">
             <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
@@ -254,7 +258,12 @@ function OwnerPage() {
               <ShopLinksPanel shopId={selected.id} shopName={selected.name} shop={selected} />
             </div>
           </TabsContent>
+
+          <TabsContent value="calendar" className="mt-6">
+            <CalendarPanel />
+          </TabsContent>
         </Tabs>
+
       </main>
 
       {tour.active && (

@@ -12,15 +12,20 @@ embed (the request comes back `403`). Two settings on the key cause this:
 1. **Maps Embed API not enabled.** In Google Cloud Console → APIs & Services →
    Library, enable **Maps Embed API** for the same project the key belongs to.
    (Maps JavaScript API being enabled is not enough.)
-2. **HTTP referrer restrictions.** If the key is restricted to specific
-   websites, the embed request must be allowed. Add:
-   - `https://*.lovable.app/*`
-   - `https://*.lovableproject.com/*`
-   - your custom domain, e.g. `https://thestandingchair.app/*`
+2. **Application restrictions on the key.** The embed URL is built and requested
+   **server-side**, so Google sees an *empty referrer*. A "Websites"/HTTP-referrer
+   restriction therefore always rejects it with:
 
-   Note: the embed URL is built server-side, so a key restricted by IP address
-   will not work — use "Websites" restrictions or leave the key unrestricted
-   while testing.
+   ```text
+   403 — This IP, site or mobile application is not authorized to use this API
+   key. Request received from IP address …, with empty referer
+   ```
+
+   Fix: on the key, set **Application restrictions → None** (or restrict by
+   **API** only, limited to Maps Embed API). Because the request comes from the
+   server, IP-address restrictions also won't work reliably — the server IP is
+   not stable.
+
 
 Also confirm billing is enabled on the Google Cloud project; Maps APIs return
 `403` without it.

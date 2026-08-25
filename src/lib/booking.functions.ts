@@ -183,7 +183,16 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
         start: new Date(r.starts_at).getTime(),
         end: new Date(r.ends_at).getTime(),
       }));
+
+      // Personal commitments already on the provider's own Google Calendar also
+      // block slots. Returns [] when Google is unreachable or not connected, so
+      // availability keeps working from shop hours plus existing bookings.
+      const { listGoogleBusy } = await import("@/server/googleCalendar.server");
+      busy = busy.concat(
+        await listGoogleBusy(data.providerId, dayStart.toISOString(), dayEnd.toISOString()),
+      );
     }
+
 
     const now = Date.now();
     const slots: string[] = [];
@@ -311,9 +320,31 @@ export const createBooking = createServerFn({ method: "POST" })
     if (error) throw dbError(error, "booking");
     const booking = saved as unknown as SavedBooking;
 
+    // Mirror onto the provider's Google Calendar when they've connected it.
+    // Never let a Google failure fail the booking.
+    try {
+      const { syncBookingToCalendar } = await import("@/server/googleCalendar.server");
+      await syncBookingToCalendar(booking.id, data.providerId ?? null, {
+        summary: `${booking.service?.name ?? "Appointment"} — ${shopRow.name}`,
+        description: [
+          data.customerName ? `Client: ${data.customerName}` : null,
+          data.customerPhone ? `Phone: ${data.customerPhone}` : null,
+          data.notes ? `Notes: ${data.notes}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        location: null,
+        startsAt: booking.starts_at,
+        endsAt: booking.ends_at,
+      });
+    } catch (e) {
+      console.error("[booking] calendar sync skipped", e);
+    }
+
     if (due <= 0 || !payoutAccountId) {
       return { booking, checkoutUrl: null, amountDueCents: 0 };
     }
+
 
     const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
     try {

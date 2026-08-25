@@ -20,6 +20,10 @@ shown only after the database confirms the write.
 | Shop details: name, description, address, cover image | shops.name / description / address / cover_image_url (`updateShop`) |
 | Service name, description, duration, price, active | services.* (`createService`, `updateService`, `deleteService`) |
 | Weekly hours: open, close, closed | shop_hours.open_time / close_time / is_closed, unique per (shop_id, weekday) (`upsertShopHours`) |
+| Calendar tab: Connect / Disconnect Google Calendar | app_user_connections.connection_key_ciphertext (AES-256-GCM, service-role only) / account_email / last_synced_at, unique per (user_id, connector_id) (`completeCalendarConnect`, `disconnectCalendar`) |
+| Booking mirrored to a provider's Google Calendar | bookings.google_event_id (`syncBookingToCalendar`; cleared implicitly on cancel via `removeBookingFromCalendar`) |
+
+
 
 ## Feedback Intelligence — `/owner/feedback`
 | Field | Table.column |
