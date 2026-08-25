@@ -1,15 +1,7 @@
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-
-const FALLBACK_ORIGIN = "https://thestandingchair.app";
-
-function useOrigin() {
-  const [origin, setOrigin] = useState(FALLBACK_ORIGIN);
-  useEffect(() => setOrigin(window.location.origin), []);
-  return origin;
-}
+import { getPublicOrigin } from "@/lib/site-origin";
 
 async function copy(text: string, message: string) {
   try {
@@ -32,7 +24,7 @@ export function ShareEmbed({
   heading?: string;
   blurb?: string;
 }) {
-  const origin = useOrigin();
+  const origin = getPublicOrigin();
   const url = `${origin}${path}`;
   const embedSrc = `${origin}${path === "/demo" ? "/demo/embed" : path}`;
   const snippet = `<iframe src="${embedSrc}" title="The Standing Chair demo" width="100%" height="720" style="border:0;border-radius:12px" loading="lazy"></iframe>`;
