@@ -141,9 +141,8 @@ export function ProviderSchedule() {
     if (view === "week") {
       const s = parseDay(range.start);
       const e = parseDay(range.end);
-      return s.getMonth() === e.getMonth()
-        ? `${s.toLocaleDateString([], { month: "short", day: "numeric" })} – ${e.toLocaleDateString([], { day: "numeric", year: "numeric" })}`
-        : `${s.toLocaleDateString([], { month: "short", day: "numeric" })} – ${e.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}`;
+      const ms = (d: Date) => d.toLocaleDateString([], { month: "short" });
+      return `${ms(s)} ${s.getDate()} – ${ms(e)} ${e.getDate()}, ${e.getFullYear()}`;
     }
     return parseDay(anchor).toLocaleDateString([], { month: "long", year: "numeric" });
   }, [view, anchor, range]);
