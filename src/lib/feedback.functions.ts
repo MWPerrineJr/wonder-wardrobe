@@ -130,21 +130,6 @@ export const updateFeedbackStatus = createServerFn({ method: "POST" })
     return saved;
   });
 
-const SubmitFeedbackInput = z.object({
-  shopId: z.string().uuid(),
-  rating: z.number().int().min(1).max(5),
-  message: z.string().trim().min(5, "Tell us a little more").max(2000),
-  customerName: z.string().trim().max(80).optional().nullable(),
-  customerEmail: z
-    .string()
-    .trim()
-    .email("Enter a valid email")
-    .max(120)
-    .optional()
-    .nullable()
-    .or(z.literal("")),
-});
-
 // ---------- AI shop report ----------
 
 export type ReportTheme = { theme: string; mentions: number; evidence: string[] };
@@ -245,33 +230,4 @@ export const regenerateShopReport = createServerFn({ method: "POST" })
       if (failure.kind === "pause") throw new Error(failure.reason);
       throw err;
     }
-  });
-
-
-export const submitFeedback = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => SubmitFeedbackInput.parse(input))
-  .handler(async ({ data, context }) => {
-    const { supabase, userId, claims } = context;
-    const email =
-      (data.customerEmail && data.customerEmail.length > 0
-        ? data.customerEmail
-        : (claims as { email?: string } | null)?.email) ?? null;
-
-    const { data: saved, error } = await supabase
-      .from("customer_feedback")
-      .insert({
-        shop_id: data.shopId,
-        customer_id: userId,
-        customer_name: data.customerName || null,
-        customer_email: email,
-        rating: data.rating,
-        message: data.message,
-        source: "web",
-        status: "new",
-      })
-      .select("id, rating, message, created_at")
-      .single();
-    if (error) throw dbError(error, "feedback");
-    return saved;
   });
