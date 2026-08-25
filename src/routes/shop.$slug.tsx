@@ -6,7 +6,6 @@ import { ShopMap } from "@/components/shop-map";
 import { SocialLinks } from "@/components/social-links";
 import { sameAsUrls } from "@/lib/social-links";
 import { BookingPanel } from "@/components/booking-panel";
-import { FeedbackForm } from "@/components/feedback-form";
 import { getBookingContext } from "@/lib/booking.functions";
 
 const shopBySlugQuery = (slug: string) =>
@@ -222,7 +221,6 @@ function ShopPage() {
                 </p>
               )}
             </div>
-            <FeedbackForm shopId={shop.id} slug={slug} />
           </div>
         </div>
       </main>
