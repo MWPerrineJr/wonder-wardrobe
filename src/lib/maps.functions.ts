@@ -42,7 +42,7 @@ export const getMapEmbedUrl = createServerFn({ method: "GET" })
         signal: AbortSignal.timeout(4000),
       });
       if (!probe.ok) {
-        console.error("[maps] embed rejected by Google", probe.status);
+        console.error("[maps] embed rejected by Google", probe.status, "origin:", origin);
         return { ok: false as const, reason: "rejected" as const };
       }
     } catch (error) {
