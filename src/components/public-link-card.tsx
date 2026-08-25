@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 
+import { getPublicOrigin } from "@/lib/site-origin";
+
 export function PublicLinkCard({ slug, shopName }: { slug: string; shopName: string }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [url, setUrl] = useState("");
 
   useEffect(() => {
-    setUrl(`${window.location.origin}/shop/${slug}`);
+    setUrl(`${getPublicOrigin()}/shop/${slug}`);
   }, [slug]);
 
   useEffect(() => {
