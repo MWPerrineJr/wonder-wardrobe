@@ -849,6 +849,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_survey_invite_by_token: {
+        Args: { _token: string }
+        Returns: {
+          customer_name: string
+          provider_name: string
+          rating_hint: number
+          shop_name: string
+          status: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -880,6 +890,16 @@ export type Database = {
       shop_has_active_analytics: {
         Args: { _env?: string; _shop_id: string }
         Returns: boolean
+      }
+      submit_survey_feedback: {
+        Args: { _message: string; _rating: number; _token: string }
+        Returns: {
+          created_at: string
+          feedback_id: string
+          google_review_url: string
+          prompt_google: boolean
+          rating: number
+        }[]
       }
     }
     Enums: {

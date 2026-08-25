@@ -1,19 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+
 import { dbError } from "@/lib/db-error";
 
 // Public, tokenized survey submission — the email-survey path.
 //
 // No auth middleware on purpose: the recipient clicks a link in their inbox and
 // has no session. Authorization comes from the invite token itself, which is a
-// high-entropy uuid that only ever exists in the survey_invites table (service
-// role only — no anon/authenticated grants) and in the recipient's email.
-//
-// Both handlers use the service-role client, loaded dynamically inside the
-// handler per the client.server.ts convention so it never reaches the client
-// bundle.
-
-const tokenSchema = z.object({ token: z.string().uuid() });
+// high-entropy uuid. These handlers call narrowly-scoped, token-matched RPCs
+// through the privileged server client; anonymous users cannot read the
+// survey_invites table directly.
 
 export type SurveyInviteView = {
   status: "ok" | "expired" | "used" | "invalid";
@@ -23,103 +19,77 @@ export type SurveyInviteView = {
   ratingHint?: number | null;
 };
 
+type SurveyInviteRow = {
+  status: SurveyInviteView["status"];
+  shop_name: string | null;
+  provider_name: string | null;
+  customer_name: string | null;
+  rating_hint: number | null;
+};
+
+type SubmitSurveyRow = {
+  feedback_id: string;
+  rating: number;
+  created_at: string;
+  google_review_url: string | null;
+  prompt_google: boolean;
+};
+
 export const getSurveyInvite = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => tokenSchema.parse(input))
+  .inputValidator((input: unknown) => z.object({ token: z.string().uuid() }).parse(input))
   .handler(async ({ data }): Promise<SurveyInviteView> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: invite, error } = await supabaseAdmin
-      .from("survey_invites")
-      .select("id, shop_id, provider_id, customer_name, expires_at, responded_at, rating_hint")
-      .eq("token", data.token)
+    const { data: invite, error } = await (supabaseAdmin as any)
+      .rpc("get_survey_invite_by_token", { _token: data.token })
       .maybeSingle();
     if (error) throw dbError(error, "survey");
     if (!invite) return { status: "invalid" };
-    if (invite.responded_at) return { status: "used" };
-    if (new Date(invite.expires_at) < new Date()) return { status: "expired" };
 
-    const [{ data: shop }, provider] = await Promise.all([
-      supabaseAdmin.from("shops").select("name").eq("id", invite.shop_id).maybeSingle(),
-      invite.provider_id
-        ? supabaseAdmin
-            .from("providers")
-            .select("display_name")
-            .eq("id", invite.provider_id)
-            .maybeSingle()
-        : Promise.resolve({ data: null }),
-    ]);
-
+    const row = invite as SurveyInviteRow;
     return {
-      status: "ok",
-      shopName: shop?.name ?? "this shop",
-      providerName: provider?.data?.display_name ?? null,
-      customerName: invite.customer_name,
-      ratingHint: invite.rating_hint,
+      status: row.status,
+      shopName: row.shop_name ?? undefined,
+      providerName: row.provider_name,
+      customerName: row.customer_name,
+      ratingHint: row.rating_hint,
     };
   });
 
-const SubmitSurveyInput = z.object({
-  token: z.string().uuid(),
-  rating: z.number().int().min(1).max(5),
-  message: z.string().trim().min(5, "Tell us a little more").max(2000),
-});
-
 export const submitSurveyFeedback = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => SubmitSurveyInput.parse(input))
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        token: z.string().uuid(),
+        rating: z.number().int().min(1).max(5),
+        message: z.string().trim().min(5, "Tell us a little more").max(2000),
+      })
+      .parse(input),
+  )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    // Atomically claim the invite: only one submission can flip responded_at
-    // from NULL, so a double-click or a replayed link can't create duplicates.
-    const { data: invite, error: claimErr } = await supabaseAdmin
-      .from("survey_invites")
-      .update({ responded_at: new Date().toISOString(), rating_hint: data.rating })
-      .eq("token", data.token)
-      .is("responded_at", null)
-      .gt("expires_at", new Date().toISOString())
-      .select("id, shop_id, customer_id, customer_name, customer_email")
-      .maybeSingle();
-    if (claimErr) throw dbError(claimErr, "survey");
-    if (!invite) throw new Error("This survey link is invalid, expired, or already used.");
-
-    const { data: saved, error: insErr } = await supabaseAdmin
-      .from("customer_feedback")
-      .insert({
-        shop_id: invite.shop_id,
-        customer_id: invite.customer_id,
-        customer_name: invite.customer_name,
-        customer_email: invite.customer_email,
-        rating: data.rating,
-        message: data.message,
-        source: "email_survey",
-        status: "new",
+    const { data: saved, error } = await (supabaseAdmin as any)
+      .rpc("submit_survey_feedback", {
+        _token: data.token,
+        _rating: data.rating,
+        _message: data.message,
       })
-      .select("id, rating, created_at")
-      .single();
-    if (insErr) {
-      // Roll the claim back so the customer can retry rather than losing
-      // their one shot at the token.
-      await supabaseAdmin.from("survey_invites").update({ responded_at: null }).eq("id", invite.id);
-      throw dbError(insErr, "survey");
-    }
-
-    await supabaseAdmin
-      .from("survey_invites")
-      .update({ feedback_id: saved.id })
-      .eq("id", invite.id);
-
-    // Happy customers get the public Google ask; unhappy ones stay private so
-    // the owner can follow up before the rating is public.
-    const { data: shop } = await supabaseAdmin
-      .from("shops")
-      .select("google_review_url")
-      .eq("id", invite.shop_id)
       .maybeSingle();
 
-    const googleReviewUrl = shop?.google_review_url ?? null;
+    if (error) {
+      const raw = "message" in error ? String(error.message) : "";
+      if (raw.includes("invalid, expired, or already used")) {
+        throw new Error("This survey link is invalid, expired, or already used.");
+      }
+      throw dbError(error, "survey");
+    }
+    if (!saved) throw new Error("This survey link is invalid, expired, or already used.");
+
+    const row = saved as SubmitSurveyRow;
     return {
-      ...saved,
-      googleReviewUrl,
-      promptGoogle: data.rating >= 4 && Boolean(googleReviewUrl),
+      id: row.feedback_id,
+      rating: row.rating,
+      created_at: row.created_at,
+      googleReviewUrl: row.google_review_url,
+      promptGoogle: row.prompt_google,
     };
   });
