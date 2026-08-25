@@ -92,6 +92,7 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       .from("bookings")
       .select(
         `id, starts_at, amount_paid_cents, payment_status, stripe_payment_intent_id,
+         provider_id, google_event_id,
          shop:shops(cancel_free_hours, late_cancel_fee_percent)`,
       )
       .eq("id", data.bookingId)
@@ -109,6 +110,15 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       .select("id, status")
       .single();
     if (error) throw dbError(error, "account");
+
+    // Pull the mirrored event off the provider's Google Calendar, best-effort.
+    try {
+      const { removeBookingFromCalendar } = await import("@/server/googleCalendar.server");
+      await removeBookingFromCalendar(before.provider_id, before.google_event_id);
+    } catch (e) {
+      console.error("[account] calendar cleanup skipped", e);
+    }
+
 
     const shopPolicy = (before as unknown as {
       shop?: { cancel_free_hours?: number; late_cancel_fee_percent?: number } | null;
