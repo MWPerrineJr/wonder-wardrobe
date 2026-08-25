@@ -368,7 +368,7 @@ export function ProviderSchedule() {
           </div>
         ) : view === "week" ? (
           <div className="overflow-x-auto">
-            <div className="grid grid-cols-7 min-w-[760px]">
+            <div className="grid grid-cols-7 min-w-[620px]">
               {weekDays.map((d) => {
                 const dayBookingsForCell = byDay.get(d) ?? [];
                 const isToday = d === todayIso;
