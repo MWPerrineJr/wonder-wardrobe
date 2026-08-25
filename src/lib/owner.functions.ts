@@ -272,6 +272,44 @@ export const deleteService = createServerFn({ method: "POST" })
     return deleted;
   });
 
+// ---------- Shop deletion ----------
+
+export const deleteShop = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ shopId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // Verify ownership through the authenticated client (RLS as the user)
+    const { data: shop, error: shopError } = await supabase
+      .from("shops")
+      .select("id")
+      .eq("id", data.shopId)
+      .eq("owner_id", userId)
+      .maybeSingle();
+    if (shopError) throw dbError(shopError, "owner");
+    if (!shop) throw new Error("Shop not found or you don't have permission to delete it.");
+
+    // Privileged cascade delete for all child records
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    await supabaseAdmin.from("survey_invites").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("bookings").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("providers").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("services").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("customer_feedback").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("feedback_reports").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("comp_grants").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("shop_hours").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("shop_payout_accounts").delete().eq("shop_id", data.shopId);
+    await supabaseAdmin.from("subscriptions").delete().eq("shop_id", data.shopId);
+
+    const { error: deleteError } = await supabaseAdmin.from("shops").delete().eq("id", data.shopId);
+    if (deleteError) throw dbError(deleteError, "owner");
+
+    return { deleted: true };
+  });
+
 // ---------- Weekly hours ----------
 
 const HourRow = z
