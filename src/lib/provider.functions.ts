@@ -93,6 +93,68 @@ export const getMyProviderDay = createServerFn({ method: "POST" })
     };
   });
 
+/**
+ * Range variant of getMyProviderDay — powers the week and month calendar views.
+ * startDate/endDate are inclusive local dates (YYYY-MM-DD); range is capped at 62 days.
+ */
+export const getMyProviderRange = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        tzOffsetMinutes: z.number().int().min(-900).max(900),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<ProviderDay> => {
+    const { supabase, userId } = context;
+    const { data: provider, error: pErr } = await supabase
+      .from("providers")
+      .select("id, display_name, shop_id, shop:shops(name)")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (pErr) throw dbError(pErr, "provider");
+    if (!provider) return { provider: null, bookings: [] };
+
+    const toUtcMidnight = (iso: string) => {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1) + data.tzOffsetMinutes * 60_000);
+    };
+    const rangeStart = toUtcMidnight(data.startDate);
+    let rangeEnd = new Date(toUtcMidnight(data.endDate).getTime() + 24 * 60 * 60_000);
+    if (rangeEnd.getTime() <= rangeStart.getTime()) {
+      rangeEnd = new Date(rangeStart.getTime() + 24 * 60 * 60_000);
+    }
+    const MAX_RANGE_MS = 62 * 24 * 60 * 60_000;
+    if (rangeEnd.getTime() - rangeStart.getTime() > MAX_RANGE_MS) {
+      throw new Error("Date range too large");
+    }
+
+    const { data: bookings, error } = await supabase
+      .from("bookings")
+      .select(
+        `id, starts_at, ends_at, status, price_cents, customer_name, customer_phone, notes,
+         service:services(id, name, duration_minutes)`,
+      )
+      .eq("provider_id", provider.id)
+      .gte("starts_at", rangeStart.toISOString())
+      .lt("starts_at", rangeEnd.toISOString())
+      .order("starts_at");
+    if (error) throw dbError(error, "provider");
+
+    return {
+      provider: {
+        id: provider.id,
+        display_name: provider.display_name,
+        shop_id: provider.shop_id,
+        shop_name: (provider as unknown as { shop?: { name?: string } }).shop?.name ?? "",
+      },
+      bookings: (bookings ?? []) as unknown as ProviderBooking[],
+    };
+  });
+
 export const setBookingStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
