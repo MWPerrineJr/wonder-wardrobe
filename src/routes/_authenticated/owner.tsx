@@ -15,6 +15,7 @@ import { getMyShops, getShopDetail } from "@/lib/shops.functions";
 import {
   createService,
   deleteService,
+  deleteShop,
   getShopHours,
   updateService,
   updateShop,
@@ -96,6 +97,18 @@ function OwnerPage() {
   const selected = shops.find((s) => s.id === selectedId) ?? shops[0];
   const tour = useSetupTour(selected?.id ?? "none");
   const steps = buildTourSteps(selected);
+  const qc = useQueryClient();
+
+  const deleteShopMutation = useMutation({
+    mutationFn: (shopId: string) => deleteShop({ data: { shopId } }),
+    onSuccess: () => {
+      toast.success("Shop deleted.");
+      qc.invalidateQueries({ queryKey: ["owner", "shops"] });
+      qc.invalidateQueries({ queryKey: ["public"] });
+      setSelectedId(null);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   useEffect(() => {
     if (tour.active) setTab(steps[Math.min(tour.step, steps.length - 1)].tab);
@@ -218,6 +231,32 @@ function OwnerPage() {
               >
                 + Create another shop
               </Link>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="border border-error/50 text-error rounded-lg px-4 py-2 hover:bg-error/10 transition-colors font-label-md">
+                    <Icon name="delete" className="text-[16px] mr-1 align-middle" />
+                    Delete shop
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete “{selected.name}”?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently remove the shop, its services, providers, bookings, feedback,
+                      and all related settings. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteShopMutation.mutate(selected.id)}
+                      className="bg-error text-on-error hover:bg-error/90"
+                    >
+                      Delete shop
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </TabsContent>
 
