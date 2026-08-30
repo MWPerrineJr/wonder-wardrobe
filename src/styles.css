@@ -64,6 +64,21 @@
   --color-electric-blue: #4c6b63;
   --color-classic-gold: #8a7a5c;
 
+  /* shadcn/ui surface tokens */
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1c1917;
+  --color-accent: #f4f1ec;
+  --color-accent-foreground: #1c1917;
+  --color-muted: #f7f4f0;
+  --color-muted-foreground: #6b655c;
+  --color-border: #e7e2d9;
+  --color-input: #e7e2d9;
+  --color-ring: #8a7a5c;
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
+  --color-destructive: #b3261e;
+  --color-destructive-foreground: #ffffff;
+
   /* Data-visualisation palette (warm stone + muted accents) */
   --color-chart-1: #8a7a5c;
   --color-chart-2: #4c6b63;
