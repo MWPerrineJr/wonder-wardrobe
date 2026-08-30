@@ -416,8 +416,16 @@ function MarketplacePage() {
             </a>
 
           </nav>
-          <div className="font-body-md text-body-md text-text-muted">
-            © 2024 The Standing Chair SaaS. All rights reserved.
+          <div className="font-body-md text-body-md text-text-muted text-center md:text-right">
+            The Standing Chair is a product of{" "}
+            <a
+              href="https://pandagentic.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Pandagentic
+            </a>
           </div>
         </div>
       </footer>

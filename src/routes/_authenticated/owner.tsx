@@ -135,6 +135,9 @@ function OwnerPage() {
               <Link to="/owner/subscribe" className="text-on-surface-variant hover:text-on-surface">
                 Plans
               </Link>
+              <Link to="/owner/contact" className="text-on-surface-variant hover:text-on-surface">
+                Contact
+              </Link>
             </nav>
           </div>
           <AccountNav />

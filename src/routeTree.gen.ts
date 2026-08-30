@@ -30,6 +30,7 @@ import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth.go
 import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
 import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
 import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
+import { Route as AuthenticatedOwnerContactRouteImport } from './routes/_authenticated/owner_.contact'
 import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authenticated/owner_.analytics'
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -149,6 +150,12 @@ const AuthenticatedOwnerFeedbackRoute =
     path: '/owner/feedback',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOwnerContactRoute =
+  AuthenticatedOwnerContactRouteImport.update({
+    id: '/owner_/contact',
+    path: '/owner/contact',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOwnerAnalyticsRoute =
   AuthenticatedOwnerAnalyticsRouteImport.update({
     id: '/owner_/analytics',
@@ -224,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
+  '/owner/contact': typeof AuthenticatedOwnerContactRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
@@ -254,6 +262,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
+  '/owner/contact': typeof AuthenticatedOwnerContactRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
@@ -287,6 +296,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/_authenticated/owner_/analytics': typeof AuthenticatedOwnerAnalyticsRoute
+  '/_authenticated/owner_/contact': typeof AuthenticatedOwnerContactRoute
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/onboarding/owner'
     | '/owner/analytics'
+    | '/owner/contact'
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/onboarding/owner'
     | '/owner/analytics'
+    | '/owner/contact'
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
@@ -382,6 +394,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/onboarding/owner'
     | '/_authenticated/owner_/analytics'
+    | '/_authenticated/owner_/contact'
     | '/_authenticated/owner_/feedback'
     | '/_authenticated/owner_/subscribe'
     | '/api/public/calendar-event'
@@ -566,6 +579,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerFeedbackRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/owner_/contact': {
+      id: '/_authenticated/owner_/contact'
+      path: '/owner/contact'
+      fullPath: '/owner/contact'
+      preLoaderRoute: typeof AuthenticatedOwnerContactRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/owner_/analytics': {
       id: '/_authenticated/owner_/analytics'
       path: '/owner/analytics'
@@ -637,6 +657,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
   AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
   AuthenticatedOwnerAnalyticsRoute: typeof AuthenticatedOwnerAnalyticsRoute
+  AuthenticatedOwnerContactRoute: typeof AuthenticatedOwnerContactRoute
   AuthenticatedOwnerFeedbackRoute: typeof AuthenticatedOwnerFeedbackRoute
   AuthenticatedOwnerSubscribeRoute: typeof AuthenticatedOwnerSubscribeRoute
 }
@@ -646,6 +667,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
   AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
   AuthenticatedOwnerAnalyticsRoute: AuthenticatedOwnerAnalyticsRoute,
+  AuthenticatedOwnerContactRoute: AuthenticatedOwnerContactRoute,
   AuthenticatedOwnerFeedbackRoute: AuthenticatedOwnerFeedbackRoute,
   AuthenticatedOwnerSubscribeRoute: AuthenticatedOwnerSubscribeRoute,
 }
