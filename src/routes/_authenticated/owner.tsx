@@ -478,6 +478,17 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteShop({ data: { shopId: shop.id } }),
+    onSuccess: () => {
+      toast.success("Shop deleted.");
+      qc.invalidateQueries({ queryKey: ["owner", "shops"] });
+      qc.invalidateQueries({ queryKey: ["public"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   function toggleCategory(cat: ServiceCategory) {
     setCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
