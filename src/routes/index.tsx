@@ -146,9 +146,7 @@ function MarketplacePage() {
       {/* Top nav — desktop */}
       <header className="hidden md:flex w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full">
-          <div className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-            The Standing Chair
-          </div>
+          <SiteBrand />
           <nav className="flex items-center gap-8">
             <Link to="/" className="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md">
               Marketplace

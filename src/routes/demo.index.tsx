@@ -43,9 +43,7 @@ function DemoPage() {
     <div className="bg-background text-on-background font-body-md min-h-screen">
       <header className="border-b border-border-subtle bg-surface">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 flex items-center justify-between gap-4">
-          <Link to="/" className="font-headline-md text-headline-md text-primary tracking-tight">
-            The Standing Chair
-          </Link>
+          <SiteBrand />
           <AccountNav />
         </div>
       </header>
