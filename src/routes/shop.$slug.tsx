@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { getPublicShopBySlug } from "@/lib/shops.functions";
 import { ShopMap } from "@/components/shop-map";
+import { SiteBrand } from "@/components/site-brand";
 import { SocialLinks } from "@/components/social-links";
 import { sameAsUrls } from "@/lib/social-links";
 import { BookingPanel } from "@/components/booking-panel";

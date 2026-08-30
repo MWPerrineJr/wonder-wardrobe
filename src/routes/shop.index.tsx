@@ -3,6 +3,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 
+import { SiteBrand } from "@/components/site-brand";
 import { listPublicShops } from "@/lib/shops.functions";
 
 const searchSchema = z.object({

@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { AccountNav } from "@/components/account-nav";
+import { SiteBrand } from "@/components/site-brand";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { listPublicShops } from "@/lib/shops.functions";
 import { CATEGORY_ICONS, CATEGORY_LABELS, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";

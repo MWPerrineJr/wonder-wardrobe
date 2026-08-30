@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AccountNav } from "@/components/account-nav";
 import { DemoTour } from "@/components/demo-tour";
 import { ShareEmbed } from "@/components/share-embed";
+import { SiteBrand } from "@/components/site-brand";
 import { listPublicShops } from "@/lib/shops.functions";
 
 const shopsQuery = queryOptions({
