@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { AccountNav } from "@/components/account-nav";
+import { SiteBrand } from "@/components/site-brand";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { listPublicShops } from "@/lib/shops.functions";
 import { CATEGORY_ICONS, CATEGORY_LABELS, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
@@ -145,9 +146,7 @@ function MarketplacePage() {
       {/* Top nav — desktop */}
       <header className="hidden md:flex w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <div className="flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full">
-          <div className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-            The Standing Chair
-          </div>
+          <SiteBrand />
           <nav className="flex items-center gap-8">
             <Link to="/" className="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md">
               Marketplace

@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AccountNav } from "@/components/account-nav";
 import { DemoTour } from "@/components/demo-tour";
 import { ShareEmbed } from "@/components/share-embed";
+import { SiteBrand } from "@/components/site-brand";
 import { listPublicShops } from "@/lib/shops.functions";
 
 const shopsQuery = queryOptions({
@@ -42,9 +43,7 @@ function DemoPage() {
     <div className="bg-background text-on-background font-body-md min-h-screen">
       <header className="border-b border-border-subtle bg-surface">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 flex items-center justify-between gap-4">
-          <Link to="/" className="font-headline-md text-headline-md text-primary tracking-tight">
-            The Standing Chair
-          </Link>
+          <SiteBrand />
           <AccountNav />
         </div>
       </header>

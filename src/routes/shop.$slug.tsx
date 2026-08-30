@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
 import { getPublicShopBySlug } from "@/lib/shops.functions";
 import { ShopMap } from "@/components/shop-map";
+import { SiteBrand } from "@/components/site-brand";
 import { SocialLinks } from "@/components/social-links";
 import { sameAsUrls } from "@/lib/social-links";
 import { BookingPanel } from "@/components/booking-panel";
@@ -118,9 +119,7 @@ function ShopPage() {
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md">
       <nav className="hidden md:flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
-        <div className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-          The Standing Chair
-        </div>
+        <SiteBrand />
         <div className="flex items-center gap-gutter">
           <Link to="/" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
             Marketplace

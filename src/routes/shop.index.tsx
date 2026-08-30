@@ -3,6 +3,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 
+import { SiteBrand } from "@/components/site-brand";
 import { listPublicShops } from "@/lib/shops.functions";
 
 const searchSchema = z.object({
@@ -57,9 +58,7 @@ function ShopIndex() {
     <div className="bg-background text-on-background min-h-screen flex flex-col">
       <header className="border-b border-border-subtle">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop h-16 flex items-center justify-between">
-          <Link to="/" className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
-            The Standing Chair
-          </Link>
+          <SiteBrand />
           <Link to="/" className="text-on-surface-variant hover:text-primary font-label-md text-label-md">
             Marketplace
           </Link>
