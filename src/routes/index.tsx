@@ -6,6 +6,8 @@ import { AccountNav } from "@/components/account-nav";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { listPublicShops } from "@/lib/shops.functions";
 import { CATEGORY_ICONS, CATEGORY_LABELS, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
+import { SUPPORT_MAILTO } from "@/lib/support";
+
 
 
 const shopsQuery = queryOptions({
@@ -406,9 +408,13 @@ function MarketplacePage() {
               See the demo
             </Link>
 
-            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
-              Contact
+            <a
+              className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm"
+              href={SUPPORT_MAILTO}
+            >
+              Contact support
             </a>
+
           </nav>
           <div className="font-body-md text-body-md text-text-muted">
             © 2024 The Standing Chair SaaS. All rights reserved.
