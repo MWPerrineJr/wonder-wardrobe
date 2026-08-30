@@ -406,9 +406,13 @@ function MarketplacePage() {
               See the demo
             </Link>
 
-            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
-              Contact
+            <a
+              className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm"
+              href={SUPPORT_MAILTO}
+            >
+              Contact support
             </a>
+
           </nav>
           <div className="font-body-md text-body-md text-text-muted">
             © 2024 The Standing Chair SaaS. All rights reserved.
