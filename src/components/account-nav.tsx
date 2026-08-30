@@ -124,7 +124,7 @@ export function AccountNav() {
           <Icon name="expand_more" className="text-on-surface-variant text-[18px]" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" className="w-64 bg-popover text-popover-foreground border-border shadow-lg">
         <DropdownMenuLabel className="flex flex-col">
           <span className="text-label-sm text-on-surface-variant">Signed in as</span>
           <span className="truncate font-medium">{user.email}</span>
