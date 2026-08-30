@@ -569,9 +569,47 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
           {mutation.isPending ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      <div className="mt-8 border-t border-border-subtle pt-6">
+        <h3 className="font-label-md text-label-md font-semibold text-error mb-1">Danger zone</h3>
+        <p className="text-on-surface-variant text-body-sm mb-3">
+          Permanently delete this shop and everything attached to it — services, providers,
+          bookings, feedback, hours, and payment settings.
+        </p>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              type="button"
+              className="border border-error/50 text-error rounded-lg px-4 py-2 hover:bg-error/10 transition-colors font-label-md"
+            >
+              <Icon name="delete" className="text-[16px] mr-1 align-middle" />
+              Delete shop
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete “{shop.name}”?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove the shop, its services, providers, bookings, feedback,
+                and all related settings. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteMutation.mutate()}
+                className="bg-error text-on-error hover:bg-error/90"
+              >
+                Delete shop
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </section>
   );
 }
+
 
 
 // -------------------- Services --------------------
