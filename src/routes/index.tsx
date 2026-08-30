@@ -6,6 +6,8 @@ import { AccountNav } from "@/components/account-nav";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { listPublicShops } from "@/lib/shops.functions";
 import { CATEGORY_ICONS, CATEGORY_LABELS, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
+import { SUPPORT_MAILTO } from "@/lib/support";
+
 
 
 const shopsQuery = queryOptions({
