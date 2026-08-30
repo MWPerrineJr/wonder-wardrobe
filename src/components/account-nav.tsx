@@ -61,7 +61,7 @@ export function AccountNav() {
             Sign in
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-72 p-2">
+        <DropdownMenuContent align="end" className="w-72 p-2 bg-popover text-popover-foreground border-border shadow-lg">
           <button
             type="button"
             onClick={handleGoogle}
