@@ -41,6 +41,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_runtime_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       app_user_connections: {
         Row: {
           account_email: string | null
@@ -866,6 +884,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      invoke_feedback_job: { Args: { job_slug: string }; Returns: number }
       pending_survey_targets: {
         Args: never
         Returns: {
