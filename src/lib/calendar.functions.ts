@@ -20,9 +20,8 @@ export type CalendarStatus = {
 export const getCalendarStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CalendarStatus> => {
-    const { calendarClientApiKey, CALENDAR_CONNECTOR_ID } = await import(
-      "@/server/googleCalendar.server"
-    );
+    const { calendarClientApiKey, CALENDAR_CONNECTOR_ID } =
+      await import("@/server/googleCalendar.server");
     const configured = !!calendarClientApiKey();
     const { getConnectionRowForUser } = await import("@/server/appUserConnections.server");
     const row = await getConnectionRowForUser(context.userId, CALENDAR_CONNECTOR_ID);
@@ -78,9 +77,8 @@ export const completeCalendarConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ code: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const { CALENDAR_CONNECTOR_ID, GATEWAY_BASE_URL, fetchAccountEmail } = await import(
-      "@/server/googleCalendar.server"
-    );
+    const { CALENDAR_CONNECTOR_ID, GATEWAY_BASE_URL, fetchAccountEmail } =
+      await import("@/server/googleCalendar.server");
     const { exchangeAppUserOAuthCode } = await import("@/integrations/lovable/appUserConnector");
     const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
       GATEWAY_BASE_URL,
@@ -98,12 +96,10 @@ export const completeCalendarConnect = createServerFn({ method: "POST" })
 export const disconnectCalendar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ ok: true }> => {
-    const { CALENDAR_CONNECTOR_ID, GATEWAY_BASE_URL } = await import(
-      "@/server/googleCalendar.server"
-    );
-    const { getConnectionKeyForUser, deleteConnectionForUser } = await import(
-      "@/server/appUserConnections.server"
-    );
+    const { CALENDAR_CONNECTOR_ID, GATEWAY_BASE_URL } =
+      await import("@/server/googleCalendar.server");
+    const { getConnectionKeyForUser, deleteConnectionForUser } =
+      await import("@/server/appUserConnections.server");
     const key = await getConnectionKeyForUser(context.userId, CALENDAR_CONNECTOR_ID);
     if (key) {
       const { disconnectAppUser } = await import("@/integrations/lovable/appUserConnector");

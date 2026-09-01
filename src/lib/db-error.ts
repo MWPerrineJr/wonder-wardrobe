@@ -1,5 +1,8 @@
 // Keeps raw Postgres/PostgREST error text server-side. Clients get a generic
 // message unless the database raised one of our own user-facing validations.
+
+import { logEvent, redactUnknown } from "./log.ts";
+
 const GENERIC = "Something went wrong, please try again.";
 
 const SAFE_MESSAGES = new Set([
@@ -22,7 +25,7 @@ export function dbError(error: unknown, context: string): Error {
       ? String((error as { message?: unknown }).message ?? "")
       : String(error ?? "");
 
-  console.error(`[db:${context}]`, error);
+  logEvent("error", { component: "db", event: context, error: redactUnknown(error) });
 
   return new Error(SAFE_MESSAGES.has(raw.trim()) ? raw.trim() : GENERIC);
 }

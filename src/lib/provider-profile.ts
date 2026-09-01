@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const PROVIDER_FROZEN_FIELDS = ["shop_id", "user_id", "is_active", "id", "created_at"] as const;
+export const PROVIDER_FROZEN_FIELDS = [
+  "shop_id",
+  "user_id",
+  "is_active",
+  "id",
+  "created_at",
+] as const;
 
 /** Fields a provider may change on their own row. Identity columns stay frozen in SQL. */
 export const ProviderSelfPatch = z

@@ -61,10 +61,7 @@ describe("resolveAppReturnUrl", () => {
 
   it("allows http only on loopback APP_URL", () => {
     const env = { APP_URL: "http://localhost:5173" };
-    assert.equal(
-      resolveAppReturnUrl("/account", { env }),
-      "http://localhost:5173/account",
-    );
+    assert.equal(resolveAppReturnUrl("/account", { env }), "http://localhost:5173/account");
     assert.equal(
       resolveAppReturnUrl("http://127.0.0.1:5173/account", { env }),
       "http://127.0.0.1:5173/account",

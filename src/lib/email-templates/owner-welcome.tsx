@@ -68,10 +68,10 @@ const OwnerWelcomeEmail = ({ ownerName, shopName, shopUrl }: OwnerWelcomeProps) 
 };
 
 export const template = {
-  component: OwnerWelcomeEmail,
-  subject: (data: Record<string, any>) =>
-    data['shopName']
-      ? `Welcome to The Standing Chair, ${data['shopName']}!`
+  component: OwnerWelcomeEmail as TemplateEntry["component"],
+  subject: (data: Record<string, unknown>) =>
+    typeof data["shopName"] === "string"
+      ? `Welcome to The Standing Chair, ${data["shopName"]}!`
       : "Welcome to The Standing Chair!",
   displayName: "Shop owner welcome",
   previewData: {

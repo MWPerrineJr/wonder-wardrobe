@@ -1,3 +1,5 @@
+import { redactUnknown } from "./log.ts";
+
 export const SURVEY_MAX_ATTEMPTS = 8;
 export const ENRICH_MAX_ATTEMPTS = 6;
 export const ENRICH_DAILY_CAP = 200;
@@ -45,14 +47,13 @@ export function enrichmentStatusAfterAttempt(
 }
 
 export function sanitizeJobError(error: unknown): string {
-  const raw = error instanceof Error ? error.message : String(error);
-  return raw
-    .replace(/sk_(live|test)_[A-Za-z0-9]+/g, "[redacted]")
-    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
-    .slice(0, 500);
+  return redactUnknown(error);
 }
 
-export function shouldAlertPaused(pausedAt: string | null | undefined, nowMs = Date.now()): boolean {
+export function shouldAlertPaused(
+  pausedAt: string | null | undefined,
+  nowMs = Date.now(),
+): boolean {
   if (!pausedAt) return false;
   const t = Date.parse(pausedAt);
   return Number.isFinite(t) && nowMs - t >= PAUSED_ALERT_AFTER_MS;
@@ -82,6 +83,9 @@ export function surveyAttemptPatch(
     email_status: status,
     email_error: status === "sent" ? null : error,
     emailed_at: status === "sent" ? now.toISOString() : null,
-    email_next_attempt_at: status === "sent" || status === "dead_letter" ? null : nextAttemptIso(attempts, now.getTime()),
+    email_next_attempt_at:
+      status === "sent" || status === "dead_letter"
+        ? null
+        : nextAttemptIso(attempts, now.getTime()),
   };
 }

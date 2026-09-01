@@ -89,11 +89,20 @@ export async function processCalendarOutbox(
 async function markOutboxProcessed(admin: Admin, id: string) {
   await admin
     .from("booking_calendar_outbox")
-    .update({ processed_at: new Date().toISOString(), last_error: null, next_attempt_at: new Date().toISOString() })
+    .update({
+      processed_at: new Date().toISOString(),
+      last_error: null,
+      next_attempt_at: new Date().toISOString(),
+    })
     .eq("id", id);
 }
 
-async function bumpOutboxAttempt(admin: Admin, id: string, previousAttempts: number, error: string) {
+async function bumpOutboxAttempt(
+  admin: Admin,
+  id: string,
+  previousAttempts: number,
+  error: string,
+) {
   const attempts = previousAttempts + 1;
   await admin
     .from("booking_calendar_outbox")

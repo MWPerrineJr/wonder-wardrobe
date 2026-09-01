@@ -103,9 +103,12 @@ export function ShopLinksPanel({
     <div className="flex flex-col gap-6">
       <section className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col gap-5 shadow-sm">
         <div>
-          <h2 className="font-headline-md text-headline-md text-on-surface">Social & contact links</h2>
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Social & contact links
+          </h2>
           <p className="text-on-surface-variant text-body-md mt-1">
-            These appear on your public page. Paste a full link or just your handle — we'll tidy it up.
+            These appear on your public page. Paste a full link or just your handle — we'll tidy it
+            up.
           </p>
         </div>
 

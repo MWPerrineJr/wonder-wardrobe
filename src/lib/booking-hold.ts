@@ -32,7 +32,10 @@ export function occupiesSlot(
   return Number.isFinite(expires) && expires > nowMs;
 }
 
-export function occupyingBookings(rows: OccupyingBooking[], nowMs = Date.now()): OccupyingBooking[] {
+export function occupyingBookings(
+  rows: OccupyingBooking[],
+  nowMs = Date.now(),
+): OccupyingBooking[] {
   return rows.filter((row) => occupiesSlot(row.status, row.holdExpiresAt, nowMs));
 }
 

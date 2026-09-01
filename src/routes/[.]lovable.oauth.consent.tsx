@@ -12,19 +12,21 @@ type AuthorizationDetails = {
 // Narrow local typed wrapper — the supabase.auth.oauth beta namespace isn't in the
 // generated types yet. Cast at the call site rather than editing the generated client.
 function oauth() {
-  return (supabase.auth as unknown as {
-    oauth: {
-      getAuthorizationDetails: (
-        id: string,
-      ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
-      approveAuthorization: (
-        id: string,
-      ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
-      denyAuthorization: (
-        id: string,
-      ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
-    };
-  }).oauth;
+  return (
+    supabase.auth as unknown as {
+      oauth: {
+        getAuthorizationDetails: (
+          id: string,
+        ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
+        approveAuthorization: (
+          id: string,
+        ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
+        denyAuthorization: (
+          id: string,
+        ) => Promise<{ data: AuthorizationDetails | null; error: { message: string } | null }>;
+      };
+    }
+  ).oauth;
 }
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
@@ -52,7 +54,9 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   errorComponent: ({ error }) => (
     <main className="min-h-screen flex items-center justify-center bg-background p-6 text-on-surface">
       <div className="max-w-md text-center">
-        <h1 className="font-headline-md text-headline-md">Could not load this authorization request</h1>
+        <h1 className="font-headline-md text-headline-md">
+          Could not load this authorization request
+        </h1>
         <p className="mt-3 text-body-md text-on-surface-variant">
           {String((error as Error)?.message ?? error)}
         </p>
@@ -93,10 +97,13 @@ function Consent() {
     <main className="min-h-screen flex items-center justify-center bg-background p-6 text-on-surface">
       <div className="w-full max-w-md glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-5">
         <div>
-          <h1 className="font-headline-md text-headline-md">Connect {clientName} to The Standing Chair</h1>
+          <h1 className="font-headline-md text-headline-md">
+            Connect {clientName} to The Standing Chair
+          </h1>
           <p className="mt-2 text-body-md text-on-surface-variant">
-            {clientName} will be able to call The Standing Chair&rsquo;s enabled tools as you while you&rsquo;re signed in.
-            This does not bypass The Standing Chair&rsquo;s permissions or backend policies.
+            {clientName} will be able to call The Standing Chair&rsquo;s enabled tools as you while
+            you&rsquo;re signed in. This does not bypass The Standing Chair&rsquo;s permissions or
+            backend policies.
           </p>
         </div>
         {details?.scope && (

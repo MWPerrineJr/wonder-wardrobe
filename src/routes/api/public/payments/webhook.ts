@@ -10,7 +10,11 @@ async function verifyPaymentsEvent(request: Request, env: StripeEnv): Promise<St
     created?: unknown;
     data?: { object?: Record<string, unknown> };
   };
-  if (typeof parsed?.id !== "string" || typeof parsed.type !== "string" || typeof parsed.created !== "number") {
+  if (
+    typeof parsed?.id !== "string" ||
+    typeof parsed.type !== "string" ||
+    typeof parsed.created !== "number"
+  ) {
     throw new Error("Malformed Stripe event");
   }
   return {
@@ -24,7 +28,8 @@ async function verifyPaymentsEvent(request: Request, env: StripeEnv): Promise<St
 export const Route = createFileRoute("/api/public/payments/webhook")({
   server: {
     handlers: {
-      POST: async ({ request }: { request: Request }) => handlePaymentsWebhook(request, verifyPaymentsEvent),
+      POST: async ({ request }: { request: Request }) =>
+        handlePaymentsWebhook(request, verifyPaymentsEvent),
     },
   },
 });

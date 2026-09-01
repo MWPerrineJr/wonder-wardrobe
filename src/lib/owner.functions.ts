@@ -27,15 +27,25 @@ const CreateShopInput = z.object({
         name: z.string().min(1).max(80),
         duration_minutes: z.number().int().positive().max(600),
         price_cents: z.number().int().nonnegative().max(1_000_000),
-        category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness", "esthetician"] as const).default("hair_barber"),
+        category: z
+          .enum([
+            "hair_barber",
+            "nails",
+            "waxing",
+            "makeup",
+            "massage",
+            "skincare_facials",
+            "brows_lashes",
+            "spa_wellness",
+            "esthetician",
+          ] as const)
+          .default("hair_barber"),
       }),
     )
     .max(10)
     .optional()
     .default([]),
 });
-
-
 
 export const createOwnerShop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -113,10 +123,16 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       return { ...shop, services: savedServices ?? [] };
     }
 
-    return { ...shop, services: [] as Array<{ id: string; name: string; duration_minutes: number; price_cents: number; category: string | null }> };
-
-
-
+    return {
+      ...shop,
+      services: [] as Array<{
+        id: string;
+        name: string;
+        duration_minutes: number;
+        price_cents: number;
+        category: string | null;
+      }>,
+    };
   });
 
 // ---------- Shop details ----------
@@ -194,7 +210,6 @@ export const updateShopLinks = createServerFn({ method: "POST" })
     return saved;
   });
 
-
 export const updateShop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => UpdateShopInput.parse(data))
@@ -243,7 +258,19 @@ const ServiceFields = z.object({
   duration_minutes: z.number().int().min(5, "Duration must be at least 5 minutes").max(600),
   price_cents: z.number().int().nonnegative().max(1_000_000),
   is_active: z.boolean().optional(),
-  category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness", "esthetician"] as const).default("hair_barber"),
+  category: z
+    .enum([
+      "hair_barber",
+      "nails",
+      "waxing",
+      "makeup",
+      "massage",
+      "skincare_facials",
+      "brows_lashes",
+      "spa_wellness",
+      "esthetician",
+    ] as const)
+    .default("hair_barber"),
 });
 
 export const createService = createServerFn({ method: "POST" })
@@ -261,7 +288,6 @@ export const createService = createServerFn({ method: "POST" })
     return saved;
   });
 
-
 export const updateService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
@@ -277,7 +303,6 @@ export const updateService = createServerFn({ method: "POST" })
     if (error) throw dbError(error, "owner");
     return saved;
   });
-
 
 export const deleteService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

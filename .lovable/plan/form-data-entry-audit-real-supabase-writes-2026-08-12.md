@@ -5,12 +5,14 @@
 Verified by reading every file that contains a form or submit action, plus all server functions and the existing migrations.
 
 **Already writing to the database correctly** (awaited call, error checked, success shown only after the server confirms):
+
 - Owner onboarding (`/onboarding/owner`) → `shops`, `services`, `user_roles`
 - Owner dashboard: shop details → `shops`; services add/edit/delete → `services`; weekly hours → `shop_hours`
 - Customer account profile edit → `profiles`
 - Feedback status buttons → `customer_feedback.status`
 
 **Real gaps:**
+
 1. **The booking page (`/shop`) saves nothing.** Barber cards, the date strip, time slots and the "Confirm Booking" button are static markup — nothing is written to `bookings`. This is the one place where user input truly disappears.
 2. **The barber calendar (`/barber`) is static** — hardcoded appointments instead of real bookings, and status changes cannot be saved.
 3. **No customer feedback form exists.** Nothing can create a `customer_feedback` row, so the Feedback Intelligence page can never fill up from the app.
@@ -20,17 +22,17 @@ Verified by reading every file that contains a form or submit action, plus all s
 
 ## Field → table → column mapping (delivered as a document in the repo)
 
-| Screen / form | Field | Table | Column |
-|---|---|---|---|
-| Owner onboarding | Shop name / URL / address / description | shops | name / slug / address / description |
-| | Starter service name, minutes, price | services | name, duration_minutes, price_cents |
-| Owner → Shop details | Name, description, address, cover image | shops | name, description, address, cover_image_url |
-| Owner → Services | Name, description, minutes, price, active | services | name, description, duration_minutes, price_cents, is_active |
-| Owner → Hours | Open, close, closed (per weekday) | shop_hours | open_time, close_time, is_closed, weekday |
-| Account → Profile | Full name, phone, avatar URL | profiles | full_name, phone, avatar_url |
-| Feedback page | Status action | customer_feedback | status |
-| **Booking page (new)** | Barber, service, date + time, name, phone, notes | bookings | barber_id, service_id, starts_at/ends_at, customer_name, customer_phone, notes |
-| **Feedback form (new)** | Name, email, rating, message | customer_feedback | customer_name, customer_email, rating, message |
+| Screen / form           | Field                                            | Table             | Column                                                                         |
+| ----------------------- | ------------------------------------------------ | ----------------- | ------------------------------------------------------------------------------ |
+| Owner onboarding        | Shop name / URL / address / description          | shops             | name / slug / address / description                                            |
+|                         | Starter service name, minutes, price             | services          | name, duration_minutes, price_cents                                            |
+| Owner → Shop details    | Name, description, address, cover image          | shops             | name, description, address, cover_image_url                                    |
+| Owner → Services        | Name, description, minutes, price, active        | services          | name, description, duration_minutes, price_cents, is_active                    |
+| Owner → Hours           | Open, close, closed (per weekday)                | shop_hours        | open_time, close_time, is_closed, weekday                                      |
+| Account → Profile       | Full name, phone, avatar URL                     | profiles          | full_name, phone, avatar_url                                                   |
+| Feedback page           | Status action                                    | customer_feedback | status                                                                         |
+| **Booking page (new)**  | Barber, service, date + time, name, phone, notes | bookings          | barber_id, service_id, starts_at/ends_at, customer_name, customer_phone, notes |
+| **Feedback form (new)** | Name, email, rating, message                     | customer_feedback | customer_name, customer_email, rating, message                                 |
 
 Fields with **no database column** today: everything on the booking page (whole flow unmapped), the barber page's static appointments, and the home-page search box (intentionally client-only — it filters already-loaded shops and should not be stored).
 

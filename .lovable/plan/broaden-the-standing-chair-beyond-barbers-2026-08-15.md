@@ -22,6 +22,7 @@ Hair & Barber, Nails, Waxing, Makeup, Massage, Skincare & Facials, Brows & Lashe
 ## Technical section
 
 ### Database migration
+
 - New enum `service_category` with the eight values above.
 - `services`: add `category service_category NOT NULL DEFAULT 'hair_barber'`; backfill existing rows to `hair_barber`.
 - `shops`: add `categories service_category[] NOT NULL DEFAULT '{}'`; backfill from each shop's existing services.
@@ -30,6 +31,7 @@ Hair & Barber, Nails, Waxing, Makeup, Massage, Skincare & Facials, Brows & Lashe
 - Keep GRANTs intact for the renamed table (`authenticated`, `anon` select, `service_role`).
 
 ### Code
+
 - Regenerate Supabase types after the migration, then rename across the codebase:
   - `src/lib/barber.functions.ts` -> `provider.functions.ts` (`getMyProviderDay`, etc.)
   - `src/components/barber-schedule.tsx` -> `provider-schedule.tsx`
@@ -42,6 +44,7 @@ Hair & Barber, Nails, Waxing, Makeup, Massage, Skincare & Facials, Brows & Lashe
 - `docs/data-mapping.md` updated with the new columns and renames.
 
 ### Neutral appearance
+
 - Keep the approved Warm Stone palette and Outfit/Figtree type — no color or font changes.
 - Replace barber-specific hero imagery and icons with a category-agnostic visual; category chips carry the visual variety instead.
 - Route `head()` titles and descriptions updated to multi-service wording on every page.

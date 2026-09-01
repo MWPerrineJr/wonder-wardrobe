@@ -22,6 +22,8 @@ function isLoopbackHost(hostname: string): boolean {
 }
 
 function hasControlChars(value: string): boolean {
+  // Reject ASCII control characters in untrusted URL input.
+  // eslint-disable-next-line no-control-regex
   return /[\u0000-\u001F\u007F\\]/.test(value);
 }
 

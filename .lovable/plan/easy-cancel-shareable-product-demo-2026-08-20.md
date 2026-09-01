@@ -7,6 +7,7 @@ page (`/owner/subscribe`) and in the upgrade panel, for shops with a
 `trialing` / `active` / `past_due` subscription.
 
 Behaviour:
+
 - Confirm dialog states exactly what happens: analytics, surveys and
   Feedback Intelligence stay available until the end of the current paid
   period; bookings, services, hours and the public shop page are unaffected.
@@ -19,6 +20,7 @@ Behaviour:
 ## 2. Demo page (`/demo`)
 
 A public, no-sign-in guided product tour page:
+
 - Hero with a one-line pitch and a "Start free" call to action.
 - Numbered walkthrough sections: publish your shop page and booking link,
   take bookings and prepayments, post-visit surveys, Feedback Intelligence,
@@ -30,6 +32,7 @@ A public, no-sign-in guided product tour page:
 ## 3. Share + embed
 
 On the demo page and on `/owner/subscribe`:
+
 - Copy-link button for the demo URL.
 - Share buttons: X, Facebook, LinkedIn, WhatsApp, email.
 - An "Embed on your website" box with a copyable `<iframe>` snippet pointing

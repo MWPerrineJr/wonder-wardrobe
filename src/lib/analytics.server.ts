@@ -167,9 +167,7 @@ export async function buildShopAnalytics(
   const current = all.filter((b) => new Date(b.starts_at) >= start);
   const previous = all.filter((b) => new Date(b.starts_at) < start);
 
-  const serviceNames = new Map(
-    (servicesRes.data ?? []).map((s) => [s.id, s.name] as const),
-  );
+  const serviceNames = new Map((servicesRes.data ?? []).map((s) => [s.id, s.name] as const));
   const providerNames = new Map(
     (providersRes.data ?? []).map((p) => [p.id, p.display_name] as const),
   );
@@ -195,9 +193,7 @@ export async function buildShopAnalytics(
     else byBucket.set(key, [b]);
   }
 
-  const priorCustomers = new Set(
-    (priorRes.data ?? []).map((r) => r.customer_id),
-  );
+  const priorCustomers = new Set((priorRes.data ?? []).map((r) => r.customer_id));
   const seenCustomers = new Set(priorCustomers);
 
   const series: SeriesPoint[] = keys.map((key) => {
@@ -313,7 +309,10 @@ export async function buildShopAnalytics(
     return {
       weekday,
       openHour: Number(row.open_time.slice(0, 2)),
-      closeHour: Math.max(Number(row.close_time.slice(0, 2)), Number(row.open_time.slice(0, 2)) + 1),
+      closeHour: Math.max(
+        Number(row.close_time.slice(0, 2)),
+        Number(row.open_time.slice(0, 2)) + 1,
+      ),
       closed: false,
     };
   });
@@ -324,7 +323,10 @@ export async function buildShopAnalytics(
   for (const b of current) {
     if (b.status === "cancelled" || b.status === "no_show") continue;
     const d = new Date(b.starts_at);
-    counts.set(`${d.getUTCDay()}-${d.getUTCHours()}`, (counts.get(`${d.getUTCDay()}-${d.getUTCHours()}`) ?? 0) + 1);
+    counts.set(
+      `${d.getUTCDay()}-${d.getUTCHours()}`,
+      (counts.get(`${d.getUTCDay()}-${d.getUTCHours()}`) ?? 0) + 1,
+    );
   }
   const cells: HeatmapCell[] = [];
   for (let weekday = 0; weekday < 7; weekday += 1) {
@@ -407,10 +409,7 @@ export async function buildShopAnalytics(
       appointments: trend(current.length, previous.length),
       avgTicketCents: trend(avgTicket(current), avgTicket(previous)),
       completionRate: trend(completedShare(current), completedShare(previous)),
-      avgRating: trend(
-        ratingAverage(rated.map((f) => f.rating)),
-        ratingAverage(prevRatings),
-      ),
+      avgRating: trend(ratingAverage(rated.map((f) => f.rating)), ratingAverage(prevRatings)),
     },
     series,
     services,

@@ -44,7 +44,8 @@ export const getMyProviderProfile = createServerFn({ method: "GET" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (error) throw dbError(error, "provider");
-    const shop = (data as any)?.shop as { name: string; slug: string } | null | undefined;
+    const shopJoin = data?.shop;
+    const shop = Array.isArray(shopJoin) ? shopJoin[0] : shopJoin;
     if (!data || !shop) return null;
     return {
       displayName: data.display_name,

@@ -77,7 +77,9 @@ export const Route = createFileRoute("/shop/$slug")({
   notFoundComponent: () => (
     <div className="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-8 gap-4">
       <h1 className="font-headline-md text-headline-md text-on-surface">Shop not found</h1>
-      <p className="text-on-surface-variant">This link may have changed or the shop is no longer listed.</p>
+      <p className="text-on-surface-variant">
+        This link may have changed or the shop is no longer listed.
+      </p>
       <Link to="/shop" className="bg-primary text-on-primary px-6 py-2 rounded font-bold">
         Browse shops
       </Link>
@@ -89,7 +91,15 @@ export const Route = createFileRoute("/shop/$slug")({
 const FALLBACK_HERO =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuC15Egl3FSRAl6spm53f0jNFHFvfm6gzWI869VRI42pcJfcsd-p1Jd8XgAOYNUXzxtQZvWezIvhwgWIGg9eimf3wql8CXkOgvnb20M_Ry8bUJyECeE6i7sLI27L4O6-AM8bQsnotKz6BzDLQEYzmXKL_iHeqoJxneXmxqwRprP4EEqrG_uh_MmEIBI7b_gYk-yUtKYxb3zpEDnRlqp9CQcK3NQBf9jrpFXFWzFVyMicYzyXbO5Q4JiK";
 
-const Icon = ({ name, className = "", filled = false }: { name: string; className?: string; filled?: boolean }) => (
+const Icon = ({
+  name,
+  className = "",
+  filled = false,
+}: {
+  name: string;
+  className?: string;
+  filled?: boolean;
+}) => (
   <span
     className={`material-symbols-outlined ${className}`}
     style={filled ? { fontVariationSettings: "'FILL' 1" } : undefined}
@@ -121,22 +131,38 @@ function ShopPage() {
       <nav className="hidden md:flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full sticky top-0 z-50 bg-background border-b border-border-subtle">
         <SiteBrand />
         <div className="flex items-center gap-gutter">
-          <Link to="/" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
+          <Link
+            to="/"
+            className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md"
+          >
             Marketplace
           </Link>
-          <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
+          <Link
+            to="/shop"
+            className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md"
+          >
             Shops
           </Link>
-          <Link to="/provider" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
+          <Link
+            to="/provider"
+            className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md"
+          >
             Provider
           </Link>
-          <Link to="/owner" className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md">
+          <Link
+            to="/owner"
+            className="text-on-surface-variant hover:text-primary transition-colors px-3 py-2 rounded-lg font-label-md text-label-md"
+          >
             Owner
           </Link>
         </div>
         <div className="flex items-center gap-4">
-          <button className="text-on-surface-variant hover:text-primary"><Icon name="notifications" /></button>
-          <button className="text-on-surface-variant hover:text-primary"><Icon name="account_circle" /></button>
+          <button className="text-on-surface-variant hover:text-primary">
+            <Icon name="notifications" />
+          </button>
+          <button className="text-on-surface-variant hover:text-primary">
+            <Icon name="account_circle" />
+          </button>
         </div>
       </nav>
 
@@ -225,19 +251,31 @@ function ShopPage() {
       </main>
 
       <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-border-subtle flex justify-around items-center h-16 px-margin-mobile shadow-lg">
-        <Link to="/" className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full">
+        <Link
+          to="/"
+          className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full"
+        >
           <Icon name="search" />
           <span className="font-label-sm text-label-sm mt-1">Explore</span>
         </Link>
-        <Link to="/shop" className="flex flex-col items-center justify-center text-primary font-bold w-1/4 h-full">
+        <Link
+          to="/shop"
+          className="flex flex-col items-center justify-center text-primary font-bold w-1/4 h-full"
+        >
           <Icon name="event_note" filled />
           <span className="font-label-sm text-label-sm mt-1">Shops</span>
         </Link>
-        <Link to="/provider" className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full">
+        <Link
+          to="/provider"
+          className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full"
+        >
           <Icon name="calendar_today" />
           <span className="font-label-sm text-label-sm mt-1">Provider</span>
         </Link>
-        <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full">
+        <Link
+          to="/owner"
+          className="flex flex-col items-center justify-center text-on-surface-variant w-1/4 h-full"
+        >
           <Icon name="dashboard" />
           <span className="font-label-sm text-label-sm mt-1">Owner</span>
         </Link>

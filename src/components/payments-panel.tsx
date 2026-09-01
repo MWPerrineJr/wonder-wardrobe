@@ -17,7 +17,11 @@ import { policySentences } from "@/lib/cancellation";
 const MODES = [
   { value: "off", label: "No prepayment", hint: "Clients pay in person." },
   { value: "deposit", label: "Deposit at booking", hint: "Hold the slot with a partial payment." },
-  { value: "full", label: "Full price upfront", hint: "Clients pay the whole service when booking." },
+  {
+    value: "full",
+    label: "Full price upfront",
+    hint: "Clients pay the whole service when booking.",
+  },
 ] as const;
 
 type Mode = (typeof MODES)[number]["value"];
@@ -59,7 +63,6 @@ export function PaymentsPanel({
     setFeePercent(lateCancelFeePercent);
     setReschedule(rescheduleAllowed);
     setRescheduleHours(rescheduleMinHours);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     shopId,
     prepayMode,
@@ -156,8 +159,8 @@ export function PaymentsPanel({
         <div className="flex flex-col gap-1">
           <h2 className="font-headline-md text-headline-md text-on-surface">Payout account</h2>
           <p className="text-on-surface-variant text-body-md">
-            Connect your own payment account so client prepayments land directly in your bank —
-            The Standing Chair never holds your money.
+            Connect your own payment account so client prepayments land directly in your bank — The
+            Standing Chair never holds your money.
           </p>
           {diagnosticsQuery.data && (
             <p className="text-on-surface-variant font-label-sm text-label-sm">
@@ -236,7 +239,9 @@ export function PaymentsPanel({
 
       <section className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col gap-4 shadow-sm">
         <div className="flex flex-col gap-1">
-          <h2 className="font-headline-md text-headline-md text-on-surface">Prepayment at booking</h2>
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Prepayment at booking
+          </h2>
           <p className="text-on-surface-variant text-body-md">
             Choose what clients pay when they book. Prepayment only shows on your booking page once
             your payout account is ready.
@@ -301,9 +306,7 @@ export function PaymentsPanel({
 
       <section className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col gap-4 shadow-sm">
         <div className="flex flex-col gap-1">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            Cancellation policy
-          </h2>
+          <h2 className="font-headline-md text-headline-md text-on-surface">Cancellation policy</h2>
           <p className="text-on-surface-variant text-body-md">
             These rules run automatically. Cancellations inside your free window are refunded in
             full; later ones keep your fee and refund the rest.
@@ -368,9 +371,7 @@ export function PaymentsPanel({
         )}
 
         <div className="border border-border-subtle rounded-lg p-4 flex flex-col gap-1">
-          <span className="font-label-md text-label-md text-on-surface">
-            What clients will see
-          </span>
+          <span className="font-label-md text-label-md text-on-surface">What clients will see</span>
           {policySentences({
             freeHours,
             lateFeePercent: feePercent,

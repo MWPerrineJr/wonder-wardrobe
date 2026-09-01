@@ -48,7 +48,14 @@ export function SocialLinks({ shop, shopName }: { shop: ShopLinkSource; shopName
   return (
     <section aria-label={`Follow and contact ${shopName}`} className="flex flex-wrap gap-3">
       {socials.map((p) => (
-        <a key={p.key} href={p.url} target="_blank" rel="noreferrer" className={pill} title={p.label}>
+        <a
+          key={p.key}
+          href={p.url}
+          target="_blank"
+          rel="noreferrer"
+          className={pill}
+          title={p.label}
+        >
           <BrandIcon platform={p.key as keyof typeof Brand} />
           <span>{p.label}</span>
         </a>
@@ -66,7 +73,12 @@ export function SocialLinks({ shop, shopName }: { shop: ShopLinkSource; shopName
         </a>
       )}
       {shop.whatsapp && (
-        <a href={`https://wa.me/${shop.whatsapp}`} target="_blank" rel="noreferrer" className={pill}>
+        <a
+          href={`https://wa.me/${shop.whatsapp}`}
+          target="_blank"
+          rel="noreferrer"
+          className={pill}
+        >
           <span className="material-symbols-outlined text-[20px]">chat</span>
           <span>WhatsApp</span>
         </a>

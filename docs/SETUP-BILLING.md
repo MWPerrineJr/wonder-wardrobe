@@ -2,16 +2,16 @@
 
 ## Plans
 
-| | Free | Solo (1 provider) | Team (2 providers) | Enterprise (3+) |
-|---|---|---|---|---|
-| Price | $0 | $120/mo or $1,000/yr | $200/mo or $2,000/yr | $250/mo or $2,500/yr |
-| Free trial | — | 1 month | 1 month | 1 month |
-| Public shop page + shareable booking link | ✅ | ✅ | ✅ | ✅ |
-| Service listings, hours, provider calendar, bookings | ✅ | ✅ | ✅ | ✅ |
-| Post-visit email surveys | — | ✅ | ✅ | ✅ |
-| AI sentiment / emotion / urgency analysis | — | ✅ | ✅ | ✅ |
-| Summaries, key phrases, recommended replies | — | ✅ | ✅ | ✅ |
-| Feedback KPIs and business analytics | — | ✅ | ✅ | ✅ |
+|                                                      | Free | Solo (1 provider)    | Team (2 providers)   | Enterprise (3+)      |
+| ---------------------------------------------------- | ---- | -------------------- | -------------------- | -------------------- |
+| Price                                                | $0   | $120/mo or $1,000/yr | $200/mo or $2,000/yr | $250/mo or $2,500/yr |
+| Free trial                                           | —    | 1 month              | 1 month              | 1 month              |
+| Public shop page + shareable booking link            | ✅   | ✅                   | ✅                   | ✅                   |
+| Service listings, hours, provider calendar, bookings | ✅   | ✅                   | ✅                   | ✅                   |
+| Post-visit email surveys                             | —    | ✅                   | ✅                   | ✅                   |
+| AI sentiment / emotion / urgency analysis            | —    | ✅                   | ✅                   | ✅                   |
+| Summaries, key phrases, recommended replies          | —    | ✅                   | ✅                   | ✅                   |
+| Feedback KPIs and business analytics                 | —    | ✅                   | ✅                   | ✅                   |
 
 One subscription per shop. Gate any future analytics feature with the same
 `shop_has_active_analytics()` check.

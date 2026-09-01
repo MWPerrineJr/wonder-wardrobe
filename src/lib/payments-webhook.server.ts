@@ -56,10 +56,15 @@ async function finishEvent(
     .eq("stripe_event_id", eventId)
     .select("stripe_event_id");
   requireOk(result, "Could not finalize webhook event");
-  if (!result.data?.length) throw new WebhookError("Webhook event row missing on finalize", "retryable");
+  if (!result.data?.length)
+    throw new WebhookError("Webhook event row missing on finalize", "retryable");
 }
 
-async function claimEvent(admin: Admin, event: StripeEvent, env: StripeEnv): Promise<"skip" | "process"> {
+async function claimEvent(
+  admin: Admin,
+  event: StripeEvent,
+  env: StripeEnv,
+): Promise<"skip" | "process"> {
   const { data: existing, error } = await admin
     .from("stripe_webhook_events")
     .select("stripe_event_id, status, updated_at, attempts")
@@ -160,11 +165,17 @@ async function markBookingPaid(
     .eq("stripe_checkout_session_id", session.id as string)
     .select("id");
   requireOk(result, "Booking paid update failed");
-  if (!result.data?.length) throw new WebhookError("Booking paid update matched zero rows", "retryable");
+  if (!result.data?.length)
+    throw new WebhookError("Booking paid update matched zero rows", "retryable");
   await enqueueCalendarSync(admin, booking.id);
 }
 
-async function releaseBooking(admin: Admin, env: StripeEnv, eventType: string, session: CheckoutSessionLike) {
+async function releaseBooking(
+  admin: Admin,
+  env: StripeEnv,
+  eventType: string,
+  session: CheckoutSessionLike,
+) {
   if (!shouldReleaseBookingHold(eventType)) return;
   const meta = checkoutMetadata(session);
   if (!meta.bookingId) {
@@ -217,7 +228,10 @@ async function upsertSubscription(
     typeof subscription.customer === "string" &&
     existing.data.stripe_customer_id !== subscription.customer
   ) {
-    throw new WebhookError("Subscription customer does not match the shop billing row", "permanent");
+    throw new WebhookError(
+      "Subscription customer does not match the shop billing row",
+      "permanent",
+    );
   }
 
   const items = asRecord(subscription.items);
@@ -247,12 +261,21 @@ async function upsertSubscription(
     updated_at: new Date().toISOString(),
   };
 
-  const result = await admin.from("subscriptions").upsert(payload, { onConflict: "shop_id,environment" }).select("id");
+  const result = await admin
+    .from("subscriptions")
+    .upsert(payload, { onConflict: "shop_id,environment" })
+    .select("id");
   requireOk(result, "Subscription upsert failed");
-  if (!result.data?.length) throw new WebhookError("Subscription upsert matched zero rows", "retryable");
+  if (!result.data?.length)
+    throw new WebhookError("Subscription upsert matched zero rows", "retryable");
 }
 
-async function markCanceled(admin: Admin, env: StripeEnv, eventCreated: number, subscription: Record<string, unknown>) {
+async function markCanceled(
+  admin: Admin,
+  env: StripeEnv,
+  eventCreated: number,
+  subscription: Record<string, unknown>,
+) {
   const subId = typeof subscription.id === "string" ? subscription.id : null;
   if (!subId) throw new WebhookError("Subscription id missing", "permanent");
 
@@ -276,7 +299,8 @@ async function markCanceled(admin: Admin, env: StripeEnv, eventCreated: number, 
     .eq("id", existing.data.id)
     .select("id");
   requireOk(result, "Subscription cancel update failed");
-  if (!result.data?.length) throw new WebhookError("Subscription cancel matched zero rows", "retryable");
+  if (!result.data?.length)
+    throw new WebhookError("Subscription cancel matched zero rows", "retryable");
 }
 
 async function syncPayoutAccount(admin: Admin, env: StripeEnv, account: Record<string, unknown>) {
@@ -349,7 +373,9 @@ export async function handlePaymentsWebhook(
     return new Response(message, { status: 503 });
   }
   if (queryEnv !== env) {
-    return new Response(`Webhook env=${queryEnv} does not match PAYMENTS_ENV=${env}`, { status: 400 });
+    return new Response(`Webhook env=${queryEnv} does not match PAYMENTS_ENV=${env}`, {
+      status: 400,
+    });
   }
 
   let event: StripeEvent;
@@ -360,7 +386,8 @@ export async function handlePaymentsWebhook(
     return new Response("Invalid signature", { status: 400 });
   }
 
-  const supabaseAdmin = admin ?? (await import("@/integrations/supabase/client.server")).supabaseAdmin;
+  const supabaseAdmin =
+    admin ?? (await import("@/integrations/supabase/client.server")).supabaseAdmin;
 
   try {
     const claim = await claimEvent(supabaseAdmin, event, env);

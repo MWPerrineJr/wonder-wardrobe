@@ -55,7 +55,8 @@ function SurveyPage() {
     mutationFn: () => submitSurveyFeedback({ data: { token, rating, message: message.trim() } }),
     onSuccess: (result) => {
       setSent(true);
-      if (result.promptGoogle && result.googleReviewUrl) setGoogleAsk({ url: result.googleReviewUrl });
+      if (result.promptGoogle && result.googleReviewUrl)
+        setGoogleAsk({ url: result.googleReviewUrl });
     },
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Could not save your feedback"),

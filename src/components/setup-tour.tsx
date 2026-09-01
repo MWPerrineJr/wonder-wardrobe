@@ -16,7 +16,9 @@ const PAD = 8;
 function readState(key: string) {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as { step?: number; completed?: boolean; dismissed?: boolean }) : null;
+    return raw
+      ? (JSON.parse(raw) as { step?: number; completed?: boolean; dismissed?: boolean })
+      : null;
   } catch {
     return null;
   }

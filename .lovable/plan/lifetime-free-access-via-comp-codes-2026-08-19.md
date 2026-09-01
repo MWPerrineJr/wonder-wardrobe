@@ -24,14 +24,17 @@ The access it grants never expires — only the code's redeem window can.
 ## Data model
 
 New table `comp_codes`
+
 - `code` (unique, uppercase), `note`, `max_redemptions` (default 1),
   `redeemed_count`, `expires_at` (nullable = never), `is_active`, `created_at`
 
 New table `comp_grants`
+
 - `shop_id` (unique — one lifetime grant per shop), `code_id`, `redeemed_by`,
   `redeemed_at`
 
 RLS/grants
+
 - `comp_codes`: no client access at all (service-role only). Redemption happens
   server-side, so codes can't be enumerated or brute-force probed from the browser.
 - `comp_grants`: `SELECT` for the shop owner (`shops.owner_id = auth.uid()`),
@@ -48,6 +51,7 @@ through this function — Feedback Intelligence, Analytics, and the survey job
 ## Server work
 
 `src/lib/billing.functions.ts`
+
 - `redeemCompCode({ shopId, code })` — auth + owner check via RLS, then a
   service-role transaction-style path that validates the code (active, not
   expired, redemptions left), inserts the grant, increments the counter, and

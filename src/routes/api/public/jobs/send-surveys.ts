@@ -153,7 +153,10 @@ export const Route = createFileRoute("/api/public/jobs/send-surveys")({
               outcome.status,
               outcome.error ? sanitizeJobError(outcome.error) : null,
             );
-            const { error: updErr } = await admin.from("survey_invites").update(patch).eq("id", inviteId);
+            const { error: updErr } = await admin
+              .from("survey_invites")
+              .update(patch)
+              .eq("id", inviteId);
             if (updErr) throw new Error(updErr.message);
 
             if (outcome.status === "sent") emailed += 1;

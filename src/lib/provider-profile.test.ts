@@ -17,8 +17,12 @@ describe("provider self-edit schema", () => {
     for (const field of PROVIDER_FROZEN_FIELDS) {
       assert.throws(() => ProviderSelfPatch.parse({ [field]: "tampered" }));
     }
-    assert.throws(() => ProviderSelfPatch.parse({ shopId: "00000000-0000-0000-0000-000000000001" }));
-    assert.throws(() => ProviderSelfPatch.parse({ userId: "00000000-0000-0000-0000-000000000001" }));
+    assert.throws(() =>
+      ProviderSelfPatch.parse({ shopId: "00000000-0000-0000-0000-000000000001" }),
+    );
+    assert.throws(() =>
+      ProviderSelfPatch.parse({ userId: "00000000-0000-0000-0000-000000000001" }),
+    );
     assert.throws(() => ProviderSelfPatch.parse({ isActive: false }));
   });
 });

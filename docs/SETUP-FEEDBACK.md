@@ -53,7 +53,7 @@ Set these before the jobs will run:
    `select vault.create_secret('paste-the-secret', 'job_secret');`
 3. Public app origin in `app_runtime_settings`:
    `insert into public.app_runtime_settings (key, value) values ('app_url', 'https://your-app.example')
-    on conflict (key) do update set value = excluded.value, updated_at = now();`
+ on conflict (key) do update set value = excluded.value, updated_at = now();`
 
 Inspect schedules with `select jobname, schedule from cron.job;`. After rotating
 `JOB_SECRET`, update the Vault secret to match; cron already reads Vault at

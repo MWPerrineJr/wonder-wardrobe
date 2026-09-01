@@ -9,67 +9,53 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ShopRouteImport } from './routes/shop'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ProviderRouteImport } from './routes/provider'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as BarberRouteImport } from './routes/barber'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ShopIndexRouteImport } from './routes/shop.index'
-import { Route as DemoIndexRouteImport } from './routes/demo.index'
-import { Route as SurveyTokenRouteImport } from './routes/survey.$token'
-import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
-import { Route as DemoEmbedRouteImport } from './routes/demo.embed'
-import { Route as AuthGoogleTestRouteImport } from './routes/auth.google-test'
-import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
-import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BarberRouteImport } from './routes/barber'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as ProviderRouteImport } from './routes/provider'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth.google-calendar.return'
-import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
-import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
-import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
-import { Route as AuthenticatedOwnerDiagnosticsRouteImport } from './routes/_authenticated/owner_.diagnostics'
-import { Route as AuthenticatedOwnerContactRouteImport } from './routes/_authenticated/owner_.contact'
-import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authenticated/owner_.analytics'
-import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
+import { Route as AuthGoogleTestRouteImport } from './routes/auth.google-test'
+import { Route as DemoIndexRouteImport } from './routes/demo.index'
+import { Route as DemoEmbedRouteImport } from './routes/demo.embed'
+import { Route as ShopIndexRouteImport } from './routes/shop.index'
+import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as SurveyTokenRouteImport } from './routes/survey.$token'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicJobsSendSurveysRouteImport } from './routes/api/public/jobs/send-surveys'
-import { Route as ApiPublicJobsEnrichFeedbackRouteImport } from './routes/api/public/jobs/enrich-feedback'
-import { Route as ApiPublicJobsBuildReportsRouteImport } from './routes/api/public/jobs/build-reports'
-import { Route as ApiPublicJobsBookingMaintenanceRouteImport } from './routes/api/public/jobs/booking-maintenance'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
+import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authenticated/owner_.analytics'
+import { Route as AuthenticatedOwnerContactRouteImport } from './routes/_authenticated/owner_.contact'
+import { Route as AuthenticatedOwnerDiagnosticsRouteImport } from './routes/_authenticated/owner_.diagnostics'
+import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
+import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
+import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
+import { Route as ApiPublicReadyRouteImport } from './routes/api/public/ready'
+import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth.google-calendar.return'
 import { Route as ApiPublicEmailsSurveyInviteRouteImport } from './routes/api/public/emails/survey-invite'
+import { Route as ApiPublicJobsBookingMaintenanceRouteImport } from './routes/api/public/jobs/booking-maintenance'
+import { Route as ApiPublicJobsBuildReportsRouteImport } from './routes/api/public/jobs/build-reports'
+import { Route as ApiPublicJobsEnrichFeedbackRouteImport } from './routes/api/public/jobs/enrich-feedback'
+import { Route as ApiPublicJobsSendSurveysRouteImport } from './routes/api/public/jobs/send-surveys'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProviderRoute = ProviderRouteImport.update({
-  id: '/provider',
-  path: '/provider',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BarberRoute = BarberRouteImport.update({
-  id: '/barber',
-  path: '/barber',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -77,13 +63,66 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const BarberRoute = BarberRouteImport.update({
+  id: '/barber',
+  path: '/barber',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProviderRoute = ProviderRouteImport.update({
+  id: '/provider',
+  path: '/provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
+  id: '/owner',
+  path: '/owner',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthGoogleTestRoute = AuthGoogleTestRouteImport.update({
+  id: '/google-test',
+  path: '/google-test',
+  getParentRoute: () => AuthRoute,
+} as any)
+const DemoIndexRoute = DemoIndexRouteImport.update({
+  id: '/demo/',
+  path: '/demo/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoEmbedRoute = DemoEmbedRouteImport.update({
+  id: '/demo/embed',
+  path: '/demo/embed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopIndexRoute = ShopIndexRouteImport.update({
@@ -91,86 +130,31 @@ const ShopIndexRoute = ShopIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ShopRoute,
 } as any)
-const DemoIndexRoute = DemoIndexRouteImport.update({
-  id: '/demo/',
-  path: '/demo/',
-  getParentRoute: () => rootRouteImport,
+const ShopSlugRoute = ShopSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ShopRoute,
 } as any)
 const SurveyTokenRoute = SurveyTokenRouteImport.update({
   id: '/survey/$token',
   path: '/survey/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShopSlugRoute = ShopSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ShopRoute,
-} as any)
-const DemoEmbedRoute = DemoEmbedRouteImport.update({
-  id: '/demo/embed',
-  path: '/demo/embed',
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthGoogleTestRoute = AuthGoogleTestRouteImport.update({
-  id: '/google-test',
-  path: '/google-test',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
-  id: '/owner',
-  path: '/owner',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OauthGoogleCalendarReturnRoute =
-  OauthGoogleCalendarReturnRouteImport.update({
-    id: '/oauth/google-calendar/return',
-    path: '/oauth/google-calendar/return',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicCalendarEventRoute = ApiPublicCalendarEventRouteImport.update({
-  id: '/api/public/calendar-event',
-  path: '/api/public/calendar-event',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedOwnerSubscribeRoute =
-  AuthenticatedOwnerSubscribeRouteImport.update({
-    id: '/owner_/subscribe',
-    path: '/owner/subscribe',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOwnerFeedbackRoute =
-  AuthenticatedOwnerFeedbackRouteImport.update({
-    id: '/owner_/feedback',
-    path: '/owner/feedback',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOwnerDiagnosticsRoute =
-  AuthenticatedOwnerDiagnosticsRouteImport.update({
-    id: '/owner_/diagnostics',
-    path: '/owner/diagnostics',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedOwnerContactRoute =
-  AuthenticatedOwnerContactRouteImport.update({
-    id: '/owner_/contact',
-    path: '/owner/contact',
+const AuthenticatedOnboardingOwnerRoute =
+  AuthenticatedOnboardingOwnerRouteImport.update({
+    id: '/onboarding/owner',
+    path: '/onboarding/owner',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOwnerAnalyticsRoute =
@@ -179,61 +163,55 @@ const AuthenticatedOwnerAnalyticsRoute =
     path: '/owner/analytics',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedOnboardingOwnerRoute =
-  AuthenticatedOnboardingOwnerRouteImport.update({
-    id: '/onboarding/owner',
-    path: '/onboarding/owner',
+const AuthenticatedOwnerContactRoute =
+  AuthenticatedOwnerContactRouteImport.update({
+    id: '/owner_/contact',
+    path: '/owner/contact',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
-    getParentRoute: () => rootRouteImport,
+const AuthenticatedOwnerDiagnosticsRoute =
+  AuthenticatedOwnerDiagnosticsRouteImport.update({
+    id: '/owner_/diagnostics',
+    path: '/owner/diagnostics',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
-  id: '/.lovable/oauth/consent',
-  path: '/.lovable/oauth/consent',
+const AuthenticatedOwnerFeedbackRoute =
+  AuthenticatedOwnerFeedbackRouteImport.update({
+    id: '/owner_/feedback',
+    path: '/owner/feedback',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOwnerSubscribeRoute =
+  AuthenticatedOwnerSubscribeRouteImport.update({
+    id: '/owner_/subscribe',
+    path: '/owner/subscribe',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiPublicCalendarEventRoute = ApiPublicCalendarEventRouteImport.update({
+  id: '/api/public/calendar-event',
+  path: '/api/public/calendar-event',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
+const ApiPublicReadyRoute = ApiPublicReadyRouteImport.update({
+  id: '/api/public/ready',
+  path: '/api/public/ready',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments/webhook',
-    path: '/api/public/payments/webhook',
+const OauthGoogleCalendarReturnRoute =
+  OauthGoogleCalendarReturnRouteImport.update({
+    id: '/oauth/google-calendar/return',
+    path: '/oauth/google-calendar/return',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicJobsSendSurveysRoute =
-  ApiPublicJobsSendSurveysRouteImport.update({
-    id: '/api/public/jobs/send-surveys',
-    path: '/api/public/jobs/send-surveys',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicJobsEnrichFeedbackRoute =
-  ApiPublicJobsEnrichFeedbackRouteImport.update({
-    id: '/api/public/jobs/enrich-feedback',
-    path: '/api/public/jobs/enrich-feedback',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicJobsBuildReportsRoute =
-  ApiPublicJobsBuildReportsRouteImport.update({
-    id: '/api/public/jobs/build-reports',
-    path: '/api/public/jobs/build-reports',
+const ApiPublicEmailsSurveyInviteRoute =
+  ApiPublicEmailsSurveyInviteRouteImport.update({
+    id: '/api/public/emails/survey-invite',
+    path: '/api/public/emails/survey-invite',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicJobsBookingMaintenanceRoute =
@@ -242,10 +220,44 @@ const ApiPublicJobsBookingMaintenanceRoute =
     path: '/api/public/jobs/booking-maintenance',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicEmailsSurveyInviteRoute =
-  ApiPublicEmailsSurveyInviteRouteImport.update({
-    id: '/api/public/emails/survey-invite',
-    path: '/api/public/emails/survey-invite',
+const ApiPublicJobsBuildReportsRoute =
+  ApiPublicJobsBuildReportsRouteImport.update({
+    id: '/api/public/jobs/build-reports',
+    path: '/api/public/jobs/build-reports',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsEnrichFeedbackRoute =
+  ApiPublicJobsEnrichFeedbackRouteImport.update({
+    id: '/api/public/jobs/enrich-feedback',
+    path: '/api/public/jobs/enrich-feedback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsSendSurveysRoute =
+  ApiPublicJobsSendSurveysRouteImport.update({
+    id: '/api/public/jobs/send-surveys',
+    path: '/api/public/jobs/send-surveys',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -276,6 +288,8 @@ export interface FileRoutesByFullPath {
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
@@ -313,6 +327,8 @@ export interface FileRoutesByTo {
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
@@ -353,6 +369,8 @@ export interface FileRoutesById {
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
@@ -393,6 +411,8 @@ export interface FileRouteTypes {
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/booking-maintenance'
@@ -430,6 +450,8 @@ export interface FileRouteTypes {
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/booking-maintenance'
@@ -469,6 +491,8 @@ export interface FileRouteTypes {
     | '/_authenticated/owner_/feedback'
     | '/_authenticated/owner_/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/booking-maintenance'
@@ -498,6 +522,8 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCalendarEventRoute: typeof ApiPublicCalendarEventRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicReadyRoute: typeof ApiPublicReadyRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
   ApiPublicJobsBookingMaintenanceRoute: typeof ApiPublicJobsBookingMaintenanceRoute
@@ -512,46 +538,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/provider': {
-      id: '/provider'
-      path: '/provider'
-      fullPath: '/provider'
-      preLoaderRoute: typeof ProviderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/barber': {
-      id: '/barber'
-      path: '/barber'
-      fullPath: '/barber'
-      preLoaderRoute: typeof BarberRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -561,74 +552,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/shop/': {
-      id: '/shop/'
-      path: '/'
-      fullPath: '/shop/'
-      preLoaderRoute: typeof ShopIndexRouteImport
-      parentRoute: typeof ShopRoute
-    }
-    '/demo/': {
-      id: '/demo/'
-      path: '/demo'
-      fullPath: '/demo/'
-      preLoaderRoute: typeof DemoIndexRouteImport
+    '/barber': {
+      id: '/barber'
+      path: '/barber'
+      fullPath: '/barber'
+      preLoaderRoute: typeof BarberRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/survey/$token': {
-      id: '/survey/$token'
-      path: '/survey/$token'
-      fullPath: '/survey/$token'
-      preLoaderRoute: typeof SurveyTokenRouteImport
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/shop/$slug': {
-      id: '/shop/$slug'
-      path: '/$slug'
-      fullPath: '/shop/$slug'
-      preLoaderRoute: typeof ShopSlugRouteImport
-      parentRoute: typeof ShopRoute
-    }
-    '/demo/embed': {
-      id: '/demo/embed'
-      path: '/demo/embed'
-      fullPath: '/demo/embed'
-      preLoaderRoute: typeof DemoEmbedRouteImport
+    '/provider': {
+      id: '/provider'
+      path: '/provider'
+      fullPath: '/provider'
+      preLoaderRoute: typeof ProviderRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/google-test': {
-      id: '/auth/google-test'
-      path: '/google-test'
-      fullPath: '/auth/google-test'
-      preLoaderRoute: typeof AuthGoogleTestRouteImport
-      parentRoute: typeof AuthRoute
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/owner': {
-      id: '/_authenticated/owner'
-      path: '/owner'
-      fullPath: '/owner'
-      preLoaderRoute: typeof AuthenticatedOwnerRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/account': {
-      id: '/_authenticated/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AuthenticatedAccountRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -638,67 +601,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/oauth/google-calendar/return': {
-      id: '/oauth/google-calendar/return'
-      path: '/oauth/google-calendar/return'
-      fullPath: '/oauth/google-calendar/return'
-      preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/calendar-event': {
-      id: '/api/public/calendar-event'
-      path: '/api/public/calendar-event'
-      fullPath: '/api/public/calendar-event'
-      preLoaderRoute: typeof ApiPublicCalendarEventRouteImport
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/owner': {
+      id: '/_authenticated/owner'
+      path: '/owner'
+      fullPath: '/owner'
+      preLoaderRoute: typeof AuthenticatedOwnerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth/google-test': {
+      id: '/auth/google-test'
+      path: '/google-test'
+      fullPath: '/auth/google-test'
+      preLoaderRoute: typeof AuthGoogleTestRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/demo/': {
+      id: '/demo/'
+      path: '/demo'
+      fullPath: '/demo/'
+      preLoaderRoute: typeof DemoIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/owner_/subscribe': {
-      id: '/_authenticated/owner_/subscribe'
-      path: '/owner/subscribe'
-      fullPath: '/owner/subscribe'
-      preLoaderRoute: typeof AuthenticatedOwnerSubscribeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/demo/embed': {
+      id: '/demo/embed'
+      path: '/demo/embed'
+      fullPath: '/demo/embed'
+      preLoaderRoute: typeof DemoEmbedRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/owner_/feedback': {
-      id: '/_authenticated/owner_/feedback'
-      path: '/owner/feedback'
-      fullPath: '/owner/feedback'
-      preLoaderRoute: typeof AuthenticatedOwnerFeedbackRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/shop/': {
+      id: '/shop/'
+      path: '/'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof ShopRoute
     }
-    '/_authenticated/owner_/diagnostics': {
-      id: '/_authenticated/owner_/diagnostics'
-      path: '/owner/diagnostics'
-      fullPath: '/owner/diagnostics'
-      preLoaderRoute: typeof AuthenticatedOwnerDiagnosticsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/shop/$slug': {
+      id: '/shop/$slug'
+      path: '/$slug'
+      fullPath: '/shop/$slug'
+      preLoaderRoute: typeof ShopSlugRouteImport
+      parentRoute: typeof ShopRoute
     }
-    '/_authenticated/owner_/contact': {
-      id: '/_authenticated/owner_/contact'
-      path: '/owner/contact'
-      fullPath: '/owner/contact'
-      preLoaderRoute: typeof AuthenticatedOwnerContactRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/owner_/analytics': {
-      id: '/_authenticated/owner_/analytics'
-      path: '/owner/analytics'
-      fullPath: '/owner/analytics'
-      preLoaderRoute: typeof AuthenticatedOwnerAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/onboarding/owner': {
-      id: '/_authenticated/onboarding/owner'
-      path: '/onboarding/owner'
-      fullPath: '/onboarding/owner'
-      preLoaderRoute: typeof AuthenticatedOnboardingOwnerRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+    '/survey/$token': {
+      id: '/survey/$token'
+      path: '/survey/$token'
+      fullPath: '/survey/$token'
+      preLoaderRoute: typeof SurveyTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.lovable/oauth/consent': {
@@ -708,46 +671,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+    '/_authenticated/onboarding/owner': {
+      id: '/_authenticated/onboarding/owner'
+      path: '/onboarding/owner'
+      fullPath: '/onboarding/owner'
+      preLoaderRoute: typeof AuthenticatedOnboardingOwnerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/owner_/analytics': {
+      id: '/_authenticated/owner_/analytics'
+      path: '/owner/analytics'
+      fullPath: '/owner/analytics'
+      preLoaderRoute: typeof AuthenticatedOwnerAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/owner_/contact': {
+      id: '/_authenticated/owner_/contact'
+      path: '/owner/contact'
+      fullPath: '/owner/contact'
+      preLoaderRoute: typeof AuthenticatedOwnerContactRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/owner_/diagnostics': {
+      id: '/_authenticated/owner_/diagnostics'
+      path: '/owner/diagnostics'
+      fullPath: '/owner/diagnostics'
+      preLoaderRoute: typeof AuthenticatedOwnerDiagnosticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/owner_/feedback': {
+      id: '/_authenticated/owner_/feedback'
+      path: '/owner/feedback'
+      fullPath: '/owner/feedback'
+      preLoaderRoute: typeof AuthenticatedOwnerFeedbackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/owner_/subscribe': {
+      id: '/_authenticated/owner_/subscribe'
+      path: '/owner/subscribe'
+      fullPath: '/owner/subscribe'
+      preLoaderRoute: typeof AuthenticatedOwnerSubscribeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/calendar-event': {
+      id: '/api/public/calendar-event'
+      path: '/api/public/calendar-event'
+      fullPath: '/api/public/calendar-event'
+      preLoaderRoute: typeof ApiPublicCalendarEventRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/payments/webhook': {
-      id: '/api/public/payments/webhook'
-      path: '/api/public/payments/webhook'
-      fullPath: '/api/public/payments/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+    '/api/public/ready': {
+      id: '/api/public/ready'
+      path: '/api/public/ready'
+      fullPath: '/api/public/ready'
+      preLoaderRoute: typeof ApiPublicReadyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/jobs/send-surveys': {
-      id: '/api/public/jobs/send-surveys'
-      path: '/api/public/jobs/send-surveys'
-      fullPath: '/api/public/jobs/send-surveys'
-      preLoaderRoute: typeof ApiPublicJobsSendSurveysRouteImport
+    '/oauth/google-calendar/return': {
+      id: '/oauth/google-calendar/return'
+      path: '/oauth/google-calendar/return'
+      fullPath: '/oauth/google-calendar/return'
+      preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/jobs/enrich-feedback': {
-      id: '/api/public/jobs/enrich-feedback'
-      path: '/api/public/jobs/enrich-feedback'
-      fullPath: '/api/public/jobs/enrich-feedback'
-      preLoaderRoute: typeof ApiPublicJobsEnrichFeedbackRouteImport
+    '/api/public/emails/survey-invite': {
+      id: '/api/public/emails/survey-invite'
+      path: '/api/public/emails/survey-invite'
+      fullPath: '/api/public/emails/survey-invite'
+      preLoaderRoute: typeof ApiPublicEmailsSurveyInviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/jobs/booking-maintenance': {
@@ -764,11 +769,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsBuildReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/emails/survey-invite': {
-      id: '/api/public/emails/survey-invite'
-      path: '/api/public/emails/survey-invite'
-      fullPath: '/api/public/emails/survey-invite'
-      preLoaderRoute: typeof ApiPublicEmailsSurveyInviteRouteImport
+    '/api/public/jobs/enrich-feedback': {
+      id: '/api/public/jobs/enrich-feedback'
+      path: '/api/public/jobs/enrich-feedback'
+      fullPath: '/api/public/jobs/enrich-feedback'
+      preLoaderRoute: typeof ApiPublicJobsEnrichFeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/send-surveys': {
+      id: '/api/public/jobs/send-surveys'
+      path: '/api/public/jobs/send-surveys'
+      fullPath: '/api/public/jobs/send-surveys'
+      preLoaderRoute: typeof ApiPublicJobsSendSurveysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -839,6 +879,8 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCalendarEventRoute: ApiPublicCalendarEventRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicReadyRoute: ApiPublicReadyRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,
   ApiPublicJobsBookingMaintenanceRoute: ApiPublicJobsBookingMaintenanceRoute,

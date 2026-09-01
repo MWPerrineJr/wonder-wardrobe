@@ -205,10 +205,10 @@ export const regenerateShopReport = createServerFn({ method: "POST" })
 
     const environment = requirePaymentsEnv(data.environment);
 
-    const { data: hasAnalytics, error: gateErr } = await supabase.rpc(
-      "shop_has_active_analytics",
-      { _shop_id: data.shopId, _env: environment },
-    );
+    const { data: hasAnalytics, error: gateErr } = await supabase.rpc("shop_has_active_analytics", {
+      _shop_id: data.shopId,
+      _env: environment,
+    });
     if (gateErr) throw dbError(gateErr, "feedback");
     if (!hasAnalytics) throw new Error("The analytics plan is required to generate reports.");
 

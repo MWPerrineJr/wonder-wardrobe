@@ -1,6 +1,7 @@
 # Buy a domain through Lovable for email sending
 
 ## Goal
+
 Get a domain you own connected to this project so the app can send branded survey emails from your own domain (e.g. `notify@yourdomain.com`).
 
 ## Steps
@@ -20,5 +21,6 @@ Get a domain you own connected to this project so the app can send branded surve
    - Run the survey send job and confirm the invite email is delivered to a real inbox.
 
 ## Notes
+
 - Domain purchase is available on paid Lovable plans.
 - If you prefer not to buy here, you can buy from any external registrar and connect it manually.

@@ -32,10 +32,10 @@ export const getShopAnalytics = createServerFn({ method: "GET" })
 
     // Business analytics is part of the paid plan — gated server-side so the
     // function can't be called directly to bypass the upgrade screen.
-    const { data: hasAnalytics, error: gateErr } = await supabase.rpc(
-      "shop_has_active_analytics",
-      { _shop_id: data.shopId, _env: environment },
-    );
+    const { data: hasAnalytics, error: gateErr } = await supabase.rpc("shop_has_active_analytics", {
+      _shop_id: data.shopId,
+      _env: environment,
+    });
     if (gateErr) throw dbError(gateErr, "analytics");
     if (!hasAnalytics) return emptyAnalytics(data.days);
 

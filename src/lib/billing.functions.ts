@@ -3,9 +3,12 @@ import { z } from "zod";
 import { dbError } from "@/lib/db-error";
 import { RETURN_PATHS, resolveAppReturnUrl } from "@/lib/return-url";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requirePaymentsEnv } from "@/lib/payments-env";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import type Stripe from "stripe";
 
 // Per-shop analytics subscription ($120/month or $1,000/year, 30-day trial).
 // Free tier: shop listing, public page, services, hours, calendar, bookings.
@@ -93,11 +96,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
         .select("id", { count: "exact", head: true })
         .eq("shop_id", data.shopId)
         .eq("is_active", true),
-      (supabase as any)
-        .from("comp_grants")
-        .select("redeemed_at")
-        .eq("shop_id", data.shopId)
-        .maybeSingle(),
+      supabase.from("comp_grants").select("redeemed_at").eq("shop_id", data.shopId).maybeSingle(),
     ]);
     if (fnErr) throw dbError(fnErr, "billing");
     if (subErr) throw dbError(subErr, "billing");
@@ -126,7 +125,7 @@ export const redeemCompCode = createServerFn({ method: "POST" })
     await requireOwnedShop(supabase, userId, data.shopId);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: outcome, error } = await (supabaseAdmin as any).rpc("redeem_comp_code", {
+    const { data: outcome, error } = await supabaseAdmin.rpc("redeem_comp_code", {
       _shop_id: data.shopId,
       _code: data.code.toUpperCase(),
       _user_id: userId,
@@ -142,7 +141,7 @@ export const redeemCompCode = createServerFn({ method: "POST" })
 
 /** Owner check through the caller's own RLS-scoped client. */
 async function requireOwnedShop(
-  supabase: { from: (t: "shops") => any },
+  supabase: SupabaseClient<Database>,
   userId: string,
   shopId: string,
 ): Promise<{ id: string; name: string }> {
@@ -202,7 +201,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
     const shop = await requireOwnedShop(supabase, userId, data.shopId);
 
-    const { data: grant, error: grantErr } = await (supabase as any)
+    const { data: grant, error: grantErr } = await supabase
       .from("comp_grants")
       .select("shop_id")
       .eq("shop_id", shop.id)
@@ -265,7 +264,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
           trial_period_days: TRIAL_DAYS,
           metadata: { userId, shop_id: shop.id },
         },
-      } as any);
+      } as Stripe.Checkout.SessionCreateParams);
 
       return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
@@ -276,8 +275,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 type PortalResult = { url: string } | { error: string };
 
 type CancelResult =
-  | { ok: true; cancelAtPeriodEnd: boolean; currentPeriodEnd: string | null }
-  | { error: string };
+  { ok: true; cancelAtPeriodEnd: boolean; currentPeriodEnd: string | null } | { error: string };
 
 /**
  * Cancel (or un-cancel) the shop's analytics subscription at the end of the
@@ -315,8 +313,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
         cancel_at_period_end: !resume,
       });
 
-      const periodEnd = (updated as unknown as { current_period_end?: number })
-        .current_period_end;
+      const periodEnd = (updated as unknown as { current_period_end?: number }).current_period_end;
       const currentPeriodEnd = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
       await supabase

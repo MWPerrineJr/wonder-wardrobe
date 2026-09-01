@@ -11,7 +11,12 @@ export default defineTool({
     id: z.string().uuid().describe("The customer_feedback row UUID."),
     status: z.enum(["new", "reviewed", "responded", "archived"]),
   },
-  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async ({ id, status }, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };

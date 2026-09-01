@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from "react";
 
 import {
   Body,
@@ -11,7 +11,7 @@ import {
   Link,
   Preview,
   Text,
-} from '@react-email/components'
+} from "@react-email/components";
 
 import {
   BRAND,
@@ -25,11 +25,11 @@ import {
   main,
   text,
   wordmark,
-} from './brand'
+} from "./brand";
 
 interface MagicLinkEmailProps {
-  siteName: string
-  confirmationUrl: string
+  siteName: string;
+  confirmationUrl: string;
 }
 
 export const MagicLinkEmail = ({ siteName, confirmationUrl }: MagicLinkEmailProps) => (
@@ -53,7 +53,7 @@ export const MagicLinkEmail = ({ siteName, confirmationUrl }: MagicLinkEmailProp
           If you didn't request this link, you can safely ignore this email.
         </Text>
         <Text style={footer}>
-          Need help?{' '}
+          Need help?{" "}
           <Link href={`mailto:${BRAND.supportEmail}`} style={link}>
             {BRAND.supportEmail}
           </Link>
@@ -61,6 +61,6 @@ export const MagicLinkEmail = ({ siteName, confirmationUrl }: MagicLinkEmailProp
       </Container>
     </Body>
   </Html>
-)
+);
 
-export default MagicLinkEmail
+export default MagicLinkEmail;

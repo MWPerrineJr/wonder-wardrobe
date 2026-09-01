@@ -120,21 +120,18 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       console.error("[account] calendar cleanup skipped", e);
     }
 
-
-    const shopPolicy = (before as unknown as {
-      shop?: { cancel_free_hours?: number; late_cancel_fee_percent?: number } | null;
-    }).shop;
+    const shopPolicy = (
+      before as unknown as {
+        shop?: { cancel_free_hours?: number; late_cancel_fee_percent?: number } | null;
+      }
+    ).shop;
     const policy: CancellationPolicy = {
       freeHours: shopPolicy?.cancel_free_hours ?? 24,
       lateFeePercent: shopPolicy?.late_cancel_fee_percent ?? 50,
       rescheduleAllowed: true,
       rescheduleMinHours: 24,
     };
-    const outcome = refundForCancellation(
-      before.amount_paid_cents ?? 0,
-      before.starts_at,
-      policy,
-    );
+    const outcome = refundForCancellation(before.amount_paid_cents ?? 0, before.starts_at, policy);
 
     const paid = before.payment_status === "paid" && (before.amount_paid_cents ?? 0) > 0;
     if (!paid || outcome.refundCents <= 0) {
@@ -205,18 +202,20 @@ export const listMyBookings = createServerFn({ method: "GET" })
       .order("starts_at", { ascending: false });
     if (error) throw error;
     return (data ?? []).map((row) => {
-      const shop = (row as unknown as {
-        shop?: {
-          id: string;
-          name: string;
-          slug: string | null;
-          address?: string | null;
-          cancel_free_hours?: number;
-          late_cancel_fee_percent?: number;
-          reschedule_allowed?: boolean;
-          reschedule_min_hours?: number;
-        } | null;
-      }).shop;
+      const shop = (
+        row as unknown as {
+          shop?: {
+            id: string;
+            name: string;
+            slug: string | null;
+            address?: string | null;
+            cancel_free_hours?: number;
+            late_cancel_fee_percent?: number;
+            reschedule_allowed?: boolean;
+            reschedule_min_hours?: number;
+          } | null;
+        }
+      ).shop;
       return {
         ...(row as unknown as MyBooking),
         shop: shop

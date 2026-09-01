@@ -83,7 +83,7 @@ export function getStripeErrorMessage(error: unknown): string {
 export async function verifyWebhook(
   req: Request,
   env: StripeEnv = configuredPaymentsEnv(),
-): Promise<{ type: string; data: { object: any } }> {
+): Promise<Record<string, unknown>> {
   const mode = requirePaymentsEnv(env);
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
@@ -124,5 +124,5 @@ export async function verifyWebhook(
 
   if (!v1Signatures.includes(expected)) throw new Error("Invalid webhook signature");
 
-  return JSON.parse(body);
+  return JSON.parse(body) as Record<string, unknown>;
 }

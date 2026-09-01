@@ -1,3 +1,5 @@
+import { redactUnknown } from "./log.ts";
+
 export type StripeEnv = "sandbox" | "live";
 
 export type WebhookKind = "signature" | "permanent" | "retryable";
@@ -20,8 +22,7 @@ export function httpStatusForWebhookError(error: unknown): 400 | 500 {
 }
 
 export function sanitizeWebhookError(error: unknown): string {
-  const raw = error instanceof Error ? error.message : String(error);
-  return raw.replace(/sk_(live|test)_[A-Za-z0-9]+/g, "[redacted]").slice(0, 500);
+  return redactUnknown(error);
 }
 
 export type CheckoutSessionLike = {
@@ -96,7 +97,10 @@ export function shouldCaptureBookingPayment(
 }
 
 export function shouldReleaseBookingHold(eventType: string): boolean {
-  return eventType === "checkout.session.expired" || eventType === "checkout.session.async_payment_failed";
+  return (
+    eventType === "checkout.session.expired" ||
+    eventType === "checkout.session.async_payment_failed"
+  );
 }
 
 export function assertBookingPaymentMatches(

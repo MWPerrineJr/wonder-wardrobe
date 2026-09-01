@@ -6,10 +6,13 @@ import { AccountNav } from "@/components/account-nav";
 import { SiteBrand } from "@/components/site-brand";
 import { WelcomeGate } from "@/components/welcome-gate";
 import { listPublicShops } from "@/lib/shops.functions";
-import { CATEGORY_ICONS, CATEGORY_LABELS, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
+import {
+  CATEGORY_ICONS,
+  CATEGORY_LABELS,
+  SERVICE_CATEGORIES,
+  type ServiceCategory,
+} from "@/lib/categories";
 import { SUPPORT_MAILTO } from "@/lib/support";
-
-
 
 const shopsQuery = queryOptions({
   queryKey: ["public", "shops"],
@@ -53,7 +56,6 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 const HERO_BG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuA8cpAj_UG6ago_RiH5Y5HvlAh7URwYB-Lhg9to3EXFyzf9AH_8W1JthLNdq43ksvarR8otGhDrLGRnqVPLzRn2v1qGYEtNYNezkhbbsOws_29yUbWdAH5ot3zwrWR5meCqg74g8ORDITM0fvnQzwUaOKwSngFhPkbB-99a3vmFjtQy1l2hR0z1Z23LA2X5B776bWXhAdtLDUyM6kTsODsp5K7BLaVXeqzVO_onraeIhg5CD3mNx8BS";
 
-
 const FALLBACK_SHOP_IMG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCGuKuKoUkaNsFqKp3Zjp0Sj0XtbFYL1y3qe1fynBBGO0jzvYr0Wt4LdowxOrSnGETsNuTDc1Dvf9NsWpGU11DEU1bUa6lIypidQCuVCGQ6ZDGj4BlRHgza9bTBML87SeW8jpnRmYyCSP4d7XBhjFYyQItmAdWJc7NoLFPMXA4TP0jCTVmqWPehX198QFQzZSrqS_MNWs4R6lP9KS7Tl54pcN_yEF10uqu4HiiVuUNzESaQoysPGFzc";
 
@@ -63,7 +65,6 @@ function MarketplacePage() {
   const [locationInput, setLocationInput] = useState("");
   const [query, setQuery] = useState({ name: "", location: "" });
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
-
 
   const filteredShops = useMemo(() => {
     // Normalize: lowercase, strip accents/punctuation, collapse whitespace.
@@ -119,17 +120,12 @@ function MarketplacePage() {
     const l = norm(query.location);
     if (!n && !l && !selectedCategory) return shops;
     return shops.filter((s) => {
-      const nameHit =
-        !n ||
-        fuzzyMatch(n, norm(s.name)) ||
-        fuzzyMatch(n, norm(s.description ?? ""));
+      const nameHit = !n || fuzzyMatch(n, norm(s.name)) || fuzzyMatch(n, norm(s.description ?? ""));
       const locHit = !l || fuzzyMatch(l, norm(s.address ?? ""));
-      const categoryHit =
-        !selectedCategory || (s.categories ?? []).includes(selectedCategory);
+      const categoryHit = !selectedCategory || (s.categories ?? []).includes(selectedCategory);
       return nameHit && locHit && categoryHit;
     });
   }, [shops, query, selectedCategory]);
-
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -148,19 +144,34 @@ function MarketplacePage() {
         <div className="flex justify-between items-center px-margin-desktop h-16 max-w-container-max mx-auto w-full">
           <SiteBrand />
           <nav className="flex items-center gap-8">
-            <Link to="/" className="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md">
+            <Link
+              to="/"
+              className="text-primary font-bold border-b-2 border-primary pb-1 font-label-md text-label-md"
+            >
               Marketplace
             </Link>
-            <Link to="/shop" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link
+              to="/shop"
+              className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded"
+            >
               Shops
             </Link>
-            <Link to="/demo" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link
+              to="/demo"
+              className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded"
+            >
               Demo
             </Link>
-            <Link to="/provider" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link
+              to="/provider"
+              className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded"
+            >
               Provider
             </Link>
-            <Link to="/owner" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded">
+            <Link
+              to="/owner"
+              className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md px-2 py-1 rounded"
+            >
               Owner
             </Link>
           </nav>
@@ -194,8 +205,8 @@ function MarketplacePage() {
                 Find your next appointment
               </h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant">
-                Discover top-rated studios, salons, and spas, view their services, and book your next appointment
-                seamlessly.
+                Discover top-rated studios, salons, and spas, view their services, and book your
+                next appointment seamlessly.
               </p>
 
               <form
@@ -203,37 +214,37 @@ function MarketplacePage() {
                 className="w-full bg-surface border border-border-subtle rounded-2xl p-2 flex flex-col gap-2 focus-within:border-primary transition-colors"
               >
                 <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-xl border border-border-subtle focus-within:border-primary">
-                <Icon name="search" className="text-text-muted mr-3" />
-                <input
-                  className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
-                  placeholder="Shop name or style..."
-                  type="text"
-                  autoComplete="off"
-                  value={nameInput}
-                  onChange={(e) => setNameInput(e.target.value)}
-                  onFocus={() => console.log("[search] name focused")}
-                  onClick={() => console.log("[search] name clicked")}
-                />
+                  <Icon name="search" className="text-text-muted mr-3" />
+                  <input
+                    className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
+                    placeholder="Shop name or style..."
+                    type="text"
+                    autoComplete="off"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    onFocus={() => console.log("[search] name focused")}
+                    onClick={() => console.log("[search] name clicked")}
+                  />
                 </div>
                 <div className="flex-grow flex items-center bg-surface-container px-4 py-3 rounded-xl border border-border-subtle focus-within:border-primary">
-                <Icon name="location_on" className="text-text-muted mr-3" />
-                <input
-                  className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
-                  placeholder="Location..."
-                  type="text"
-                  autoComplete="off"
-                  value={locationInput}
-                  onChange={(e) => setLocationInput(e.target.value)}
-                  onFocus={() => {
-                    console.log("[search] location focused");
-                    if (!import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY) {
-                      console.info(
-                        "[search] Google Places autocomplete not enabled: no browser-safe Maps key is configured (GOOGLE_MAPS_API_KEY is server-only and used for the map embed). Add VITE_GOOGLE_MAPS_BROWSER_KEY with an HTTP-referrer-restricted key to enable Places suggestions.",
-                      );
-                    }
-                  }}
-                  onClick={() => console.log("[search] location clicked")}
-                />
+                  <Icon name="location_on" className="text-text-muted mr-3" />
+                  <input
+                    className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
+                    placeholder="Location..."
+                    type="text"
+                    autoComplete="off"
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    onFocus={() => {
+                      console.log("[search] location focused");
+                      if (!import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY) {
+                        console.info(
+                          "[search] Google Places autocomplete not enabled: no browser-safe Maps key is configured (GOOGLE_MAPS_API_KEY is server-only and used for the map embed). Add VITE_GOOGLE_MAPS_BROWSER_KEY with an HTTP-referrer-restricted key to enable Places suggestions.",
+                        );
+                      }
+                    }}
+                    onClick={() => console.log("[search] location clicked")}
+                  />
                 </div>
                 <button
                   type="submit"
@@ -297,12 +308,13 @@ function MarketplacePage() {
             </div>
           </section>
 
-
           {/* Featured shops */}
           <section id="featured-shops" className="flex flex-col gap-8 scroll-mt-24">
             <div className="flex justify-between items-end">
               <h2 className="font-headline-md text-headline-md text-on-surface">
-                {query.name || query.location || selectedCategory ? "Search Results" : "Featured Shops"}
+                {query.name || query.location || selectedCategory
+                  ? "Search Results"
+                  : "Featured Shops"}
               </h2>
               {(query.name || query.location || selectedCategory) && (
                 <button
@@ -383,7 +395,6 @@ function MarketplacePage() {
                         {s.description}
                       </p>
                     )}
-
                   </Link>
                 ))}
               </div>
@@ -395,15 +406,26 @@ function MarketplacePage() {
       {/* Footer */}
       <footer className="bg-background border-t border-border-subtle w-full py-10 mt-auto">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin-desktop max-w-container-max mx-auto gap-gutter">
-          <div className="font-headline-md text-headline-md text-on-surface">The Standing Chair</div>
+          <div className="font-headline-md text-headline-md text-on-surface">
+            The Standing Chair
+          </div>
           <nav className="flex flex-wrap justify-center gap-6">
-            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
+            <a
+              className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm"
+              href="#"
+            >
               Privacy Policy
             </a>
-            <a className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm" href="#">
+            <a
+              className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm"
+              href="#"
+            >
               Terms of Service
             </a>
-            <Link to="/demo" className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm">
+            <Link
+              to="/demo"
+              className="text-text-muted hover:text-primary transition-colors font-label-sm text-label-sm"
+            >
               See the demo
             </Link>
 
@@ -413,7 +435,6 @@ function MarketplacePage() {
             >
               Contact support
             </a>
-
           </nav>
           <div className="font-body-md text-body-md text-text-muted text-center md:text-right">
             The Standing Chair is a product of{" "}
@@ -432,19 +453,31 @@ function MarketplacePage() {
       {/* Bottom nav — mobile */}
       <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-border-subtle shadow-lg">
         <div className="flex justify-around items-center h-16 px-margin-mobile">
-          <Link to="/" className="flex flex-col items-center justify-center text-primary font-bold p-2 rounded">
+          <Link
+            to="/"
+            className="flex flex-col items-center justify-center text-primary font-bold p-2 rounded"
+          >
             <Icon name="search" />
             <span className="font-label-sm text-label-sm mt-1">Explore</span>
           </Link>
-          <Link to="/shop" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+          <Link
+            to="/shop"
+            className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded"
+          >
             <Icon name="event_note" />
             <span className="font-label-sm text-label-sm mt-1">Bookings</span>
           </Link>
-          <Link to="/provider" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+          <Link
+            to="/provider"
+            className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded"
+          >
             <Icon name="calendar_today" />
             <span className="font-label-sm text-label-sm mt-1">Provider</span>
           </Link>
-          <Link to="/owner" className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded">
+          <Link
+            to="/owner"
+            className="flex flex-col items-center justify-center text-on-surface-variant p-2 rounded"
+          >
             <Icon name="dashboard" />
             <span className="font-label-sm text-label-sm mt-1">Owner</span>
           </Link>

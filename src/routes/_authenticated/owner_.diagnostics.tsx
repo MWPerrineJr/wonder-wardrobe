@@ -77,11 +77,7 @@ function DiagnosticsPage() {
 
         <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm">
           <Row label="PAYMENTS_ENV" value={mode} ok={data.ok} />
-          <Row
-            label="Status"
-            value={data.ok ? "Ready" : "Incomplete"}
-            ok={data.ok}
-          />
+          <Row label="Status" value={data.ok ? "Ready" : "Incomplete"} ok={data.ok} />
           <Row
             label="Stripe connection"
             value={data.stripeKeyConfigured ? "Configured" : "Missing"}
@@ -102,12 +98,66 @@ function DiagnosticsPage() {
             value={data.appUrlConfigured ? "Configured" : "Missing"}
             ok={data.appUrlConfigured}
           />
-          <Row
-            label="Client token"
-            value={data.clientToken}
-            ok={data.clientToken !== "missing"}
-          />
+          <Row label="Client token" value={data.clientToken} ok={data.clientToken !== "missing"} />
           <Row label="Webhook path" value={data.webhookPath ?? "—"} />
+        </section>
+
+        <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm">
+          <h2 className="font-headline-md text-headline-md text-on-surface mb-2">
+            Stripe webhooks
+          </h2>
+          <p className="text-on-surface-variant text-body-sm mb-2">
+            Stuck processing or failed rows need a retry from Stripe or a look at recent logs.
+          </p>
+          <Row
+            label="Processing"
+            value={String(data.webhook.processing)}
+            ok={data.webhook.processing === 0}
+          />
+          <Row label="Failed" value={String(data.webhook.failed)} ok={data.webhook.failed === 0} />
+          <Row label="Completed (24h)" value={String(data.webhook.completedLastDay)} />
+          <Row
+            label="Calendar outbox pending"
+            value={String(data.calendarOutboxPending)}
+            ok={data.calendarOutboxPending === 0}
+          />
+        </section>
+
+        <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm">
+          <h2 className="font-headline-md text-headline-md text-on-surface mb-2">
+            Background jobs
+          </h2>
+          {data.jobs.length === 0 ? (
+            <p className="text-on-surface-variant text-body-md">
+              No job state yet, or this account is not a shop owner.
+            </p>
+          ) : (
+            data.jobs.map((job) => (
+              <div key={job.jobName} className="py-3 border-b border-border-subtle last:border-0">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="font-label-md text-label-md text-on-surface">{job.jobName}</span>
+                  <span
+                    className={`text-label-md ${
+                      job.status === "paused" || job.consecutiveFailures > 0
+                        ? "text-destructive"
+                        : "text-on-surface-variant"
+                    }`}
+                  >
+                    {job.status}
+                  </span>
+                </div>
+                <p className="text-body-sm text-on-surface-variant mt-1">
+                  Failures: {job.consecutiveFailures}
+                  {job.lastRunAt ? ` · Last run ${job.lastRunAt}` : ""}
+                </p>
+                {(job.pausedReason || job.lastError) && (
+                  <p className="text-body-sm text-destructive mt-1">
+                    {job.pausedReason ?? job.lastError}
+                  </p>
+                )}
+              </div>
+            ))
+          )}
         </section>
 
         {!data.ok && data.issues.length > 0 && (

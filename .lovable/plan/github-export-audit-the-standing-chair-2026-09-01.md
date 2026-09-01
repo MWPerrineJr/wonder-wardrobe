@@ -4,33 +4,36 @@ Read-only audit. Nothing was modified. Below is the full inventory of what the a
 
 ## 1. Runtime services the app talks to
 
-| Service | Used for | Where |
-|---|---|---|
-| Supabase (Lovable Cloud) | Database, auth, RLS, cron + pg_net jobs | `src/integrations/supabase/*`, `supabase/migrations` |
-| Lovable AI Gateway (`ai.gateway.lovable.dev`) | Feedback sentiment analysis, daily reports | `src/lib/ai.server.ts`, `feedback-analysis.server.ts` |
-| Lovable Connector Gateway (`connector-gateway.lovable.dev`) | Stripe API proxy, Google Calendar per-user OAuth | `src/lib/stripe.server.ts`, `src/integrations/lovable/appUserConnector.ts` |
-| Stripe (via gateway) | Subscriptions, deposits, Connect payouts, webhooks | `src/lib/billing.functions.ts`, `payouts.functions.ts`, `routes/api/public/payments/webhook.ts` |
-| Lovable Email (`@lovable.dev/email-js`) | Auth emails + owner welcome + survey invites | `src/routes/lovable/email/**`, `src/lib/email-templates/**` |
-| Google Maps (Embed + optional Places) | Shop map, address autocomplete | `src/lib/maps.functions.ts`, `src/components/shop-map.tsx` |
-| Google Calendar API | Provider calendar sync | `src/server/googleCalendar.server.ts` |
-| Google OAuth (Supabase provider) | Customer/owner sign-in | `src/routes/auth.tsx` |
-| Google Fonts | Outfit / Figtree | `src/routes/__root.tsx` |
+| Service                                                     | Used for                                           | Where                                                                                           |
+| ----------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Supabase (Lovable Cloud)                                    | Database, auth, RLS, cron + pg_net jobs            | `src/integrations/supabase/*`, `supabase/migrations`                                            |
+| Lovable AI Gateway (`ai.gateway.lovable.dev`)               | Feedback sentiment analysis, daily reports         | `src/lib/ai.server.ts`, `feedback-analysis.server.ts`                                           |
+| Lovable Connector Gateway (`connector-gateway.lovable.dev`) | Stripe API proxy, Google Calendar per-user OAuth   | `src/lib/stripe.server.ts`, `src/integrations/lovable/appUserConnector.ts`                      |
+| Stripe (via gateway)                                        | Subscriptions, deposits, Connect payouts, webhooks | `src/lib/billing.functions.ts`, `payouts.functions.ts`, `routes/api/public/payments/webhook.ts` |
+| Lovable Email (`@lovable.dev/email-js`)                     | Auth emails + owner welcome + survey invites       | `src/routes/lovable/email/**`, `src/lib/email-templates/**`                                     |
+| Google Maps (Embed + optional Places)                       | Shop map, address autocomplete                     | `src/lib/maps.functions.ts`, `src/components/shop-map.tsx`                                      |
+| Google Calendar API                                         | Provider calendar sync                             | `src/server/googleCalendar.server.ts`                                                           |
+| Google OAuth (Supabase provider)                            | Customer/owner sign-in                             | `src/routes/auth.tsx`                                                                           |
+| Google Fonts                                                | Outfit / Figtree                                   | `src/routes/__root.tsx`                                                                         |
 
 ## 2. Environment variables
 
 **Client-visible (must exist at build time, in `.env*`, currently not committed):**
+
 - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`
 - `VITE_PAYMENTS_CLIENT_TOKEN` (separate test/live values in `.env.development` / `.env.production`)
 - `VITE_GOOGLE_MAPS_BROWSER_KEY` (optional; enables Places autocomplete — never set in this project)
 
 **Server-only, non-secret:**
+
 - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_ANON_KEY`, `SUPABASE_PROJECT_ID`
 - `APP_URL` (used to build survey links in the cron jobs)
 - `LOVABLE_SEND_URL` (optional email dispatch override)
 
 **Secrets (8 configured today, values not retrievable):**
+
 - `LOVABLE_API_KEY` — platform-managed; gateway auth for AI, email, connectors. **No equivalent outside Lovable.**
-- `STRIPE_LIVE_API_KEY`, `STRIPE_SANDBOX_API_KEY` — gateway connection ids, *not* Stripe secret keys
+- `STRIPE_LIVE_API_KEY`, `STRIPE_SANDBOX_API_KEY` — gateway connection ids, _not_ Stripe secret keys
 - `PAYMENTS_LIVE_WEBHOOK_SECRET`, `PAYMENTS_SANDBOX_WEBHOOK_SECRET`
 - `GOOGLE_MAPS_API_KEY` (server-side, map embed)
 - `GOOGLE_CALENDAR_APP_USER_CONNECTOR_CLIENT_API_KEY` — connector-managed
@@ -49,6 +52,7 @@ Read-only audit. Nothing was modified. Below is the full inventory of what the a
 ## 4. Scheduled jobs (live in the database, not in code)
 
 Three `pg_cron` jobs POST to the app with the publishable key as `apikey`:
+
 - `feedback-send-surveys` — hourly → `/api/public/jobs/send-surveys`
 - `feedback-enrich` — every 5 min → `/api/public/jobs/enrich-feedback`
 - `feedback-build-reports` — daily 06:30 → `/api/public/jobs/build-reports`
@@ -74,7 +78,7 @@ They target `project--cb8ddcf9-…lovable.app`. **These URLs must be repointed a
 
 1. **`.env`, `.env.development`, `.env.production`** — `*.local` is ignored but these three are plain `.env*` files; confirm your export actually includes or excludes them, and never publish the live Stripe token in a public repo.
 2. **All 8 secrets** — stored in Lovable's secret store, never on disk. Must be recreated in the new host.
-3. **`src/assets/pandagentic-mark.png`** — only the `.asset.json` pointer is in the repo; the PNG itself is served from Lovable's CDN (`/__l5e/assets-v1/…`). The byline logo breaks outside Lovable hosting. `public/favicon.png` *is* a real committed file.
+3. **`src/assets/pandagentic-mark.png`** — only the `.asset.json` pointer is in the repo; the PNG itself is served from Lovable's CDN (`/__l5e/assets-v1/…`). The byline logo breaks outside Lovable hosting. `public/favicon.png` _is_ a real committed file.
 4. **Lovable-generated integration files** — `src/integrations/supabase/{client,client.server,auth-middleware,auth-attacher,previewAuthStorage,types}.ts` are on disk but auto-generated; there is no generator outside Lovable, so treat them as hand-maintained after export.
 5. **Cron job definitions and the current `net.http_post` schedule** — live database state; the last migration is the source of truth but must be re-run with new URLs.
 6. **Connector configuration** — the Stripe connection and Google Calendar App User Connector client live in the Lovable workspace, not in code.

@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from "react";
 
 import {
   Body,
@@ -10,23 +10,12 @@ import {
   Link,
   Preview,
   Text,
-} from '@react-email/components'
+} from "@react-email/components";
 
-import {
-  BRAND,
-  codeStyle,
-  container,
-  footer,
-  h1,
-  hr,
-  link,
-  main,
-  text,
-  wordmark,
-} from './brand'
+import { BRAND, codeStyle, container, footer, h1, hr, link, main, text, wordmark } from "./brand";
 
 interface ReauthenticationEmailProps {
-  token: string
+  token: string;
 }
 
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
@@ -44,7 +33,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
           The code expires shortly. If you didn't request it, you can safely ignore this email.
         </Text>
         <Text style={footer}>
-          Need help?{' '}
+          Need help?{" "}
           <Link href={`mailto:${BRAND.supportEmail}`} style={link}>
             {BRAND.supportEmail}
           </Link>
@@ -52,6 +41,6 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
       </Container>
     </Body>
   </Html>
-)
+);
 
-export default ReauthenticationEmail
+export default ReauthenticationEmail;

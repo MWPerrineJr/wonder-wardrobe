@@ -29,6 +29,7 @@ This keeps every visit's feedback private-first while sending happy customers to
 ## Technical plan
 
 ### Database (one migration)
+
 - `shops.google_review_url text` (nullable, `https://` validated on write).
 - `survey_invites`: add `rating_hint smallint`, `email_status text default 'pending'`, `email_error text`, `emailed_at timestamptz`. Service-role-only grants stay.
 - `feedback_reports`: `id, shop_id, window_start, window_end, overall_sentiment numeric, summary text, praise_themes jsonb, complaint_themes jsonb, suggestions jsonb, model text, feedback_count int, created_at`. GRANT SELECT to `authenticated`, ALL to `service_role`; RLS policy: shop owner can select.
@@ -36,15 +37,18 @@ This keeps every visit's feedback private-first while sending happy customers to
 - Replace `pending_survey_targets(lookback_days)` with a version returning completed bookings whose `ends_at` is 24-72h old and have no invite, joined to shop name, provider name, customer email and `google_review_url`. Security definer, service-role execute only.
 
 ### Email
+
 - Provision transactional email for the project and scaffold a `survey-invite` template (branded, shop name in the from-name, 5 star links to `/survey/<token>?r=<n>`, address in the footer). Sends log to `email_send_log`.
 
 ### Scheduled server routes (pg_cron calls these)
+
 - `src/routes/api/public/jobs/send-surveys.ts` — shared-secret header check, acquire lease from `ai_job_state`, call the RPC, insert invite, send email, mark `email_status`, cap 25 per run.
 - `src/routes/api/public/jobs/enrich-feedback.ts` — same guard/lease; up to 10 rows where `enriched_at is null`, one Lovable AI call each (`openai/gpt-5.6-sol`) with a strict schema for sentiment/urgency/summary/key phrases/suggested reply, written back with an `enriched_at is null` re-check. Halts and records `paused_reason` on 402/403, backs off on 429, resumes via a single probe item on a later run.
 - `src/routes/api/public/jobs/build-reports.ts` — for each shop with an active analytics subscription and new feedback, generate the rolling report into `feedback_reports`.
 - Cron entries registered in the migration with `pg_cron` + `pg_net` against the stable project URL, authorized by a new `JOB_SHARED_SECRET`.
 
 ### App code
+
 - `src/lib/ai.server.ts` — Lovable AI Gateway provider helper (streamed, run-id aware).
 - `src/lib/feedback-analysis.server.ts` — per-review and per-shop prompts and schemas.
 - `src/lib/survey.functions.ts` — accept the rating prefill; after submit return `{ googleReviewUrl, promptGoogle: rating >= 4 }`.
@@ -54,4 +58,5 @@ This keeps every visit's feedback private-first while sending happy customers to
 - Remove the two `n8n/*.workflow.json` files and replace `n8n/SETUP.md` with `docs/FEEDBACK-PIPELINE.md` describing the in-app pipeline.
 
 ### Verification
+
 Seed a completed booking ~36h old, run the send job, confirm the invite row and email log entry, submit through the tokenized page at 5 stars and at 2 stars to check both thank-you paths, run the enrichment and report jobs, and confirm the dashboard renders the analysis and suggestions.

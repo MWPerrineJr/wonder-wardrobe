@@ -164,9 +164,18 @@ describe("canReserveSlot", () => {
 
 describe("shouldExpireHold", () => {
   it("expires only unpaid pending holds past hold_expires_at", () => {
-    assert.equal(shouldExpireHold("pending", "awaiting_payment", "2026-09-01T10:00:00.000Z", now), true);
-    assert.equal(shouldExpireHold("pending", "awaiting_payment", "2026-09-01T12:00:00.000Z", now), false);
-    assert.equal(shouldExpireHold("pending", "not_required", "2026-09-01T10:00:00.000Z", now), false);
+    assert.equal(
+      shouldExpireHold("pending", "awaiting_payment", "2026-09-01T10:00:00.000Z", now),
+      true,
+    );
+    assert.equal(
+      shouldExpireHold("pending", "awaiting_payment", "2026-09-01T12:00:00.000Z", now),
+      false,
+    );
+    assert.equal(
+      shouldExpireHold("pending", "not_required", "2026-09-01T10:00:00.000Z", now),
+      false,
+    );
     assert.equal(shouldExpireHold("confirmed", "paid", "2026-09-01T10:00:00.000Z", now), false);
   });
 });

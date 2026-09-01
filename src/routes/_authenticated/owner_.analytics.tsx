@@ -3,10 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { AccountNav } from "@/components/account-nav";
-import {
-  AnalyticsUpgradePanel,
-  ManageBillingButton,
-} from "@/components/analytics-upgrade-panel";
+import { AnalyticsUpgradePanel, ManageBillingButton } from "@/components/analytics-upgrade-panel";
 import {
   BookingsTrend,
   LostBookingsTrend,

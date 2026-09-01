@@ -56,7 +56,9 @@ export async function buildShopReport(
     .not("sentiment_score", "is", null);
   const scores = (scored ?? []).map((r) => Number(r.sentiment_score));
   const overall =
-    scores.length > 0 ? Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)) : null;
+    scores.length > 0
+      ? Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2))
+      : null;
 
   const { data: saved, error: insErr } = await admin
     .from("feedback_reports")

@@ -9,6 +9,7 @@ import {
   sanitizeJobError,
   shouldAlertPaused,
 } from "@/lib/job-retry";
+import { logEvent } from "@/lib/log";
 
 export type JobName = "send-surveys" | "enrich-feedback" | "build-reports" | "booking-maintenance";
 
@@ -25,7 +26,7 @@ type JobLog = Record<string, string | number | boolean | null | undefined>;
 
 /** Structured logs only. Never include Authorization, JOB_SECRET, or API keys. */
 export function logJobEvent(fields: JobLog) {
-  console.log(JSON.stringify({ component: "jobs", ts: new Date().toISOString(), ...fields }));
+  logEvent("info", { component: "jobs", ...fields });
 }
 
 export async function runScheduledJob(
@@ -95,7 +96,11 @@ export async function acquireLease(admin: Admin, job: JobName): Promise<JobLease
 
   const { data: claimed } = await admin
     .from("ai_job_state")
-    .update({ lease_until: leaseUntil, last_run_at: now.toISOString(), updated_at: now.toISOString() })
+    .update({
+      lease_until: leaseUntil,
+      last_run_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    })
     .eq("job_name", job)
     .or(`lease_until.is.null,lease_until.lt.${now.toISOString()}`)
     .select("status, paused_reason, paused_at")
@@ -169,7 +174,13 @@ export async function noteJobItemFailure(admin: Admin, job: JobName, error: unkn
     .maybeSingle();
   const next = (data?.consecutive_failures ?? 0) + 1;
   if (next >= CONSECUTIVE_FAILURE_ALERT) {
-    logJobEvent({ event: "job.alert", job, alert: "repeated_failures", consecutive_failures: next, error: sanitized });
+    logJobEvent({
+      event: "job.alert",
+      job,
+      alert: "repeated_failures",
+      consecutive_failures: next,
+      error: sanitized,
+    });
   }
   await admin
     .from("ai_job_state")

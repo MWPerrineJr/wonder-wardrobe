@@ -29,9 +29,7 @@ export const Route = createFileRoute("/demo/embed")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  errorComponent: ({ error }) => (
-    <div className="p-6 text-on-surface-variant">{error.message}</div>
-  ),
+  errorComponent: ({ error }) => <div className="p-6 text-on-surface-variant">{error.message}</div>,
   notFoundComponent: () => <div className="p-6 text-on-surface">Not found.</div>,
   component: DemoEmbedPage,
 });

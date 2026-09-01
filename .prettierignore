@@ -2,6 +2,15 @@ node_modules
 dist
 .output
 .vinxi
+.tanstack
+.nitro
+.wrangler
 pnpm-lock.yaml
 package-lock.json
 routeTree.gen.ts
+src/routeTree.gen.ts
+n8n workflow
+test-results
+playwright-report
+blob-report
+coverage

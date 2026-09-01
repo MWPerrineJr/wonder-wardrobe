@@ -10,7 +10,9 @@ export default defineTool({
   inputSchema: {
     shop_id: z.string().uuid().describe("The shop UUID."),
     status: z.enum(["new", "reviewed", "responded", "archived"]).optional(),
-    sentiment: z.enum(["very_positive", "positive", "neutral", "negative", "very_negative"]).optional(),
+    sentiment: z
+      .enum(["very_positive", "positive", "neutral", "negative", "very_negative"])
+      .optional(),
     urgency: z.enum(["low", "medium", "high"]).optional(),
     limit: z.number().int().min(1).max(200).optional(),
   },

@@ -23,7 +23,14 @@ import {
 } from "@/lib/owner.functions";
 import { categoryLabel, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +42,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
 
 const myShopsQuery = queryOptions({
   queryKey: ["owner", "shops"],
@@ -58,9 +64,7 @@ export const Route = createFileRoute("/_authenticated/owner")({
       </div>
     </div>
   ),
-  notFoundComponent: () => (
-    <div className="p-8 text-on-surface">Not found.</div>
-  ),
+  notFoundComponent: () => <div className="p-8 text-on-surface">Not found.</div>,
   component: OwnerPage,
 });
 
@@ -198,17 +202,27 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
 
-
           <TabsContent value="overview" className="mt-6 flex flex-col gap-6">
             <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-              <StatCard icon="event_available" label="Bookings today" value={selected.today_bookings} />
-              <StatCard icon="content_cut" label="Active services" value={selected.services_count} />
+              <StatCard
+                icon="event_available"
+                label="Bookings today"
+                value={selected.today_bookings}
+              />
+              <StatCard
+                icon="content_cut"
+                label="Active services"
+                value={selected.services_count}
+              />
               <StatCard icon="groups" label="Team providers" value={selected.providers_count} />
             </section>
             <div data-tour="public-link">
               <PublicLinkCard slug={selected.slug} shopName={selected.name} />
             </div>
-            <div data-tour="growth" className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-wrap items-center gap-3 shadow-sm">
+            <div
+              data-tour="growth"
+              className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-wrap items-center gap-3 shadow-sm"
+            >
               <span className="text-on-surface-variant text-body-md flex-grow">
                 Analytics and AI feedback reports live on the paid plan.
               </span>
@@ -251,8 +265,8 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete “{selected.name}”?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently remove the shop, its services, providers, bookings, feedback,
-                      and all related settings. This action cannot be undone.
+                      This will permanently remove the shop, its services, providers, bookings,
+                      feedback, and all related settings. This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -311,7 +325,6 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
             <CalendarPanel />
           </TabsContent>
         </Tabs>
-
       </main>
 
       {tour.active && (
@@ -349,7 +362,9 @@ function buildTourSteps(shop: ShopSummary & { services_count?: number }): TourSt
       tab: "details",
       title: "Start with your shop details",
       body: "Your name, a short description, your address and a cover photo. This is the first thing clients see.",
-      status: detailsDone ? "Details look complete" : "Description, address or cover photo still missing",
+      status: detailsDone
+        ? "Details look complete"
+        : "Description, address or cover photo still missing",
       done: detailsDone,
     },
     {
@@ -436,7 +451,6 @@ type ShopSummary = {
   reschedule_min_hours?: number | null;
 } & ShopLinkValues;
 
-
 function DetailsPanel({ shop }: { shop: ShopSummary }) {
   const qc = useQueryClient();
   const [name, setName] = useState(shop.name);
@@ -497,16 +511,15 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-
   function toggleCategory(cat: ServiceCategory) {
-    setCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
-    );
+    setCategories((prev) => (prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]));
   }
 
   return (
     <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm max-w-2xl">
-      <h2 className="font-headline-md text-[20px] font-semibold text-on-surface mb-4">Shop details</h2>
+      <h2 className="font-headline-md text-[20px] font-semibold text-on-surface mb-4">
+        Shop details
+      </h2>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
@@ -524,7 +537,11 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
           />
         </Field>
         <Field label="Address">
-          <input value={address} onChange={(e) => setAddress(e.target.value)} className={inputCls} />
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className={inputCls}
+          />
         </Field>
         <Field label="Description">
           <textarea
@@ -565,7 +582,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
               src={coverUrl}
               alt="Cover preview"
               className="mt-2 h-32 w-full object-cover rounded border border-border-subtle"
-              onError={(e) => ((e.currentTarget.style.display = "none"))}
+              onError={(e) => (e.currentTarget.style.display = "none")}
             />
           )}
         </Field>
@@ -630,8 +647,6 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
   );
 }
 
-
-
 // -------------------- Services --------------------
 
 type ServiceRow = {
@@ -643,7 +658,6 @@ type ServiceRow = {
   is_active: boolean;
   category: ServiceCategory;
 };
-
 
 function ServicesPanel({ shopId }: { shopId: string }) {
   const qc = useQueryClient();
@@ -663,14 +677,20 @@ function ServicesPanel({ shopId }: { shopId: string }) {
 
   const del = useMutation({
     mutationFn: (serviceId: string) => deleteService({ data: { serviceId } }),
-    onSuccess: () => { toast.success("Service deleted."); invalidate(); },
+    onSuccess: () => {
+      toast.success("Service deleted.");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const toggleActive = useMutation({
     mutationFn: (s: ServiceRow) =>
       updateService({ data: { serviceId: s.id, fields: { is_active: !s.is_active } } }),
-    onSuccess: () => { toast.success("Updated."); invalidate(); },
+    onSuccess: () => {
+      toast.success("Updated.");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -693,17 +713,25 @@ function ServicesPanel({ shopId }: { shopId: string }) {
       ) : (
         <ul className="flex flex-col divide-y divide-border-subtle">
           {data.services.map((s) => (
-            <li key={s.id} className="py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <li
+              key={s.id}
+              className="py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+            >
               <div className="flex-1">
                 <p className="font-label-md text-label-md text-on-surface">
                   {s.name}
-                  {!s.is_active && <span className="ml-2 text-label-sm text-on-surface-variant">(inactive)</span>}
+                  {!s.is_active && (
+                    <span className="ml-2 text-label-sm text-on-surface-variant">(inactive)</span>
+                  )}
                 </p>
                 <p className="text-label-sm text-on-surface-variant">
-                  {categoryLabel(s.category)} · {s.duration_minutes} min · ${(s.price_cents / 100).toFixed(2)}
+                  {categoryLabel(s.category)} · {s.duration_minutes} min · $
+                  {(s.price_cents / 100).toFixed(2)}
                 </p>
                 {s.description && (
-                  <p className="text-label-sm text-on-surface-variant mt-1 line-clamp-2">{s.description}</p>
+                  <p className="text-label-sm text-on-surface-variant mt-1 line-clamp-2">
+                    {s.description}
+                  </p>
                 )}
               </div>
 
@@ -767,7 +795,9 @@ function ServiceDialog({
   const [name, setName] = useState(service?.name ?? "");
   const [description, setDescription] = useState(service?.description ?? "");
   const [durationMin, setDurationMin] = useState(service?.duration_minutes ?? 30);
-  const [priceDollars, setPriceDollars] = useState(((service?.price_cents ?? 3500) / 100).toFixed(2));
+  const [priceDollars, setPriceDollars] = useState(
+    ((service?.price_cents ?? 3500) / 100).toFixed(2),
+  );
   const [isActive, setIsActive] = useState(service?.is_active ?? true);
   const [category, setCategory] = useState<ServiceCategory>(service?.category ?? "hair_barber");
 
@@ -782,7 +812,7 @@ function ServiceDialog({
     setPriceDollars(((service?.price_cents ?? 3500) / 100).toFixed(2));
     setIsActive(service?.is_active ?? true);
     setCategory(service?.category ?? "hair_barber");
-  }, [open, service?.id]);
+  }, [open, service]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -809,7 +839,6 @@ function ServiceDialog({
     onError: (e: Error) => toast.error(e.message),
   });
 
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -825,10 +854,21 @@ function ServiceDialog({
           }}
         >
           <Field label="Name">
-            <input required minLength={1} value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
+            <input
+              required
+              minLength={1}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={inputCls}
+            />
           </Field>
           <Field label="Description">
-            <textarea rows={3} value={description ?? ""} onChange={(e) => setDescription(e.target.value)} className={inputCls} />
+            <textarea
+              rows={3}
+              value={description ?? ""}
+              onChange={(e) => setDescription(e.target.value)}
+              className={inputCls}
+            />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Duration (min)">
@@ -877,7 +917,6 @@ function ServiceDialog({
             Active (bookable by customers)
           </label>
           <DialogFooter>
-
             <button
               type="submit"
               disabled={mutation.isPending}
@@ -963,14 +1002,18 @@ function HoursPanel({ shopId }: { shopId: string }) {
 
   return (
     <section className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm max-w-2xl">
-      <h2 className="font-headline-md text-[20px] font-semibold text-on-surface mb-4">Weekly hours</h2>
+      <h2 className="font-headline-md text-[20px] font-semibold text-on-surface mb-4">
+        Weekly hours
+      </h2>
       <div className="flex flex-col gap-3">
         {rows.map((r) => (
           <div
             key={r.weekday}
             className="grid grid-cols-[110px_auto_1fr_auto_1fr] items-center gap-3 py-2 border-b border-border-subtle last:border-0"
           >
-            <span className="font-label-md text-label-md text-on-surface">{WEEKDAYS[r.weekday]}</span>
+            <span className="font-label-md text-label-md text-on-surface">
+              {WEEKDAYS[r.weekday]}
+            </span>
             <label className="flex items-center gap-2 text-label-sm text-on-surface-variant">
               <input
                 type="checkbox"

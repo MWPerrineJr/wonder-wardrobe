@@ -4,7 +4,11 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { useAuth } from "@/hooks/use-auth";
-import { getMyProviderRange, setBookingStatus, type ProviderBooking } from "@/lib/provider.functions";
+import {
+  getMyProviderRange,
+  setBookingStatus,
+  type ProviderBooking,
+} from "@/lib/provider.functions";
 
 const STATUSES = ["pending", "confirmed", "completed", "cancelled", "no_show"] as const;
 
@@ -114,7 +118,8 @@ export function ProviderSchedule() {
       toast.success(`Appointment marked ${saved.status.replace("_", " ")}.`);
       qc.invalidateQueries({ queryKey: ["provider-range"] });
     },
-    onError: (err) => toast.error(err instanceof Error ? err.message : "Could not update appointment"),
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "Could not update appointment"),
   });
 
   const bookings = useMemo(() => rangeQuery.data?.bookings ?? [], [rangeQuery.data]);
@@ -172,9 +177,13 @@ export function ProviderSchedule() {
   if (!user) {
     return (
       <div className="bg-surface rounded-xl p-6 border border-border-subtle flex flex-col gap-3">
-        <h3 className="font-headline-md text-headline-md text-on-surface">Sign in to see your schedule</h3>
+        <h3 className="font-headline-md text-headline-md text-on-surface">
+          Sign in to see your schedule
+        </h3>
         <p className="text-on-surface-variant text-body-md">
-          {loading ? "Checking your session…" : "Your appointments load once you're signed in as a provider."}
+          {loading
+            ? "Checking your session…"
+            : "Your appointments load once you're signed in as a provider."}
         </p>
         <Link
           to="/auth"
@@ -231,7 +240,9 @@ export function ProviderSchedule() {
         </div>
 
         <div className="bg-surface rounded-xl p-6 border border-border-subtle flex flex-col gap-2">
-          <label className="font-label-md text-label-md text-on-surface-variant">Jump to a date</label>
+          <label className="font-label-md text-label-md text-on-surface-variant">
+            Jump to a date
+          </label>
           <input
             type="date"
             value={anchor}
@@ -309,7 +320,9 @@ export function ProviderSchedule() {
           <p className="p-4 text-on-surface-variant text-body-md">Loading your schedule…</p>
         ) : rangeQuery.isError ? (
           <p className="p-4 text-error text-body-md">
-            {rangeQuery.error instanceof Error ? rangeQuery.error.message : "Could not load schedule"}
+            {rangeQuery.error instanceof Error
+              ? rangeQuery.error.message
+              : "Could not load schedule"}
           </p>
         ) : !rangeQuery.data?.provider ? (
           <p className="p-4 text-on-surface-variant text-body-md">
@@ -318,7 +331,9 @@ export function ProviderSchedule() {
         ) : view === "day" ? (
           <div className="p-4 flex flex-col gap-3">
             {dayBookings.length === 0 ? (
-              <p className="text-on-surface-variant text-body-md">No appointments booked for this day.</p>
+              <p className="text-on-surface-variant text-body-md">
+                No appointments booked for this day.
+              </p>
             ) : (
               dayBookings.map((b) => (
                 <div
@@ -334,12 +349,18 @@ export function ProviderSchedule() {
                         {b.customer_name ?? "Customer"} • {timeRange(b)}
                       </p>
                       {b.customer_phone && (
-                        <p className="font-label-sm text-label-sm text-text-muted">{b.customer_phone}</p>
+                        <p className="font-label-sm text-label-sm text-text-muted">
+                          {b.customer_phone}
+                        </p>
                       )}
-                      {b.notes && <p className="mt-1 text-body-md text-on-surface-variant">{b.notes}</p>}
+                      {b.notes && (
+                        <p className="mt-1 text-body-md text-on-surface-variant">{b.notes}</p>
+                      )}
                     </div>
                     <div className="text-right flex flex-col items-end gap-2">
-                      <span className="font-label-md text-label-md text-on-surface">{money(b.price_cents)}</span>
+                      <span className="font-label-md text-label-md text-on-surface">
+                        {money(b.price_cents)}
+                      </span>
                       <span
                         className={`text-[11px] uppercase tracking-wider border rounded px-2 py-0.5 ${
                           statusColor[b.status] ?? "border-border-subtle text-on-surface-variant"

@@ -4,6 +4,8 @@ import { dbError } from "@/lib/db-error";
 import { requirePaymentsEnv } from "@/lib/payments-env";
 import { RETURN_PATHS, resolveAppReturnUrl } from "@/lib/return-url";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Shop-owned payout accounts (Stripe Connect Express). Client prepayments are
@@ -43,7 +45,7 @@ export const getPayoutAccount = createServerFn({ method: "GET" })
   });
 
 async function requireOwnedShop(
-  supabase: { from: (t: "shops") => any },
+  supabase: SupabaseClient<Database>,
   userId: string,
   shopId: string,
 ): Promise<{ id: string; name: string }> {

@@ -11,6 +11,7 @@ import { RETURN_PATHS, resolveAppReturnUrl, withSearchParams } from "@/lib/retur
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { CancellationPolicy } from "@/lib/cancellation";
+import type Stripe from "stripe";
 
 export { amountDueCents } from "@/lib/booking-money";
 
@@ -372,7 +373,7 @@ export const createBooking = createServerFn({ method: "POST" })
         metadata: { booking_id: booking.id, shop_id: shopRow.id },
         success_url: withSearchParams(returnTo, { paid: "1", booking: booking.id }),
         cancel_url: withSearchParams(returnTo, { paid: "0", booking: booking.id }),
-      } as any);
+      } satisfies Stripe.Checkout.SessionCreateParams);
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const attached = await supabaseAdmin

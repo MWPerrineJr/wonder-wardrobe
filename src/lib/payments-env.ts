@@ -69,7 +69,11 @@ export function inspectPaymentsConfig(env: EnvBag = process.env): PaymentsDiagno
   }
 
   const tokenKind = clientTokenKind(env["VITE_PAYMENTS_CLIENT_TOKEN"]);
-  if (environment && (tokenKind === "missing" || tokenKind === "other") && vitePaymentsEnv !== environment) {
+  if (
+    environment &&
+    (tokenKind === "missing" || tokenKind === "other") &&
+    vitePaymentsEnv !== environment
+  ) {
     issues.push(`Set VITE_PAYMENTS_ENV=${environment} so the client matches PAYMENTS_ENV`);
   }
   if (environment === "sandbox" && tokenKind === "live") {
@@ -115,7 +119,8 @@ export function assertPaymentsConfig(env: EnvBag = process.env): PaymentsConfig 
   }
   return {
     env: diagnostic.environment,
-    stripeKeyName: diagnostic.environment === "sandbox" ? "STRIPE_SANDBOX_API_KEY" : "STRIPE_LIVE_API_KEY",
+    stripeKeyName:
+      diagnostic.environment === "sandbox" ? "STRIPE_SANDBOX_API_KEY" : "STRIPE_LIVE_API_KEY",
     webhookSecretName:
       diagnostic.environment === "sandbox"
         ? "PAYMENTS_SANDBOX_WEBHOOK_SECRET"

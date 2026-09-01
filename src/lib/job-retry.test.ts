@@ -59,11 +59,20 @@ describe("AI item retry and spend caps", () => {
   });
 
   it("alerts when a job stays paused for more than an hour", () => {
-    assert.equal(shouldAlertPaused("2026-09-01T10:00:00.000Z", Date.parse("2026-09-01T11:00:00.000Z")), true);
-    assert.equal(shouldAlertPaused("2026-09-01T10:30:00.000Z", Date.parse("2026-09-01T11:00:00.000Z")), false);
+    assert.equal(
+      shouldAlertPaused("2026-09-01T10:00:00.000Z", Date.parse("2026-09-01T11:00:00.000Z")),
+      true,
+    );
+    assert.equal(
+      shouldAlertPaused("2026-09-01T10:30:00.000Z", Date.parse("2026-09-01T11:00:00.000Z")),
+      false,
+    );
   });
 
   it("redacts secrets from stored job errors", () => {
-    assert.equal(sanitizeJobError("Bearer abcdefghijklmnopqrstuv wx sk_live_abc123xyz"), "Bearer [redacted] wx [redacted]");
+    assert.equal(
+      sanitizeJobError("Bearer abcdefghijklmnopqrstuv wx sk_live_abc123xyz"),
+      "Bearer [redacted] wx [redacted]",
+    );
   });
 });
