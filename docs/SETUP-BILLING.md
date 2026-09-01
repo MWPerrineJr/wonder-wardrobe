@@ -61,6 +61,10 @@ Revoke access by deleting the shop's `comp_grants` row.
 - `src/lib/billing.functions.ts` — `getBillingStatus`, `createCheckoutSession`
   (embedded checkout, 30-day trial, end-to-end tax/compliance handling enabled),
   `createPortalSession`. All owner-verified through RLS before any provider call.
+  Stripe `return_url`, `success_url`, and Connect `refresh_url` values are built
+  on the server from `APP_URL` (plus optional `APP_URL_ALLOWLIST` for preview
+  origins). Clients may send a relative path such as `/owner/feedback`; absolute
+  URLs to other sites are rejected.
 - `src/routes/api/public/payments/webhook.ts` — signature-verified receiver at
   `/api/public/payments/webhook?env=sandbox|live`. Events are claimed in
   `public.stripe_webhook_events` before any booking or subscription mutation.

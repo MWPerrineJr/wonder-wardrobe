@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { RETURN_PATHS, resolveAppReturnUrl } from "@/lib/return-url";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -64,13 +65,20 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
       .object({
         shopId: z.string().uuid(),
         environment: envSchema,
-        returnUrl: z.string().url(),
+        returnUrl: z.string().max(2048).optional(),
       })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<LinkResult> => {
     const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
     const shop = await requireOwnedShop(context.supabase, context.userId, data.shopId);
+
+    let returnUrl: string;
+    try {
+      returnUrl = resolveAppReturnUrl(data.returnUrl, { fallbackPath: RETURN_PATHS.payouts });
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
+    }
 
     try {
       const stripe = createStripeClient(data.environment);
@@ -113,8 +121,8 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
       const link = await stripe.accountLinks.create({
         account: accountId,
         type: "account_onboarding",
-        refresh_url: data.returnUrl,
-        return_url: data.returnUrl,
+        refresh_url: returnUrl,
+        return_url: returnUrl,
       });
       return { url: link.url };
     } catch (error) {

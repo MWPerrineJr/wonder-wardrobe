@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { RETURN_PATHS, resolveAppReturnUrl } from "@/lib/return-url";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
@@ -28,13 +29,13 @@ const checkoutInput = z.object({
     "analytics_enterprise_monthly",
     "analytics_enterprise_yearly",
   ]),
-  returnUrl: z.string().url(),
+  returnUrl: z.string().max(2048).optional(),
 });
 
 const portalInput = z.object({
   shopId: z.string().uuid(),
   environment: envSchema,
-  returnUrl: z.string().url().optional(),
+  returnUrl: z.string().max(2048).optional(),
 });
 
 const redeemInput = z.object({
@@ -224,6 +225,15 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       );
     }
 
+    let returnUrl: string;
+    try {
+      returnUrl = resolveAppReturnUrl(data.returnUrl, {
+        fallbackPath: RETURN_PATHS.billingCheckout,
+      });
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
+    }
+
     try {
       const stripe = createStripeClient(environment);
       const {
@@ -245,7 +255,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         line_items: [{ price: price.id, quantity: 1 }],
         mode: "subscription",
         ui_mode: "embedded_page",
-        return_url: data.returnUrl,
+        return_url: returnUrl,
         customer: customerId,
         managed_payments: { enabled: true },
         metadata: { userId, shop_id: shop.id, managed_payments: "true" },
@@ -340,11 +350,20 @@ export const createPortalSession = createServerFn({ method: "POST" })
     if (error) throw dbError(error, "billing");
     if (!sub?.stripe_customer_id) throw new Error("No billing record for this shop yet.");
 
+    let returnUrl: string;
+    try {
+      returnUrl = resolveAppReturnUrl(data.returnUrl, {
+        fallbackPath: RETURN_PATHS.billingPortal,
+      });
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
+    }
+
     try {
       const stripe = createStripeClient(data.environment);
       const portal = await stripe.billingPortal.sessions.create({
         customer: sub.stripe_customer_id,
-        ...(data.returnUrl ? { return_url: data.returnUrl } : {}),
+        return_url: returnUrl,
       });
       return { url: portal.url };
     } catch (err) {

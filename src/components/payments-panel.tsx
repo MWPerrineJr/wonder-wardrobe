@@ -86,7 +86,7 @@ export function PaymentsPanel({
         data: {
           shopId,
           environment,
-          returnUrl: `${window.location.origin}/owner?payouts=return`,
+          returnUrl: "/owner?payouts=return",
         },
       }),
     onSuccess: (res) => {

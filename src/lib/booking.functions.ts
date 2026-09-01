@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { RETURN_PATHS, resolveAppReturnUrl, withSearchParams } from "@/lib/return-url";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
@@ -224,7 +225,7 @@ const CreateBookingInput = z.object({
     .max(30)
     .regex(/^[+()\d\s.-]+$/, "Phone can only contain digits and + ( ) - . spaces"),
   notes: z.string().trim().max(500).optional().nullable(),
-  returnUrl: z.string().url().optional(),
+  returnUrl: z.string().max(2048).optional(),
 });
 
 export type SavedBooking = {
@@ -289,6 +290,10 @@ export const createBooking = createServerFn({ method: "POST" })
     const due = payoutAccountId
       ? amountDueCents(service.price_cents, mode, shopRow.deposit_percent ?? 25)
       : 0;
+    const returnTo =
+      due > 0
+        ? resolveAppReturnUrl(data.returnUrl, { fallbackPath: RETURN_PATHS.booking })
+        : null;
 
     const startsAt = toInstant(data.date, data.time, data.tzOffsetMinutes);
     if (startsAt.getTime() <= Date.now()) throw new Error("Pick a time in the future");
@@ -343,7 +348,7 @@ export const createBooking = createServerFn({ method: "POST" })
       console.error("[booking] calendar sync skipped", e);
     }
 
-    if (due <= 0 || !payoutAccountId) {
+    if (due <= 0 || !payoutAccountId || !returnTo) {
       return { booking, checkoutUrl: null, amountDueCents: 0 };
     }
 
@@ -369,8 +374,8 @@ export const createBooking = createServerFn({ method: "POST" })
           metadata: { booking_id: booking.id, shop_id: shopRow.id },
         },
         metadata: { booking_id: booking.id, shop_id: shopRow.id },
-        success_url: `${data.returnUrl ?? "https://example.com"}?paid=1&booking=${booking.id}`,
-        cancel_url: `${data.returnUrl ?? "https://example.com"}?paid=0&booking=${booking.id}`,
+        success_url: withSearchParams(returnTo, { paid: "1", booking: booking.id }),
+        cancel_url: withSearchParams(returnTo, { paid: "0", booking: booking.id }),
       } as any);
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
