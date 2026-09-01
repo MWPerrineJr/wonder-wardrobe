@@ -32,9 +32,24 @@ export type BookingContext = {
   cancellation: CancellationPolicy;
 };
 
-/** Which payments environment this deployment charges in. */
-function paymentEnv(): "sandbox" | "live" {
-  return process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
+/**
+ * Which payments environment this deployment charges in. Declared through
+ * PAYMENTS_ENV and validated against the credentials that are actually present,
+ * so a half-configured deployment can never take real money by accident.
+ */
+async function paymentEnv(): Promise<"sandbox" | "live"> {
+  const { resolvePaymentEnv } = await import("@/lib/stripe.server");
+  return resolvePaymentEnv();
+}
+
+/** Same, but null instead of throwing — for read paths that must still render. */
+async function paymentEnvOrNull(): Promise<"sandbox" | "live" | null> {
+  try {
+    return await paymentEnv();
+  } catch (e) {
+    console.error("[booking] payments not configured:", e instanceof Error ? e.message : e);
+    return null;
+  }
 }
 
 /** Amount the client must pay up front, in cents (0 when prepay is off). */
