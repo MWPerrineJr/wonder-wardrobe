@@ -179,6 +179,33 @@ function AuthPage() {
 
         {!hydrated || loading ? (
           <div className="glass-panel rounded-xl p-8 text-center text-on-surface-variant">Loading…</div>
+        ) : pendingConfirmation ? (
+          <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
+            <h2 className="font-headline-sm text-headline-sm text-on-surface">Check your email</h2>
+            <p className="text-body-md text-on-surface-variant">
+              We sent a confirmation link to{" "}
+              <span className="font-bold text-on-surface">{pendingConfirmation}</span>. Click it to
+              verify your address, then sign in.
+            </p>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="w-full bg-primary text-on-primary font-label-md text-label-md py-3 rounded-lg font-bold hover:bg-primary/90 transition-all disabled:opacity-60"
+            >
+              {resending ? "Sending…" : "Resend confirmation link"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPendingConfirmation(null);
+                setMode("sign_in");
+              }}
+              className="w-full border border-border-subtle rounded-lg bg-surface hover:border-primary transition-colors py-3 text-on-surface font-label-md text-label-md"
+            >
+              Back to sign in
+            </button>
+          </div>
         ) : session ? (
           <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
             <div className="text-body-md text-on-surface">
