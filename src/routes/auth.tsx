@@ -109,7 +109,14 @@ function AuthPage() {
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (/not confirmed|confirm/i.test(error.message)) {
+            setPendingConfirmation(email);
+            setPassword("");
+            return;
+          }
+          throw error;
+        }
         toast.success("Welcome back.");
         router.invalidate();
         if (next) {
