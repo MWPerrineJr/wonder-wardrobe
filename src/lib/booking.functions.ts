@@ -6,6 +6,7 @@ import { dbError } from "@/lib/db-error";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { CancellationPolicy } from "@/lib/cancellation";
+import { resolveReturnUrl, returnPathSchema } from "@/lib/return-path";
 
 function publicClient() {
   return createClient<Database>(
