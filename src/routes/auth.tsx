@@ -308,6 +308,16 @@ function AuthPage() {
             >
               {submitting ? "Please wait…" : mode === "sign_in" ? "Sign in" : "Create account"}
             </button>
+            {mode === "sign_in" && (
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={submitting}
+                className="text-center text-label-md font-label-md text-primary hover:underline disabled:opacity-60"
+              >
+                Forgot password?
+              </button>
+            )}
           </form>
 
           <p className="text-center text-body-md text-on-surface-variant">
