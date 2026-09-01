@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CANONICAL_ORIGIN } from "./site-origin";
+import { CANONICAL_ORIGIN } from "./site-origin.ts";
 
 /**
  * Return addresses for hosted payment flows (checkout, billing portal, payout
