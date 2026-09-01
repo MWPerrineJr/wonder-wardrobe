@@ -902,6 +902,10 @@ export type Database = {
           shop_name: string
         }[]
       }
+      provision_job_scheduler: {
+        Args: { _app_url: string; _secret: string }
+        Returns: string
+      }
       redeem_comp_code: {
         Args: { _code: string; _shop_id: string; _user_id: string }
         Returns: string
