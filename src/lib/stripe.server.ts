@@ -146,17 +146,18 @@ export function getStripeErrorMessage(error: unknown): string {
   return "Stripe request failed";
 }
 
+export type StripeWebhookEvent = {
+  id: string;
+  type: string;
+  created?: number;
+  data: { object: any };
+};
+
 /** Verify a webhook signature (HMAC-SHA256 over "<timestamp>.<body>"). */
-export async function verifyWebhook(
-  req: Request,
-  env: StripeEnv,
-): Promise<{ type: string; data: { object: any } }> {
+export async function verifyWebhook(req: Request, env: StripeEnv): Promise<StripeWebhookEvent> {
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
-  const secret =
-    env === "sandbox"
-      ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
-      : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
+  const secret = getEnv(WEBHOOK_SECRET_KEYS[env]);
 
   if (!signature || !body) throw new Error("Missing signature or body");
 
