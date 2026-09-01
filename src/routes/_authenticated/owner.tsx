@@ -95,7 +95,7 @@ function OwnerPage() {
   return <OwnerDashboard shops={shops} />;
 }
 
-function OwnerDashboard({ shops }: { shops: Array<{ id: string } & Record<string, unknown>> }) {
+function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops>> }) {
   const [selectedId, setSelectedId] = useState<string | null>(shops[0]?.id ?? null);
   const [tab, setTab] = useState("overview");
 
