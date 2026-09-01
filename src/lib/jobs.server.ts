@@ -4,7 +4,11 @@
 
 import { authorizeJobCall, jobAuthResponse } from "@/lib/jobs.auth";
 
-export type JobName = "send-surveys" | "enrich-feedback" | "build-reports";
+export type JobName =
+  | "send-surveys"
+  | "enrich-feedback"
+  | "build-reports"
+  | "booking-maintenance";
 
 type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 

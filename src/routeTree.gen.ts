@@ -28,9 +28,12 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth.google-calendar.return'
+import { Route as ApiPublicReadyRouteImport } from './routes/api/public/ready'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
 import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
 import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
+import { Route as AuthenticatedOwnerDiagnosticsRouteImport } from './routes/_authenticated/owner_.diagnostics'
 import { Route as AuthenticatedOwnerContactRouteImport } from './routes/_authenticated/owner_.contact'
 import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authenticated/owner_.analytics'
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
@@ -43,6 +46,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicJobsSendSurveysRouteImport } from './routes/api/public/jobs/send-surveys'
 import { Route as ApiPublicJobsEnrichFeedbackRouteImport } from './routes/api/public/jobs/enrich-feedback'
 import { Route as ApiPublicJobsBuildReportsRouteImport } from './routes/api/public/jobs/build-reports'
+import { Route as ApiPublicJobsBookingMaintenanceRouteImport } from './routes/api/public/jobs/booking-maintenance'
 import { Route as ApiPublicEmailsSurveyInviteRouteImport } from './routes/api/public/emails/survey-invite'
 
 const ShopRoute = ShopRouteImport.update({
@@ -142,6 +146,16 @@ const OauthGoogleCalendarReturnRoute =
     path: '/oauth/google-calendar/return',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicReadyRoute = ApiPublicReadyRouteImport.update({
+  id: '/api/public/ready',
+  path: '/api/public/ready',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCalendarEventRoute = ApiPublicCalendarEventRouteImport.update({
   id: '/api/public/calendar-event',
   path: '/api/public/calendar-event',
@@ -157,6 +171,12 @@ const AuthenticatedOwnerFeedbackRoute =
   AuthenticatedOwnerFeedbackRouteImport.update({
     id: '/owner_/feedback',
     path: '/owner/feedback',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOwnerDiagnosticsRoute =
+  AuthenticatedOwnerDiagnosticsRouteImport.update({
+    id: '/owner_/diagnostics',
+    path: '/owner/diagnostics',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOwnerContactRoute =
@@ -228,6 +248,12 @@ const ApiPublicJobsBuildReportsRoute =
     path: '/api/public/jobs/build-reports',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsBookingMaintenanceRoute =
+  ApiPublicJobsBookingMaintenanceRouteImport.update({
+    id: '/api/public/jobs/booking-maintenance',
+    path: '/api/public/jobs/booking-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEmailsSurveyInviteRoute =
   ApiPublicEmailsSurveyInviteRouteImport.update({
     id: '/api/public/emails/survey-invite',
@@ -258,11 +284,15 @@ export interface FileRoutesByFullPath {
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/contact': typeof AuthenticatedOwnerContactRoute
+  '/owner/diagnostics': typeof AuthenticatedOwnerDiagnosticsRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
@@ -293,11 +323,15 @@ export interface FileRoutesByTo {
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/contact': typeof AuthenticatedOwnerContactRoute
+  '/owner/diagnostics': typeof AuthenticatedOwnerDiagnosticsRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
@@ -331,11 +365,15 @@ export interface FileRoutesById {
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/_authenticated/owner_/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/_authenticated/owner_/contact': typeof AuthenticatedOwnerContactRoute
+  '/_authenticated/owner_/diagnostics': typeof AuthenticatedOwnerDiagnosticsRoute
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
@@ -369,11 +407,15 @@ export interface FileRouteTypes {
     | '/onboarding/owner'
     | '/owner/analytics'
     | '/owner/contact'
+    | '/owner/diagnostics'
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
@@ -404,11 +446,15 @@ export interface FileRouteTypes {
     | '/onboarding/owner'
     | '/owner/analytics'
     | '/owner/contact'
+    | '/owner/diagnostics'
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
@@ -441,11 +487,15 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding/owner'
     | '/_authenticated/owner_/analytics'
     | '/_authenticated/owner_/contact'
+    | '/_authenticated/owner_/diagnostics'
     | '/_authenticated/owner_/feedback'
     | '/_authenticated/owner_/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
@@ -472,8 +522,11 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCalendarEventRoute: typeof ApiPublicCalendarEventRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicReadyRoute: typeof ApiPublicReadyRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
+  ApiPublicJobsBookingMaintenanceRoute: typeof ApiPublicJobsBookingMaintenanceRoute
   ApiPublicJobsBuildReportsRoute: typeof ApiPublicJobsBuildReportsRoute
   ApiPublicJobsEnrichFeedbackRoute: typeof ApiPublicJobsEnrichFeedbackRoute
   ApiPublicJobsSendSurveysRoute: typeof ApiPublicJobsSendSurveysRoute
@@ -618,6 +671,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ready': {
+      id: '/api/public/ready'
+      path: '/api/public/ready'
+      fullPath: '/api/public/ready'
+      preLoaderRoute: typeof ApiPublicReadyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/calendar-event': {
       id: '/api/public/calendar-event'
       path: '/api/public/calendar-event'
@@ -637,6 +704,13 @@ declare module '@tanstack/react-router' {
       path: '/owner/feedback'
       fullPath: '/owner/feedback'
       preLoaderRoute: typeof AuthenticatedOwnerFeedbackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/owner_/diagnostics': {
+      id: '/_authenticated/owner_/diagnostics'
+      path: '/owner/diagnostics'
+      fullPath: '/owner/diagnostics'
+      preLoaderRoute: typeof AuthenticatedOwnerDiagnosticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/owner_/contact': {
@@ -723,6 +797,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsBuildReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/booking-maintenance': {
+      id: '/api/public/jobs/booking-maintenance'
+      path: '/api/public/jobs/booking-maintenance'
+      fullPath: '/api/public/jobs/booking-maintenance'
+      preLoaderRoute: typeof ApiPublicJobsBookingMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/emails/survey-invite': {
       id: '/api/public/emails/survey-invite'
       path: '/api/public/emails/survey-invite'
@@ -739,6 +820,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
   AuthenticatedOwnerAnalyticsRoute: typeof AuthenticatedOwnerAnalyticsRoute
   AuthenticatedOwnerContactRoute: typeof AuthenticatedOwnerContactRoute
+  AuthenticatedOwnerDiagnosticsRoute: typeof AuthenticatedOwnerDiagnosticsRoute
   AuthenticatedOwnerFeedbackRoute: typeof AuthenticatedOwnerFeedbackRoute
   AuthenticatedOwnerSubscribeRoute: typeof AuthenticatedOwnerSubscribeRoute
 }
@@ -749,6 +831,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
   AuthenticatedOwnerAnalyticsRoute: AuthenticatedOwnerAnalyticsRoute,
   AuthenticatedOwnerContactRoute: AuthenticatedOwnerContactRoute,
+  AuthenticatedOwnerDiagnosticsRoute: AuthenticatedOwnerDiagnosticsRoute,
   AuthenticatedOwnerFeedbackRoute: AuthenticatedOwnerFeedbackRoute,
   AuthenticatedOwnerSubscribeRoute: AuthenticatedOwnerSubscribeRoute,
 }
@@ -796,8 +879,11 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCalendarEventRoute: ApiPublicCalendarEventRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicReadyRoute: ApiPublicReadyRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,
+  ApiPublicJobsBookingMaintenanceRoute: ApiPublicJobsBookingMaintenanceRoute,
   ApiPublicJobsBuildReportsRoute: ApiPublicJobsBuildReportsRoute,
   ApiPublicJobsEnrichFeedbackRoute: ApiPublicJobsEnrichFeedbackRoute,
   ApiPublicJobsSendSurveysRoute: ApiPublicJobsSendSurveysRoute,

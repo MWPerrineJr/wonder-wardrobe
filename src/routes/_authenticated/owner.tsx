@@ -144,6 +144,12 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
               <Link to="/owner/contact" className="text-on-surface-variant hover:text-on-surface">
                 Contact
               </Link>
+              <Link
+                to="/owner/diagnostics"
+                className="text-on-surface-variant hover:text-on-surface"
+              >
+                Diagnostics
+              </Link>
             </nav>
           </div>
           <AccountNav />
