@@ -3,6 +3,11 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "packageManager": "npm@11.17.0",
+  "engines": {
+    "node": ">=22.16.5",
+    "npm": ">=11.0.0"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -10,7 +15,11 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "node --experimental-strip-types --test src/lib/jobs.auth.test.ts"
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/lib/jobs.auth.test.ts",
+    "audit": "npm audit --audit-level=high",
+    "migrations:check": "node scripts/check-migrations.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.30",
@@ -100,9 +109,7 @@
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16"
   },
-  "pnpm": {
-    "overrides": {
-      "entities": "4.5.0"
-    }
+  "overrides": {
+    "entities": "4.5.0"
   }
 }
