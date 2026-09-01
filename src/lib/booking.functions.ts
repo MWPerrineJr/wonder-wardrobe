@@ -292,10 +292,11 @@ export const createBooking = createServerFn({ method: "POST" })
     if (shopErr) throw dbError(shopErr, "booking");
     if (!shopRow) throw new Error("Shop not found");
 
-    const env = paymentEnv();
     const mode = (shopRow.prepay_mode ?? "off") as "off" | "deposit" | "full";
+    // Only resolve (and require) payment credentials when this shop charges up front.
+    const env = mode === "off" ? null : await paymentEnv();
     let payoutAccountId: string | null = null;
-    if (mode !== "off") {
+    if (mode !== "off" && env) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: acct } = await supabaseAdmin
         .from("shop_payout_accounts")
@@ -360,7 +361,7 @@ export const createBooking = createServerFn({ method: "POST" })
       console.error("[booking] calendar sync skipped", e);
     }
 
-    if (due <= 0 || !payoutAccountId) {
+    if (due <= 0 || !payoutAccountId || !env) {
       return { booking, checkoutUrl: null, amountDueCents: 0 };
     }
 
@@ -386,8 +387,14 @@ export const createBooking = createServerFn({ method: "POST" })
           metadata: { booking_id: booking.id, shop_id: shopRow.id },
         },
         metadata: { booking_id: booking.id, shop_id: shopRow.id },
-        success_url: `${data.returnUrl ?? "https://example.com"}?paid=1&booking=${booking.id}`,
-        cancel_url: `${data.returnUrl ?? "https://example.com"}?paid=0&booking=${booking.id}`,
+        success_url: resolveReturnUrl(data.returnPath ?? "/account", {
+          paid: "1",
+          booking: booking.id,
+        }),
+        cancel_url: resolveReturnUrl(data.returnPath ?? "/account", {
+          paid: "0",
+          booking: booking.id,
+        }),
       } as any);
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
