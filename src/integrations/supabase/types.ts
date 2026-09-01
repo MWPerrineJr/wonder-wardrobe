@@ -103,6 +103,7 @@ export type Database = {
           customer_phone: string | null
           ends_at: string
           google_event_id: string | null
+          hold_expires_at: string | null
           id: string
           notes: string | null
           payment_status: string
@@ -127,6 +128,7 @@ export type Database = {
           customer_phone?: string | null
           ends_at: string
           google_event_id?: string | null
+          hold_expires_at?: string | null
           id?: string
           notes?: string | null
           payment_status?: string
@@ -151,6 +153,7 @@ export type Database = {
           customer_phone?: string | null
           ends_at?: string
           google_event_id?: string | null
+          hold_expires_at?: string | null
           id?: string
           notes?: string | null
           payment_status?: string
@@ -399,6 +402,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payment_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          environment: string
+          event_id: string
+          event_type: string
+          id: string
+          last_error: string | null
+          processed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          environment: string
+          event_id: string
+          event_type: string
+          id?: string
+          last_error?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          environment?: string
+          event_id?: string
+          event_type?: string
+          id?: string
+          last_error?: string | null
+          processed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -756,12 +798,16 @@ export type Database = {
           customer_email: string
           customer_id: string | null
           customer_name: string | null
+          delivery_terminal: boolean
+          email_attempts: number
           email_error: string | null
           email_status: string
           emailed_at: string | null
           expires_at: string
           feedback_id: string | null
           id: string
+          last_attempt_at: string | null
+          next_attempt_at: string | null
           provider_id: string | null
           rating_hint: number | null
           responded_at: string | null
@@ -776,12 +822,16 @@ export type Database = {
           customer_email: string
           customer_id?: string | null
           customer_name?: string | null
+          delivery_terminal?: boolean
+          email_attempts?: number
           email_error?: string | null
           email_status?: string
           emailed_at?: string | null
           expires_at?: string
           feedback_id?: string | null
           id?: string
+          last_attempt_at?: string | null
+          next_attempt_at?: string | null
           provider_id?: string | null
           rating_hint?: number | null
           responded_at?: string | null
@@ -796,12 +846,16 @@ export type Database = {
           customer_email?: string
           customer_id?: string | null
           customer_name?: string | null
+          delivery_terminal?: boolean
+          email_attempts?: number
           email_error?: string | null
           email_status?: string
           emailed_at?: string | null
           expires_at?: string
           feedback_id?: string | null
           id?: string
+          last_attempt_at?: string | null
+          next_attempt_at?: string | null
           provider_id?: string | null
           rating_hint?: number | null
           responded_at?: string | null
@@ -867,6 +921,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      expire_stale_booking_holds: { Args: never; Returns: number }
       get_survey_invite_by_token: {
         Args: { _token: string }
         Returns: {
@@ -885,6 +940,20 @@ export type Database = {
         Returns: boolean
       }
       invoke_feedback_job: { Args: { job_slug: string }; Returns: number }
+      pending_survey_retries: {
+        Args: never
+        Returns: {
+          attempts: number
+          customer_email: string
+          customer_name: string
+          invite_id: string
+          provider_name: string
+          service_name: string
+          shop_address: string
+          shop_name: string
+          token: string
+        }[]
+      }
       pending_survey_targets: {
         Args: never
         Returns: {
