@@ -33,6 +33,7 @@ import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
 import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
 import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
+import { Route as AuthenticatedOwnerDiagnosticsRouteImport } from './routes/_authenticated/owner_.diagnostics'
 import { Route as AuthenticatedOwnerContactRouteImport } from './routes/_authenticated/owner_.contact'
 import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authenticated/owner_.analytics'
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
@@ -172,6 +173,12 @@ const AuthenticatedOwnerFeedbackRoute =
     path: '/owner/feedback',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOwnerDiagnosticsRoute =
+  AuthenticatedOwnerDiagnosticsRouteImport.update({
+    id: '/owner_/diagnostics',
+    path: '/owner/diagnostics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOwnerContactRoute =
   AuthenticatedOwnerContactRouteImport.update({
     id: '/owner_/contact',
@@ -277,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/contact': typeof AuthenticatedOwnerContactRoute
+  '/owner/diagnostics': typeof AuthenticatedOwnerDiagnosticsRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
@@ -315,6 +323,7 @@ export interface FileRoutesByTo {
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/contact': typeof AuthenticatedOwnerContactRoute
+  '/owner/diagnostics': typeof AuthenticatedOwnerDiagnosticsRoute
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
@@ -356,6 +365,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/_authenticated/owner_/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/_authenticated/owner_/contact': typeof AuthenticatedOwnerContactRoute
+  '/_authenticated/owner_/diagnostics': typeof AuthenticatedOwnerDiagnosticsRoute
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/onboarding/owner'
     | '/owner/analytics'
     | '/owner/contact'
+    | '/owner/diagnostics'
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/onboarding/owner'
     | '/owner/analytics'
     | '/owner/contact'
+    | '/owner/diagnostics'
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
@@ -475,6 +487,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding/owner'
     | '/_authenticated/owner_/analytics'
     | '/_authenticated/owner_/contact'
+    | '/_authenticated/owner_/diagnostics'
     | '/_authenticated/owner_/feedback'
     | '/_authenticated/owner_/subscribe'
     | '/api/public/calendar-event'
@@ -693,6 +706,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerFeedbackRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/owner_/diagnostics': {
+      id: '/_authenticated/owner_/diagnostics'
+      path: '/owner/diagnostics'
+      fullPath: '/owner/diagnostics'
+      preLoaderRoute: typeof AuthenticatedOwnerDiagnosticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/owner_/contact': {
       id: '/_authenticated/owner_/contact'
       path: '/owner/contact'
@@ -800,6 +820,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
   AuthenticatedOwnerAnalyticsRoute: typeof AuthenticatedOwnerAnalyticsRoute
   AuthenticatedOwnerContactRoute: typeof AuthenticatedOwnerContactRoute
+  AuthenticatedOwnerDiagnosticsRoute: typeof AuthenticatedOwnerDiagnosticsRoute
   AuthenticatedOwnerFeedbackRoute: typeof AuthenticatedOwnerFeedbackRoute
   AuthenticatedOwnerSubscribeRoute: typeof AuthenticatedOwnerSubscribeRoute
 }
@@ -810,6 +831,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
   AuthenticatedOwnerAnalyticsRoute: AuthenticatedOwnerAnalyticsRoute,
   AuthenticatedOwnerContactRoute: AuthenticatedOwnerContactRoute,
+  AuthenticatedOwnerDiagnosticsRoute: AuthenticatedOwnerDiagnosticsRoute,
   AuthenticatedOwnerFeedbackRoute: AuthenticatedOwnerFeedbackRoute,
   AuthenticatedOwnerSubscribeRoute: AuthenticatedOwnerSubscribeRoute,
 }
