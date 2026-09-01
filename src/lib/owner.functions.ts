@@ -80,7 +80,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       const email = context.claims?.email as string | undefined;
       if (email) {
         const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
-        const { SITE_ORIGIN } = await import("@/lib/site-origin");
+        const { CANONICAL_ORIGIN } = await import("@/lib/site-origin");
         const { OWNER_CONTACT_EMAIL } = await import("@/lib/support");
         await sendTemplateEmail("owner-welcome", email, {
           idempotencyKey: `owner-welcome-${shop.id}`,
@@ -88,7 +88,7 @@ export const createOwnerShop = createServerFn({ method: "POST" })
           templateData: {
             ownerName: (context.claims?.["name"] as string | undefined) ?? null,
             shopName: shop.name,
-            shopUrl: `${SITE_ORIGIN}/shop/${shop.slug}`,
+            shopUrl: `${CANONICAL_ORIGIN}/shop/${shop.slug}`,
           },
         });
       }
