@@ -70,8 +70,6 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 
 function OwnerPage() {
   const { data: shops } = useSuspenseQuery(myShopsQuery);
-  const [selectedId, setSelectedId] = useState<string | null>(shops[0]?.id ?? null);
-  const [tab, setTab] = useState("overview");
 
   if (shops.length === 0) {
     return (
@@ -94,7 +92,15 @@ function OwnerPage() {
     );
   }
 
+  return <OwnerDashboard shops={shops} />;
+}
+
+function OwnerDashboard({ shops }: { shops: Array<{ id: string } & Record<string, unknown>> }) {
+  const [selectedId, setSelectedId] = useState<string | null>(shops[0]?.id ?? null);
+  const [tab, setTab] = useState("overview");
+
   const selected = shops.find((s) => s.id === selectedId) ?? shops[0];
+
   const tour = useSetupTour(selected?.id ?? "none");
   const steps = buildTourSteps(selected);
   const qc = useQueryClient();
