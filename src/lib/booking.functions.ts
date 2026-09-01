@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { canReserveSlot, DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
 import { dbError } from "@/lib/db-error";
 import { RETURN_PATHS, resolveAppReturnUrl, withSearchParams } from "@/lib/return-url";
 
@@ -165,35 +166,46 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
     const openM = toMinutes(open);
     const closeM = toMinutes(close);
 
-    // Busy ranges for the chosen provider require reading other customers' rows,
-    // so use the privileged client and return only opaque time ranges.
-    let busy: Array<{ start: number; end: number }> = [];
-    if (data.providerId) {
-      const dayStart = toInstant(data.date, "00:00", data.tzOffsetMinutes);
-      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: rows, error } = await supabaseAdmin
-        .from("bookings")
-        .select("starts_at, ends_at")
-        .eq("provider_id", data.providerId)
-        .in("status", ["pending", "confirmed"])
-        .gte("starts_at", dayStart.toISOString())
-        .lt("starts_at", dayEnd.toISOString());
-      if (error) throw dbError(error, "booking");
-      busy = (rows ?? []).map((r) => ({
-        start: new Date(r.starts_at).getTime(),
-        end: new Date(r.ends_at).getTime(),
-      }));
+    const { data: providerRows, error: provErr } = await pub
+      .from("providers")
+      .select("id")
+      .eq("shop_id", data.shopId)
+      .eq("is_active", true);
+    if (provErr) throw dbError(provErr, "booking");
+    const activeProviderCount = (providerRows ?? []).length;
 
+    const dayStart = toInstant(data.date, "00:00", data.tzOffsetMinutes);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
+
+    // Occupying bookings for any customer require the privileged client.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("bookings")
+      .select("starts_at, ends_at, provider_id, status, hold_expires_at")
+      .eq("shop_id", data.shopId)
+      .in("status", ["pending", "confirmed"])
+      .gte("starts_at", dayStart.toISOString())
+      .lt("starts_at", dayEnd.toISOString());
+    if (error) throw dbError(error, "booking");
+    const occupying = (rows ?? []).map((row) => ({
+      providerId: row.provider_id,
+      start: new Date(row.starts_at).getTime(),
+      end: new Date(row.ends_at).getTime(),
+      status: row.status,
+      holdExpiresAt: row.hold_expires_at,
+    }));
+
+    let googleBusy: Array<{ start: number; end: number }> = [];
+    if (data.providerId) {
       // Personal commitments already on the provider's own Google Calendar also
-      // block slots. Returns [] when Google is unreachable or not connected, so
-      // availability keeps working from shop hours plus existing bookings.
+      // block slots. Returns [] when Google is unreachable or not connected.
       const { listGoogleBusy } = await import("@/server/googleCalendar.server");
-      busy = busy.concat(
-        await listGoogleBusy(data.providerId, dayStart.toISOString(), dayEnd.toISOString()),
+      googleBusy = await listGoogleBusy(
+        data.providerId,
+        dayStart.toISOString(),
+        dayEnd.toISOString(),
       );
     }
-
 
     const now = Date.now();
     const slots: string[] = [];
@@ -204,7 +216,16 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
       const start = toInstant(data.date, time, data.tzOffsetMinutes).getTime();
       const end = start + service.duration_minutes * 60_000;
       if (start <= now) continue;
-      if (busy.some((b) => start < b.end && end > b.start)) continue;
+      const reservation = canReserveSlot({
+        existing: occupying,
+        activeProviderCount,
+        providerId: data.providerId ?? null,
+        start,
+        end,
+        nowMs: now,
+      });
+      if (!reservation.ok) continue;
+      if (googleBusy.some((b) => start < b.end && end > b.start)) continue;
       slots.push(time);
     }
     return { slots, closed: false };
@@ -316,6 +337,7 @@ export const createBooking = createServerFn({ method: "POST" })
         payment_status: due > 0 ? "awaiting_payment" : "not_required",
         amount_due_cents: due > 0 ? due : null,
         payment_environment: due > 0 ? env : null,
+        hold_expires_at: due > 0 ? holdExpiryIso(new Date(), bookingHoldMinutes()) : null,
       })
       .select(
         `id, starts_at, ends_at, status, price_cents, customer_name, customer_phone, notes,
@@ -327,31 +349,12 @@ export const createBooking = createServerFn({ method: "POST" })
     if (error) throw dbError(error, "booking");
     const booking = saved as unknown as SavedBooking;
 
-    // Mirror onto the provider's Google Calendar when they've connected it.
-    // Never let a Google failure fail the booking.
-    try {
-      const { syncBookingToCalendar } = await import("@/server/googleCalendar.server");
-      await syncBookingToCalendar(booking.id, data.providerId ?? null, {
-        summary: `${booking.service?.name ?? "Appointment"} — ${shopRow.name}`,
-        description: [
-          data.customerName ? `Client: ${data.customerName}` : null,
-          data.customerPhone ? `Phone: ${data.customerPhone}` : null,
-          data.notes ? `Notes: ${data.notes}` : null,
-        ]
-          .filter(Boolean)
-          .join("\n"),
-        location: null,
-        startsAt: booking.starts_at,
-        endsAt: booking.ends_at,
-      });
-    } catch (e) {
-      console.error("[booking] calendar sync skipped", e);
-    }
+    // Calendar sync waits until the booking is confirmed (paid, or the
+    // provider confirms a no-prepay visit). See booking-calendar.server.ts.
 
     if (due <= 0 || !payoutAccountId || !returnTo) {
       return { booking, checkoutUrl: null, amountDueCents: 0 };
     }
-
 
     const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
     try {
@@ -387,12 +390,42 @@ export const createBooking = createServerFn({ method: "POST" })
           payment_environment: env,
         })
         .eq("id", booking.id)
+        .eq("status", "pending")
+        .eq("payment_status", "awaiting_payment")
         .select("id");
       if (attached.error) throw dbError(attached.error, "booking");
       if (!attached.data?.length) throw new Error("Could not attach checkout session to booking");
 
       return { booking, checkoutUrl: session.url ?? null, amountDueCents: due };
     } catch (e) {
+      await cancelUnpaidHold(booking.id);
       throw new Error(getStripeErrorMessage(e));
     }
   });
+
+function bookingHoldMinutes(): number {
+  const n = Number(process.env["BOOKING_HOLD_MINUTES"]);
+  return Number.isFinite(n) && n >= 5 && n <= 120 ? n : DEFAULT_HOLD_MINUTES;
+}
+
+async function cancelUnpaidHold(bookingId: string): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const released = await supabaseAdmin
+    .from("bookings")
+    .update({
+      status: "cancelled",
+      payment_status: "failed",
+      hold_expires_at: null,
+    })
+    .eq("id", bookingId)
+    .eq("status", "pending")
+    .eq("payment_status", "awaiting_payment")
+    .select("id");
+  if (released.error) {
+    console.error("[booking] hold release failed", released.error);
+    return;
+  }
+  if (!released.data?.length) {
+    console.error("[booking] hold release matched zero rows", bookingId);
+  }
+}

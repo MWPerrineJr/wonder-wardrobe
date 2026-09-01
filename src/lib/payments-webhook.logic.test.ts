@@ -137,6 +137,11 @@ describe("booking hold release", () => {
   it("releases an unpaid hold", () => {
     assert.equal(canReleaseBookingHold(booking), true);
   });
+
+  it("does not release a completed or cancelled row", () => {
+    assert.equal(canReleaseBookingHold({ ...booking, status: "completed" }), false);
+    assert.equal(canReleaseBookingHold({ ...booking, status: "cancelled" }), false);
+  });
 });
 
 describe("subscription event ordering", () => {

@@ -43,6 +43,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicJobsSendSurveysRouteImport } from './routes/api/public/jobs/send-surveys'
 import { Route as ApiPublicJobsEnrichFeedbackRouteImport } from './routes/api/public/jobs/enrich-feedback'
 import { Route as ApiPublicJobsBuildReportsRouteImport } from './routes/api/public/jobs/build-reports'
+import { Route as ApiPublicJobsBookingMaintenanceRouteImport } from './routes/api/public/jobs/booking-maintenance'
 import { Route as ApiPublicEmailsSurveyInviteRouteImport } from './routes/api/public/emails/survey-invite'
 
 const ShopRoute = ShopRouteImport.update({
@@ -228,6 +229,12 @@ const ApiPublicJobsBuildReportsRoute =
     path: '/api/public/jobs/build-reports',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsBookingMaintenanceRoute =
+  ApiPublicJobsBookingMaintenanceRouteImport.update({
+    id: '/api/public/jobs/booking-maintenance',
+    path: '/api/public/jobs/booking-maintenance',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEmailsSurveyInviteRoute =
   ApiPublicEmailsSurveyInviteRouteImport.update({
     id: '/api/public/emails/survey-invite',
@@ -263,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
@@ -298,6 +306,7 @@ export interface FileRoutesByTo {
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
@@ -336,6 +345,7 @@ export interface FileRoutesById {
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
+  '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
@@ -374,6 +384,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-event'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
@@ -409,6 +420,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-event'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
@@ -446,6 +458,7 @@ export interface FileRouteTypes {
     | '/api/public/calendar-event'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
+    | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
@@ -474,6 +487,7 @@ export interface RootRouteChildren {
   ApiPublicCalendarEventRoute: typeof ApiPublicCalendarEventRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
+  ApiPublicJobsBookingMaintenanceRoute: typeof ApiPublicJobsBookingMaintenanceRoute
   ApiPublicJobsBuildReportsRoute: typeof ApiPublicJobsBuildReportsRoute
   ApiPublicJobsEnrichFeedbackRoute: typeof ApiPublicJobsEnrichFeedbackRoute
   ApiPublicJobsSendSurveysRoute: typeof ApiPublicJobsSendSurveysRoute
@@ -716,6 +730,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsEnrichFeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/booking-maintenance': {
+      id: '/api/public/jobs/booking-maintenance'
+      path: '/api/public/jobs/booking-maintenance'
+      fullPath: '/api/public/jobs/booking-maintenance'
+      preLoaderRoute: typeof ApiPublicJobsBookingMaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/build-reports': {
       id: '/api/public/jobs/build-reports'
       path: '/api/public/jobs/build-reports'
@@ -798,6 +819,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCalendarEventRoute: ApiPublicCalendarEventRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,
+  ApiPublicJobsBookingMaintenanceRoute: ApiPublicJobsBookingMaintenanceRoute,
   ApiPublicJobsBuildReportsRoute: ApiPublicJobsBuildReportsRoute,
   ApiPublicJobsEnrichFeedbackRoute: ApiPublicJobsEnrichFeedbackRoute,
   ApiPublicJobsSendSurveysRoute: ApiPublicJobsSendSurveysRoute,

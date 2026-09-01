@@ -48,7 +48,7 @@ shown only after the database confirms the write.
 | Full name | bookings.customer_name |
 | Phone number | bookings.customer_phone |
 | Notes | bookings.notes |
-| — | bookings.customer_id = auth.uid(), bookings.shop_id, bookings.price_cents (copied server-side from services.price_cents), bookings.status = 'pending' |
+| — | bookings.customer_id = auth.uid(), bookings.shop_id, bookings.price_cents (copied server-side from services.price_cents), bookings.status = 'pending'. Prepaid visits also set payment_status = 'awaiting_payment' and hold_expires_at (default 30 minutes). |
 
 ## Shop feedback form — `/shop?slug=…` (`submitFeedback`)
 | Field | Table.column |
@@ -72,6 +72,9 @@ shown only after the database confirms the write.
 - `created_at` / `updated_at` on every table, with `update_updated_at_column()` triggers.
 - `validate_booking()` trigger: end must be after start, service and provider must belong to the
   booked shop, and overlapping pending/confirmed bookings for the same provider are rejected.
+  Expired unpaid holds (`hold_expires_at` in the past) do not occupy a chair. No-provider-preference
+  bookings occupy one chair of shop capacity (active providers); a shop-scoped advisory lock
+  serializes concurrent inserts so two requests cannot take the same provider or the last chair.
 - Check constraints on `customer_feedback` for rating range and allowed status/sentiment/urgency.
 - RLS: customers read/write only their own bookings, profile and feedback; providers read and
   update bookings assigned to them; owners manage their own shops, services, hours and feedback.

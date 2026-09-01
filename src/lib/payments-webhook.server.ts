@@ -1,4 +1,5 @@
 import type { StripeEnv } from "./stripe.server.ts";
+import { enqueueCalendarSync } from "./booking-calendar-outbox.ts";
 import {
   assertBookingPaymentMatches,
   canReleaseBookingHold,
@@ -151,6 +152,7 @@ async function markBookingPaid(
       amount_paid_cents: typeof session.amount_total === "number" ? session.amount_total : 0,
       stripe_payment_intent_id: paymentIntentId(session),
       status: "confirmed",
+      hold_expires_at: null,
     })
     .eq("id", booking.id)
     .eq("shop_id", booking.shop_id)
@@ -158,6 +160,7 @@ async function markBookingPaid(
     .select("id");
   requireOk(result, "Booking paid update failed");
   if (!result.data?.length) throw new WebhookError("Booking paid update matched zero rows", "retryable");
+  await enqueueCalendarSync(admin, booking.id);
 }
 
 async function releaseBooking(admin: Admin, env: StripeEnv, eventType: string, session: CheckoutSessionLike) {
@@ -173,11 +176,12 @@ async function releaseBooking(admin: Admin, env: StripeEnv, eventType: string, s
 
   const result = await admin
     .from("bookings")
-    .update({ payment_status: "failed", status: "cancelled" })
+    .update({ payment_status: "failed", status: "cancelled", hold_expires_at: null })
     .eq("id", booking.id)
     .eq("shop_id", booking.shop_id)
     .eq("stripe_checkout_session_id", session.id as string)
     .eq("payment_status", "awaiting_payment")
+    .eq("status", "pending")
     .select("id");
   requireOk(result, "Booking release failed");
 }

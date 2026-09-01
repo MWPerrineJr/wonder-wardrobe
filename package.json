@@ -17,7 +17,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/lib/jobs.auth.test.ts src/lib/payments-webhook.logic.test.ts src/lib/payments-webhook.server.test.ts src/lib/return-url.test.ts src/lib/provider-profile.test.ts src/lib/job-retry.test.ts",
+    "test": "node --experimental-strip-types --test src/lib/jobs.auth.test.ts src/lib/payments-webhook.logic.test.ts src/lib/payments-webhook.server.test.ts src/lib/return-url.test.ts src/lib/provider-profile.test.ts src/lib/job-retry.test.ts src/lib/booking-hold.test.ts",
     "audit": "npm audit --audit-level=high",
     "migrations:check": "node scripts/check-migrations.mjs"
   },

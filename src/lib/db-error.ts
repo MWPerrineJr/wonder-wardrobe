@@ -7,6 +7,7 @@ const SAFE_MESSAGES = new Set([
   "Selected service does not belong to this shop",
   "Selected provider does not belong to this shop",
   "That time slot is already booked for this provider",
+  "No providers are free at that time",
   "Providers cannot change shop assignment, account link, or active status",
   "Providers can only be moved to a shop you own",
   "Providers can only update booking status",

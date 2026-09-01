@@ -101,6 +101,7 @@ export type Database = {
           customer_phone: string | null
           ends_at: string
           google_event_id: string | null
+          hold_expires_at: string | null
           id: string
           notes: string | null
           payment_environment: string | null
@@ -127,6 +128,7 @@ export type Database = {
           customer_phone?: string | null
           ends_at: string
           google_event_id?: string | null
+          hold_expires_at?: string | null
           id?: string
           notes?: string | null
           payment_environment?: string | null
@@ -153,6 +155,7 @@ export type Database = {
           customer_phone?: string | null
           ends_at?: string
           google_event_id?: string | null
+          hold_expires_at?: string | null
           id?: string
           notes?: string | null
           payment_environment?: string | null
@@ -188,6 +191,44 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_calendar_outbox: {
+        Row: {
+          attempt_count: number
+          booking_id: string
+          created_at: string
+          id: string
+          last_error: string | null
+          next_attempt_at: string
+          processed_at: string | null
+        }
+        Insert: {
+          attempt_count?: number
+          booking_id: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          next_attempt_at?: string
+          processed_at?: string | null
+        }
+        Update: {
+          attempt_count?: number
+          booking_id?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          next_attempt_at?: string
+          processed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_calendar_outbox_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
         ]
@@ -952,6 +993,17 @@ export type Database = {
       }
     }
     Functions: {
+      booking_occupies_slot: {
+        Args: {
+          p_hold_expires_at?: string | null
+          p_status: Database["public"]["Enums"]["booking_status"]
+        }
+        Returns: boolean
+      }
+      expire_booking_holds: {
+        Args: never
+        Returns: number
+      }
       get_survey_invite_by_token: {
         Args: { _token: string }
         Returns: {

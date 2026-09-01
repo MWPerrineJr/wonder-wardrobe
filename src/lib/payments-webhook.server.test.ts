@@ -115,6 +115,7 @@ const bookingRow = {
   stripe_checkout_session_id: "cs_1",
   amount_due_cents: 2500,
   payment_environment: "sandbox",
+  hold_expires_at: "2026-09-01T12:00:00.000Z",
 };
 
 function sessionEvent(
@@ -197,7 +198,10 @@ describe("handlePaymentsWebhook", () => {
     assert.equal(first.status, 200);
     assert.equal(admin.tables.bookings[0]?.payment_status, "paid");
     assert.equal(admin.tables.bookings[0]?.status, "confirmed");
+    assert.equal(admin.tables.bookings[0]?.hold_expires_at, null);
     assert.equal(admin.tables.stripe_webhook_events[0]?.status, "completed");
+    assert.equal(admin.tables.booking_calendar_outbox?.length, 1);
+    assert.equal(admin.tables.booking_calendar_outbox[0]?.booking_id, "book-1");
 
     const second = await post(event, admin);
     assert.equal(second.status, 200);

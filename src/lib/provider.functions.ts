@@ -203,5 +203,14 @@ export const setBookingStatus = createServerFn({ method: "POST" })
       .select("id, status, starts_at")
       .single();
     if (error) throw dbError(error, "provider");
+    if (data.status === "confirmed" && saved) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { enqueueCalendarSync } = await import("@/lib/booking-calendar-outbox");
+        await enqueueCalendarSync(supabaseAdmin, saved.id);
+      } catch (e) {
+        console.error("[provider] calendar enqueue skipped", e);
+      }
+    }
     return saved;
   });

@@ -40,9 +40,10 @@ when they stay paused for more than an hour or fail five items in a row.
 
 ## Schedules
 
-`pg_cron` calls `public.invoke_feedback_job(job_slug)`, which POSTs to the three
+`pg_cron` calls `public.invoke_feedback_job(job_slug)`, which POSTs to the job
 routes with `Authorization: Bearer <JOB_SECRET>`. The public Supabase key is
-not accepted.
+not accepted. Slugs: `send-surveys`, `enrich-feedback`, `build-reports`,
+`booking-maintenance` (expire unpaid holds + Google Calendar outbox).
 
 Set these before the jobs will run:
 

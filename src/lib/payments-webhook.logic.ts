@@ -132,7 +132,7 @@ export function assertBookingPaymentMatches(
 
 /** Expired/failed checkout must not touch a booking that already collected funds. */
 export function canReleaseBookingHold(booking: BookingLike): boolean {
-  return booking.payment_status === "awaiting_payment" && booking.status !== "confirmed";
+  return booking.payment_status === "awaiting_payment" && booking.status === "pending";
 }
 
 export function shouldApplySubscriptionEvent(

@@ -35,7 +35,9 @@ under **Test users**, or publish the app.
 
 ## What providers get once connected
 
-- Every new booking is written to their primary Google Calendar.
+- Confirmed bookings are written to their primary Google Calendar (after
+  payment, or when the provider confirms a no-prepay visit). Unpaid checkout
+  holds are not synced.
 - Cancelling a booking deletes that event; rescheduling moves it.
 - Busy events already on their calendar block those times in the public booking
   grid, so clients can't book over personal commitments.
@@ -43,7 +45,8 @@ under **Test users**, or publish the app.
   revokes access and deletes the stored connection.
 
 If Google is unreachable, bookings still work — availability falls back to shop
-hours plus existing bookings, and a Google error never fails a booking.
+hours plus existing bookings, and a Google error never fails a booking. Failed
+syncs retry from `booking_calendar_outbox` via `/api/public/jobs/booking-maintenance`.
 
 ## Client-side "Add to calendar"
 
