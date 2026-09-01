@@ -28,6 +28,7 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth.google-calendar.return'
+import { Route as ApiPublicReadyRouteImport } from './routes/api/public/ready'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
 import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
@@ -143,6 +144,11 @@ const OauthGoogleCalendarReturnRoute =
     path: '/oauth/google-calendar/return',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicReadyRoute = ApiPublicReadyRouteImport.update({
+  id: '/api/public/ready',
+  path: '/api/public/ready',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
@@ -268,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -343,6 +351,7 @@ export interface FileRoutesById {
   '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
   '/api/public/health': typeof ApiPublicHealthRoute
+  '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/owner/subscribe'
     | '/api/public/calendar-event'
     | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/owner/subscribe'
     | '/api/public/calendar-event'
     | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner_/subscribe'
     | '/api/public/calendar-event'
     | '/api/public/health'
+    | '/api/public/ready'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
@@ -485,6 +497,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCalendarEventRoute: typeof ApiPublicCalendarEventRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
+  ApiPublicReadyRoute: typeof ApiPublicReadyRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
   ApiPublicJobsBuildReportsRoute: typeof ApiPublicJobsBuildReportsRoute
@@ -629,6 +642,13 @@ declare module '@tanstack/react-router' {
       path: '/oauth/google-calendar/return'
       fullPath: '/oauth/google-calendar/return'
       preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ready': {
+      id: '/api/public/ready'
+      path: '/api/public/ready'
+      fullPath: '/api/public/ready'
+      preLoaderRoute: typeof ApiPublicReadyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/health': {
@@ -817,6 +837,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCalendarEventRoute: ApiPublicCalendarEventRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
+  ApiPublicReadyRoute: ApiPublicReadyRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,
   ApiPublicJobsBuildReportsRoute: ApiPublicJobsBuildReportsRoute,
