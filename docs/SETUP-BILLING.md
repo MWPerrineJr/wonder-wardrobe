@@ -61,8 +61,14 @@ Revoke access by deleting the shop's `comp_grants` row.
 - `src/lib/billing.functions.ts` — `getBillingStatus`, `createCheckoutSession`
   (embedded checkout, 30-day trial, end-to-end tax/compliance handling enabled),
   `createPortalSession`. All owner-verified through RLS before any provider call.
-- `src/routes/api/public/payments/webhook.ts` — signature-verified receiver that
-  upserts `public.subscriptions` keyed by `(shop_id, environment)`.
+- `src/routes/api/public/payments/webhook.ts` — signature-verified receiver at
+  `/api/public/payments/webhook?env=sandbox|live`. Events are claimed in
+  `public.stripe_webhook_events` before any booking or subscription mutation.
+  Stripe gets **2xx** for successful or already-completed deliveries, **400**
+  for a bad signature or malformed payload, and **5xx** when the database
+  fails so Stripe retries. Booking Checkout is marked paid only when
+  `payment_status` is `paid` (or `async_payment_succeeded` arrives), and only
+  if booking id, shop id, session id, environment, amount, and currency match.
 - `src/components/analytics-upgrade-panel.tsx` — plan comparison, monthly/annual
   toggle, inline checkout form, and Manage billing.
 

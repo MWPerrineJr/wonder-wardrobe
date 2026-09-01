@@ -76,6 +76,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          amount_due_cents: number | null
           amount_paid_cents: number
           cancellation_reason: string | null
           cancelled_at: string | null
@@ -87,6 +88,7 @@ export type Database = {
           google_event_id: string | null
           id: string
           notes: string | null
+          payment_environment: string | null
           payment_status: string
           price_cents: number
           provider_id: string | null
@@ -100,6 +102,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          amount_due_cents?: number | null
           amount_paid_cents?: number
           cancellation_reason?: string | null
           cancelled_at?: string | null
@@ -111,6 +114,7 @@ export type Database = {
           google_event_id?: string | null
           id?: string
           notes?: string | null
+          payment_environment?: string | null
           payment_status?: string
           price_cents: number
           provider_id?: string | null
@@ -124,6 +128,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          amount_due_cents?: number | null
           amount_paid_cents?: number
           cancellation_reason?: string | null
           cancelled_at?: string | null
@@ -135,6 +140,7 @@ export type Database = {
           google_event_id?: string | null
           id?: string
           notes?: string | null
+          payment_environment?: string | null
           payment_status?: string
           price_cents?: number
           provider_id?: string | null
@@ -678,6 +684,45 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_webhook_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          environment: string
+          event_type: string
+          last_error: string | null
+          processed_at: string | null
+          status: string
+          stripe_created_at: string
+          stripe_event_id: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          environment: string
+          event_type: string
+          last_error?: string | null
+          processed_at?: string | null
+          status: string
+          stripe_created_at: string
+          stripe_event_id: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          environment?: string
+          event_type?: string
+          last_error?: string | null
+          processed_at?: string | null
+          status?: string
+          stripe_created_at?: string
+          stripe_event_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -685,6 +730,7 @@ export type Database = {
           current_period_end: string | null
           environment: string
           id: string
+          last_stripe_event_at: string | null
           plan: string
           price_id: string | null
           shop_id: string
@@ -699,6 +745,7 @@ export type Database = {
           current_period_end?: string | null
           environment?: string
           id?: string
+          last_stripe_event_at?: string | null
           plan?: string
           price_id?: string | null
           shop_id: string
@@ -713,6 +760,7 @@ export type Database = {
           current_period_end?: string | null
           environment?: string
           id?: string
+          last_stripe_event_at?: string | null
           plan?: string
           price_id?: string | null
           shop_id?: string

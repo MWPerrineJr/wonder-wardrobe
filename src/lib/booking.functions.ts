@@ -309,6 +309,8 @@ export const createBooking = createServerFn({ method: "POST" })
         notes: data.notes || null,
         status: "pending",
         payment_status: due > 0 ? "awaiting_payment" : "not_required",
+        amount_due_cents: due > 0 ? due : null,
+        payment_environment: due > 0 ? env : null,
       })
       .select(
         `id, starts_at, ends_at, status, price_cents, customer_name, customer_phone, notes,
@@ -372,10 +374,17 @@ export const createBooking = createServerFn({ method: "POST" })
       } as any);
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin
+      const attached = await supabaseAdmin
         .from("bookings")
-        .update({ stripe_checkout_session_id: session.id })
-        .eq("id", booking.id);
+        .update({
+          stripe_checkout_session_id: session.id,
+          amount_due_cents: due,
+          payment_environment: env,
+        })
+        .eq("id", booking.id)
+        .select("id");
+      if (attached.error) throw dbError(attached.error, "booking");
+      if (!attached.data?.length) throw new Error("Could not attach checkout session to booking");
 
       return { booking, checkoutUrl: session.url ?? null, amountDueCents: due };
     } catch (e) {
