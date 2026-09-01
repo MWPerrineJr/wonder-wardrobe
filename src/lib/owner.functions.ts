@@ -27,7 +27,7 @@ const CreateShopInput = z.object({
         name: z.string().min(1).max(80),
         duration_minutes: z.number().int().positive().max(600),
         price_cents: z.number().int().nonnegative().max(1_000_000),
-        category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const).default("hair_barber"),
+        category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness", "esthetician"] as const).default("hair_barber"),
       }),
     )
     .max(10)
@@ -221,7 +221,7 @@ const ServiceFields = z.object({
   duration_minutes: z.number().int().min(5, "Duration must be at least 5 minutes").max(600),
   price_cents: z.number().int().nonnegative().max(1_000_000),
   is_active: z.boolean().optional(),
-  category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness"] as const).default("hair_barber"),
+  category: z.enum(["hair_barber", "nails", "waxing", "makeup", "massage", "skincare_facials", "brows_lashes", "spa_wellness", "esthetician"] as const).default("hair_barber"),
 });
 
 export const createService = createServerFn({ method: "POST" })
