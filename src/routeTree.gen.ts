@@ -23,7 +23,6 @@ import { Route as SurveyTokenRouteImport } from './routes/survey.$token'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as DemoEmbedRouteImport } from './routes/demo.embed'
 import { Route as AuthGoogleTestRouteImport } from './routes/auth.google-test'
-import { Route as ApiSetupJobsRouteImport } from './routes/api/setup-jobs'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -114,11 +113,6 @@ const AuthGoogleTestRoute = AuthGoogleTestRouteImport.update({
   id: '/google-test',
   path: '/google-test',
   getParentRoute: () => AuthRoute,
-} as any)
-const ApiSetupJobsRoute = ApiSetupJobsRouteImport.update({
-  id: '/api/setup-jobs',
-  path: '/api/setup-jobs',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
   id: '/owner',
@@ -253,7 +247,6 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
   '/owner': typeof AuthenticatedOwnerRoute
-  '/api/setup-jobs': typeof ApiSetupJobsRoute
   '/auth/google-test': typeof AuthGoogleTestRoute
   '/demo/embed': typeof DemoEmbedRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -289,7 +282,6 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/account': typeof AuthenticatedAccountRoute
   '/owner': typeof AuthenticatedOwnerRoute
-  '/api/setup-jobs': typeof ApiSetupJobsRoute
   '/auth/google-test': typeof AuthGoogleTestRoute
   '/demo/embed': typeof DemoEmbedRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -328,7 +320,6 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/owner': typeof AuthenticatedOwnerRoute
-  '/api/setup-jobs': typeof ApiSetupJobsRoute
   '/auth/google-test': typeof AuthGoogleTestRoute
   '/demo/embed': typeof DemoEmbedRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -367,7 +358,6 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/account'
     | '/owner'
-    | '/api/setup-jobs'
     | '/auth/google-test'
     | '/demo/embed'
     | '/shop/$slug'
@@ -403,7 +393,6 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/account'
     | '/owner'
-    | '/api/setup-jobs'
     | '/auth/google-test'
     | '/demo/embed'
     | '/shop/$slug'
@@ -441,7 +430,6 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/account'
     | '/_authenticated/owner'
-    | '/api/setup-jobs'
     | '/auth/google-test'
     | '/demo/embed'
     | '/shop/$slug'
@@ -478,7 +466,6 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRouteWithChildren
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  ApiSetupJobsRoute: typeof ApiSetupJobsRoute
   DemoEmbedRoute: typeof DemoEmbedRoute
   SurveyTokenRoute: typeof SurveyTokenRoute
   DemoIndexRoute: typeof DemoIndexRoute
@@ -595,13 +582,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/google-test'
       preLoaderRoute: typeof AuthGoogleTestRouteImport
       parentRoute: typeof AuthRoute
-    }
-    '/api/setup-jobs': {
-      id: '/api/setup-jobs'
-      path: '/api/setup-jobs'
-      fullPath: '/api/setup-jobs'
-      preLoaderRoute: typeof ApiSetupJobsRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/owner': {
       id: '/_authenticated/owner'
@@ -810,7 +790,6 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
-  ApiSetupJobsRoute: ApiSetupJobsRoute,
   DemoEmbedRoute: DemoEmbedRoute,
   SurveyTokenRoute: SurveyTokenRoute,
   DemoIndexRoute: DemoIndexRoute,
