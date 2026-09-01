@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { updateShop } from "@/lib/owner.functions";
@@ -9,6 +10,7 @@ import {
   refreshPayoutAccount,
   startPayoutOnboarding,
 } from "@/lib/payouts.functions";
+import { getPaymentsDiagnostics } from "@/lib/payments-diagnostics.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { policySentences } from "@/lib/cancellation";
 
@@ -39,6 +41,10 @@ export function PaymentsPanel({
 }) {
   const qc = useQueryClient();
   const environment = getStripeEnvironment();
+  const diagnosticsQuery = useQuery({
+    queryKey: ["payments-diagnostics"],
+    queryFn: () => getPaymentsDiagnostics(),
+  });
   const [mode, setMode] = useState<Mode>(prepayMode);
   const [percent, setPercent] = useState(depositPercent || 50);
   const [freeHours, setFreeHours] = useState(cancelFreeHours);
@@ -153,6 +159,18 @@ export function PaymentsPanel({
             Connect your own payment account so client prepayments land directly in your bank —
             The Standing Chair never holds your money.
           </p>
+          {diagnosticsQuery.data && (
+            <p className="text-on-surface-variant font-label-sm text-label-sm">
+              This deployment is in{" "}
+              <span className="font-bold text-on-surface">
+                {diagnosticsQuery.data.environment ?? "unconfigured"}
+              </span>{" "}
+              payment mode.{" "}
+              <Link to="/owner/diagnostics" className="underline">
+                View diagnostics
+              </Link>
+            </p>
+          )}
         </div>
 
         {accountQuery.isPending ? (

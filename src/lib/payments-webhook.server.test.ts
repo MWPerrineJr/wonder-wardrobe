@@ -150,7 +150,7 @@ function request(env = "sandbox") {
 }
 
 async function post(event: StripeEvent, admin: ReturnType<typeof createMemoryAdmin>) {
-  return handlePaymentsWebhook(request(), async () => event, admin as never);
+  return handlePaymentsWebhook(request(), async () => event, admin as never, "sandbox");
 }
 
 describe("handlePaymentsWebhook", () => {
@@ -162,8 +162,19 @@ describe("handlePaymentsWebhook", () => {
         throw new Error("should not verify");
       },
       admin as never,
+      "sandbox",
     );
     assert.equal(badEnv.status, 400);
+
+    const mismatched = await handlePaymentsWebhook(
+      request("live"),
+      async () => {
+        throw new Error("should not verify");
+      },
+      admin as never,
+      "sandbox",
+    );
+    assert.equal(mismatched.status, 400);
 
     const badSig = await handlePaymentsWebhook(
       request(),
@@ -171,6 +182,7 @@ describe("handlePaymentsWebhook", () => {
         throw new Error("Invalid signature");
       },
       admin as never,
+      "sandbox",
     );
     assert.equal(badSig.status, 400);
   });
@@ -286,6 +298,7 @@ describe("handlePaymentsWebhook", () => {
         },
       }),
       admin as never,
+      "sandbox",
     );
     assert.equal(response.status, 200);
     assert.equal(admin.tables.subscriptions[0]?.status, "active");

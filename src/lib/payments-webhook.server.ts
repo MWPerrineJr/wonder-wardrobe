@@ -1,5 +1,6 @@
 import type { StripeEnv } from "./stripe.server.ts";
 import { enqueueCalendarSync } from "./booking-calendar-outbox.ts";
+import { configuredPaymentsEnv, PaymentsConfigError } from "./payments-env.ts";
 import {
   assertBookingPaymentMatches,
   canReleaseBookingHold,
@@ -326,12 +327,29 @@ export async function handlePaymentsWebhook(
   request: Request,
   verify: (req: Request, env: StripeEnv) => Promise<StripeEvent>,
   admin?: Admin,
+  deploymentEnv?: StripeEnv,
 ): Promise<Response> {
-  let env: StripeEnv;
+  let queryEnv: StripeEnv;
   try {
-    env = parseStripeEnv(new URL(request.url).searchParams.get("env"));
+    queryEnv = parseStripeEnv(new URL(request.url).searchParams.get("env"));
   } catch (error) {
     return new Response(error instanceof Error ? error.message : "Invalid env", { status: 400 });
+  }
+
+  let env: StripeEnv;
+  try {
+    env = deploymentEnv ?? configuredPaymentsEnv();
+  } catch (error) {
+    const message =
+      error instanceof PaymentsConfigError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : "Payments are not configured";
+    return new Response(message, { status: 503 });
+  }
+  if (queryEnv !== env) {
+    return new Response(`Webhook env=${queryEnv} does not match PAYMENTS_ENV=${env}`, { status: 400 });
   }
 
   let event: StripeEvent;

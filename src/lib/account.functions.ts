@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { configuredPaymentsEnv } from "@/lib/payments-env";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { refundForCancellation, type CancellationPolicy } from "@/lib/cancellation";
@@ -92,7 +93,7 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       .from("bookings")
       .select(
         `id, starts_at, amount_paid_cents, payment_status, stripe_payment_intent_id,
-         provider_id, google_event_id,
+         payment_environment, provider_id, google_event_id,
          shop:shops(cancel_free_hours, late_cancel_fee_percent)`,
       )
       .eq("id", data.bookingId)
@@ -146,10 +147,17 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const env = process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
+    const configured = configuredPaymentsEnv();
+    const chargedIn =
+      before.payment_environment === "live" || before.payment_environment === "sandbox"
+        ? before.payment_environment
+        : configured;
+    const env = chargedIn;
     let refundError: string | null = null;
     let refunded = 0;
-    if (before.stripe_payment_intent_id) {
+    if (env !== configured) {
+      refundError = `This booking was charged in ${env} mode; this deployment is ${configured}`;
+    } else if (before.stripe_payment_intent_id) {
       const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
       try {
         const stripe = createStripeClient(env);

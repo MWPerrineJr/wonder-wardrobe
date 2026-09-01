@@ -3,12 +3,16 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js";
 type StripeEnv = "sandbox" | "live";
 
 const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
+const vitePaymentsEnv = import.meta.env.VITE_PAYMENTS_ENV as string | undefined;
 
 function paymentsEnvironment(): StripeEnv {
+  if (vitePaymentsEnv === "sandbox" || vitePaymentsEnv === "live") {
+    return vitePaymentsEnv;
+  }
   if (clientToken?.startsWith("pk_test_")) return "sandbox";
   if (clientToken?.startsWith("pk_live_")) return "live";
   throw new Error(
-    "Payments are not configured for this build. Finish the go-live steps in the Payments tab to enable production checkout.",
+    "Payments are not configured for this build. Set VITE_PAYMENTS_ENV=sandbox|live to match PAYMENTS_ENV.",
   );
 }
 

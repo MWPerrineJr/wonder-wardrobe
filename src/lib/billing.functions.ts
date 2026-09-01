@@ -4,6 +4,7 @@ import { dbError } from "@/lib/db-error";
 import { RETURN_PATHS, resolveAppReturnUrl } from "@/lib/return-url";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePaymentsEnv } from "@/lib/payments-env";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
 // Per-shop analytics subscription ($120/month or $1,000/year, 30-day trial).
@@ -67,6 +68,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => statusInput.parse(input))
   .handler(async ({ data, context }): Promise<BillingStatus> => {
     const { supabase } = context;
+    const environment = requirePaymentsEnv(data.environment);
 
     const [
       { data: active, error: fnErr },
@@ -76,13 +78,13 @@ export const getBillingStatus = createServerFn({ method: "GET" })
     ] = await Promise.all([
       supabase.rpc("shop_has_active_analytics", {
         _shop_id: data.shopId,
-        _env: data.environment,
+        _env: environment,
       }),
       supabase
         .from("subscriptions")
         .select("status, price_id, current_period_end, cancel_at_period_end")
         .eq("shop_id", data.shopId)
-        .eq("environment", data.environment)
+        .eq("environment", environment)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
@@ -196,7 +198,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => checkoutInput.parse(input))
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
     const { userId, supabase } = context;
-    const environment: StripeEnv = data.environment;
+    const environment: StripeEnv = requirePaymentsEnv(data.environment);
 
     const shop = await requireOwnedShop(supabase, userId, data.shopId);
 
@@ -287,6 +289,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => cancelInput.parse(input))
   .handler(async ({ data, context }): Promise<CancelResult> => {
     const { userId, supabase } = context;
+    const environment = requirePaymentsEnv(data.environment);
 
     await requireOwnedShop(supabase, userId, data.shopId);
 
@@ -294,7 +297,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
       .from("subscriptions")
       .select("stripe_subscription_id, status")
       .eq("shop_id", data.shopId)
-      .eq("environment", data.environment)
+      .eq("environment", environment)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -307,7 +310,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
     const resume = data.resume === true;
 
     try {
-      const stripe = createStripeClient(data.environment);
+      const stripe = createStripeClient(environment);
       const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
         cancel_at_period_end: !resume,
       });
@@ -323,7 +326,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
           ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
         })
         .eq("shop_id", data.shopId)
-        .eq("environment", data.environment);
+        .eq("environment", environment);
 
       return { ok: true, cancelAtPeriodEnd: !resume, currentPeriodEnd };
     } catch (err) {
@@ -336,6 +339,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => portalInput.parse(input))
   .handler(async ({ data, context }): Promise<PortalResult> => {
     const { userId, supabase } = context;
+    const environment = requirePaymentsEnv(data.environment);
 
     await requireOwnedShop(supabase, userId, data.shopId);
 
@@ -343,7 +347,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("shop_id", data.shopId)
-      .eq("environment", data.environment)
+      .eq("environment", environment)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -360,7 +364,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
     }
 
     try {
-      const stripe = createStripeClient(data.environment);
+      const stripe = createStripeClient(environment);
       const portal = await stripe.billingPortal.sessions.create({
         customer: sub.stripe_customer_id,
         return_url: returnUrl,

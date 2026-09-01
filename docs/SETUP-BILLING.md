@@ -78,10 +78,22 @@ Revoke access by deleting the shop's `comp_grants` row.
 
 ## Test vs live
 
-`subscriptions.environment` separates test and live records. The database gate
-`shop_has_active_analytics(shop_id, env)` defaults to `live`, so test-mode
-subscriptions unlock analytics in the preview only, never on the published site.
-Surveys (`pending_survey_targets`) only ever consider live subscriptions.
+Set `PAYMENTS_ENV=sandbox` or `PAYMENTS_ENV=live` on the host. The process
+will not start until that value is set and the matching Stripe connection id,
+webhook secret, and `LOVABLE_API_KEY` are present. A live key sitting in the
+environment does **not** switch the deployment to live.
+
+Also set `VITE_PAYMENTS_ENV` to the same value (required when
+`VITE_PAYMENTS_CLIENT_TOKEN` is not a `pk_test_` / `pk_live_` key). Point
+Stripe at `/api/public/payments/webhook?env=<PAYMENTS_ENV>` — a webhook for
+the other mode is rejected.
+
+`subscriptions.environment` still separates test and live rows. The database
+gate `shop_has_active_analytics(shop_id, env)` is called with this
+deployment's `PAYMENTS_ENV`. Surveys (`pending_survey_targets`) only ever
+consider live subscriptions.
+
+Owners can confirm the mode at `/owner/diagnostics`.
 
 ## Testing in the preview
 
@@ -95,6 +107,6 @@ Surveys (`pending_survey_targets`) only ever consider live subscriptions.
 
 ## Going live
 
-Complete the go-live steps in the Payments tab (claim the account, finish
-verification, install the app on the live account). Live keys and the live
-webhook are provisioned automatically — nothing to configure in code.
+Complete the go-live steps in the Payments tab, then set `PAYMENTS_ENV=live`
+and `VITE_PAYMENTS_ENV=live` with the live connection id and live webhook
+secret. Do not rely on `STRIPE_LIVE_API_KEY` existing as the switch.

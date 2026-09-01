@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { canReserveSlot, DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
 import { dbError } from "@/lib/db-error";
+import { configuredPaymentsEnv } from "@/lib/payments-env";
 import { RETURN_PATHS, resolveAppReturnUrl, withSearchParams } from "@/lib/return-url";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -35,7 +36,7 @@ export type BookingContext = {
 
 /** Which payments environment this deployment charges in. */
 function paymentEnv(): "sandbox" | "live" {
-  return process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
+  return configuredPaymentsEnv();
 }
 
 /** Amount the client must pay up front, in cents (0 when prepay is off). */

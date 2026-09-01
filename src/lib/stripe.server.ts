@@ -1,6 +1,7 @@
 // Server-only Stripe access. All calls are routed through the Lovable
 // connector gateway, which holds the real Stripe secret key — the
 // STRIPE_*_API_KEY values in this project are gateway connection ids.
+import { configuredPaymentsEnv, requirePaymentsEnv, type StripeEnv } from "./payments-env.ts";
 import Stripe from "stripe";
 
 const getEnv = (key: string): string => {
@@ -9,15 +10,16 @@ const getEnv = (key: string): string => {
   return value;
 };
 
-export type StripeEnv = "sandbox" | "live";
+export type { StripeEnv } from "./payments-env.ts";
 
 const GATEWAY_STRIPE_BASE = "https://connector-gateway.lovable.dev/stripe";
 
-export function getConnectionApiKey(env: StripeEnv): string {
-  return env === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
+export function getConnectionApiKey(env: StripeEnv = configuredPaymentsEnv()): string {
+  const mode = requirePaymentsEnv(env);
+  return mode === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
 }
 
-export function createStripeClient(env: StripeEnv): Stripe {
+export function createStripeClient(env: StripeEnv = configuredPaymentsEnv()): Stripe {
   const connectionApiKey = getConnectionApiKey(env);
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
 
@@ -80,12 +82,13 @@ export function getStripeErrorMessage(error: unknown): string {
 /** Verify a webhook signature (HMAC-SHA256 over "<timestamp>.<body>"). */
 export async function verifyWebhook(
   req: Request,
-  env: StripeEnv,
+  env: StripeEnv = configuredPaymentsEnv(),
 ): Promise<{ type: string; data: { object: any } }> {
+  const mode = requirePaymentsEnv(env);
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
   const secret =
-    env === "sandbox"
+    mode === "sandbox"
       ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
       : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
 

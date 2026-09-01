@@ -76,6 +76,11 @@ jobs:
       SUPABASE_PROJECT_ID: ci
       JOB_SECRET: ci-job-secret-must-be-at-least-32-chars
       APP_URL: https://example.com
+      PAYMENTS_ENV: sandbox
+      VITE_PAYMENTS_ENV: sandbox
+      STRIPE_SANDBOX_API_KEY: ci_sandbox_stripe_connection
+      PAYMENTS_SANDBOX_WEBHOOK_SECRET: ci_sandbox_webhook_secret
+      LOVABLE_API_KEY: ci_lovable_api_key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
