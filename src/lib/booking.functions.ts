@@ -6,6 +6,7 @@ import { dbError } from "@/lib/db-error";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { CancellationPolicy } from "@/lib/cancellation";
+import { resolveReturnUrl, returnPathSchema } from "@/lib/return-path";
 
 function publicClient() {
   return createClient<Database>(
@@ -31,9 +32,24 @@ export type BookingContext = {
   cancellation: CancellationPolicy;
 };
 
-/** Which payments environment this deployment charges in. */
-function paymentEnv(): "sandbox" | "live" {
-  return process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
+/**
+ * Which payments environment this deployment charges in. Declared through
+ * PAYMENTS_ENV and validated against the credentials that are actually present,
+ * so a half-configured deployment can never take real money by accident.
+ */
+async function paymentEnv(): Promise<"sandbox" | "live"> {
+  const { resolvePaymentEnv } = await import("@/lib/stripe.server");
+  return resolvePaymentEnv();
+}
+
+/** Same, but null instead of throwing — for read paths that must still render. */
+async function paymentEnvOrNull(): Promise<"sandbox" | "live" | null> {
+  try {
+    return await paymentEnv();
+  } catch (e) {
+    console.error("[booking] payments not configured:", e instanceof Error ? e.message : e);
+    return null;
+  }
 }
 
 /** Amount the client must pay up front, in cents (0 when prepay is off). */
@@ -87,14 +103,17 @@ export const getBookingContext = createServerFn({ method: "GET" })
     const mode = (shop.prepay_mode ?? "off") as "off" | "deposit" | "full";
     let chargesEnabled = false;
     if (mode !== "off") {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: acct } = await supabaseAdmin
-        .from("shop_payout_accounts")
-        .select("charges_enabled")
-        .eq("shop_id", shop.id)
-        .eq("environment", paymentEnv())
-        .maybeSingle();
-      chargesEnabled = acct?.charges_enabled ?? false;
+      const env = await paymentEnvOrNull();
+      if (env) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: acct } = await supabaseAdmin
+          .from("shop_payout_accounts")
+          .select("charges_enabled")
+          .eq("shop_id", shop.id)
+          .eq("environment", env)
+          .maybeSingle();
+        chargesEnabled = acct?.charges_enabled ?? false;
+      }
     }
 
     return {
@@ -224,7 +243,7 @@ const CreateBookingInput = z.object({
     .max(30)
     .regex(/^[+()\d\s.-]+$/, "Phone can only contain digits and + ( ) - . spaces"),
   notes: z.string().trim().max(500).optional().nullable(),
-  returnUrl: z.string().url().optional(),
+  returnPath: returnPathSchema.optional(),
 });
 
 export type SavedBooking = {
@@ -273,10 +292,11 @@ export const createBooking = createServerFn({ method: "POST" })
     if (shopErr) throw dbError(shopErr, "booking");
     if (!shopRow) throw new Error("Shop not found");
 
-    const env = paymentEnv();
     const mode = (shopRow.prepay_mode ?? "off") as "off" | "deposit" | "full";
+    // Only resolve (and require) payment credentials when this shop charges up front.
+    const env = mode === "off" ? null : await paymentEnv();
     let payoutAccountId: string | null = null;
-    if (mode !== "off") {
+    if (mode !== "off" && env) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: acct } = await supabaseAdmin
         .from("shop_payout_accounts")
@@ -341,7 +361,7 @@ export const createBooking = createServerFn({ method: "POST" })
       console.error("[booking] calendar sync skipped", e);
     }
 
-    if (due <= 0 || !payoutAccountId) {
+    if (due <= 0 || !payoutAccountId || !env) {
       return { booking, checkoutUrl: null, amountDueCents: 0 };
     }
 
@@ -367,8 +387,14 @@ export const createBooking = createServerFn({ method: "POST" })
           metadata: { booking_id: booking.id, shop_id: shopRow.id },
         },
         metadata: { booking_id: booking.id, shop_id: shopRow.id },
-        success_url: `${data.returnUrl ?? "https://example.com"}?paid=1&booking=${booking.id}`,
-        cancel_url: `${data.returnUrl ?? "https://example.com"}?paid=0&booking=${booking.id}`,
+        success_url: resolveReturnUrl(data.returnPath ?? "/account", {
+          paid: "1",
+          booking: booking.id,
+        }),
+        cancel_url: resolveReturnUrl(data.returnPath ?? "/account", {
+          paid: "0",
+          booking: booking.id,
+        }),
       } as any);
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

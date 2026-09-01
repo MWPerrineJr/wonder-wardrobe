@@ -3,6 +3,7 @@ import { z } from "zod";
 import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolveReturnUrl, returnPathSchema } from "@/lib/return-path";
 
 // Shop-owned payout accounts (Stripe Connect Express). Client prepayments are
 // charged on the platform and transferred straight to the shop's own account.
@@ -64,7 +65,7 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
       .object({
         shopId: z.string().uuid(),
         environment: envSchema,
-        returnUrl: z.string().url(),
+        returnPath: returnPathSchema,
       })
       .parse(input),
   )
@@ -113,8 +114,8 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
       const link = await stripe.accountLinks.create({
         account: accountId,
         type: "account_onboarding",
-        refresh_url: data.returnUrl,
-        return_url: data.returnUrl,
+        refresh_url: resolveReturnUrl(data.returnPath, { onboarding: "refresh" }),
+        return_url: resolveReturnUrl(data.returnPath, { onboarding: "done" }),
       });
       return { url: link.url };
     } catch (error) {

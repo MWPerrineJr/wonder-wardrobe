@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "node --experimental-strip-types --test src/lib/jobs.auth.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/jobs.auth.test.ts src/lib/return-path.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.30",
