@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { isAuthorizedJobCall } from "@/lib/jobs.server";
+import { authorizeJobCall, jobAuthResponse } from "@/lib/jobs.auth";
+import { logJobEvent } from "@/lib/jobs.server";
 
 const payloadSchema = z.object({
   templateName: z.literal("survey-invite"),
@@ -23,7 +24,17 @@ export const Route = createFileRoute("/api/public/emails/survey-invite")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!isAuthorizedJobCall(request)) return new Response("Unauthorized", { status: 401 });
+        const auth = authorizeJobCall(request);
+        if (!auth.ok) {
+          logJobEvent({
+            event: "job.auth",
+            job: "survey-invite-email",
+            ok: false,
+            reason: auth.reason,
+            status: auth.status,
+          });
+          return jobAuthResponse(auth);
+        }
 
         const parsed = payloadSchema.safeParse(await request.json());
         if (!parsed.success) return new Response("Invalid payload", { status: 400 });

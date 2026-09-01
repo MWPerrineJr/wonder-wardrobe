@@ -28,8 +28,27 @@ with a single item per run until it recovers.
 
 ## Schedules
 
-`pg_cron` calls the three routes with the project's publishable key in an `apikey`
-header. Inspect with `select jobname, schedule from cron.job;`.
+`pg_cron` calls `public.invoke_feedback_job(job_slug)`, which POSTs to the three
+routes with `Authorization: Bearer <JOB_SECRET>`. The public Supabase key is
+not accepted.
+
+Set these before the jobs will run:
+
+1. Deployment secret `JOB_SECRET` — `openssl rand -base64 32` (32+ characters).
+   Put it in `.env.local` / the host secret store. Do not commit it.
+2. The same value in Supabase Vault as name `job_secret`:
+   `select vault.create_secret('paste-the-secret', 'job_secret');`
+3. Public app origin in `app_runtime_settings`:
+   `insert into public.app_runtime_settings (key, value) values ('app_url', 'https://your-app.example')
+    on conflict (key) do update set value = excluded.value, updated_at = now();`
+
+Inspect schedules with `select jobname, schedule from cron.job;`. After rotating
+`JOB_SECRET`, update the Vault secret to match; cron already reads Vault at
+run time.
+
+To rotate: generate a new secret, update the deployment env, then
+`select vault.update_secret((select id from vault.secrets where name = 'job_secret'), 'new-secret');`
+Verify one job with a Bearer header, then discard the old secret.
 
 ## Owner setup
 

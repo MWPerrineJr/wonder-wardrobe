@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { acquireLease, isAuthorizedJobCall, releaseLease } from "@/lib/jobs.server";
+import { runScheduledJob } from "@/lib/jobs.server";
 import { sendSurveyInviteEmail } from "@/lib/survey-email.server";
 
 const MAX_PER_RUN = 25;
@@ -13,15 +13,9 @@ const MAX_PER_RUN = 25;
 export const Route = createFileRoute("/api/public/jobs/send-surveys")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        if (!isAuthorizedJobCall(request)) return new Response("Unauthorized", { status: 401 });
-
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const lease = await acquireLease(supabaseAdmin, "send-surveys");
-        if (!lease.ok) return Response.json({ skipped: lease.skipped });
-
-        try {
-          const { data: targets, error } = await supabaseAdmin.rpc("pending_survey_targets");
+      POST: async ({ request }) =>
+        runScheduledJob(request, "send-surveys", async ({ request: req, admin }) => {
+          const { data: targets, error } = await admin.rpc("pending_survey_targets");
           if (error) throw new Error(error.message);
 
           let invited = 0;
@@ -29,7 +23,7 @@ export const Route = createFileRoute("/api/public/jobs/send-surveys")({
           let failed = 0;
 
           for (const t of (targets ?? []).slice(0, MAX_PER_RUN)) {
-            const { data: invite, error: insErr } = await supabaseAdmin
+            const { data: invite, error: insErr } = await admin
               .from("survey_invites")
               .insert({
                 shop_id: t.shop_id,
@@ -56,10 +50,10 @@ export const Route = createFileRoute("/api/public/jobs/send-surveys")({
                 serviceName: t.service_name,
                 shopAddress: t.shop_address,
               },
-              process.env["APP_URL"] ?? new URL(request.url).origin,
+              process.env["APP_URL"] ?? new URL(req.url).origin,
             );
 
-            await supabaseAdmin
+            await admin
               .from("survey_invites")
               .update({
                 email_status: outcome.status,
@@ -73,10 +67,7 @@ export const Route = createFileRoute("/api/public/jobs/send-surveys")({
           }
 
           return Response.json({ invited, emailed, failed });
-        } finally {
-          await releaseLease(supabaseAdmin, "send-surveys");
-        }
-      },
+        }),
     },
   },
 });

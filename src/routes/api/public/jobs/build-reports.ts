@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { classifyGatewayError, FEEDBACK_MODEL } from "@/lib/ai.server";
+import { pauseJob, resumeJob, runScheduledJob } from "@/lib/jobs.server";
 import { buildShopReport } from "@/lib/shop-report.server";
-import { acquireLease, isAuthorizedJobCall, pauseJob, releaseLease, resumeJob } from "@/lib/jobs.server";
 
 const MAX_SHOPS = 5;
 
@@ -14,18 +14,12 @@ const MAX_SHOPS = 5;
 export const Route = createFileRoute("/api/public/jobs/build-reports")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        if (!isAuthorizedJobCall(request)) return new Response("Unauthorized", { status: 401 });
+      POST: async ({ request }) =>
+        runScheduledJob(request, "build-reports", async ({ admin, lease }) => {
+          const apiKey = process.env["LOVABLE_API_KEY"];
+          if (!apiKey) return new Response("LOVABLE_API_KEY is not configured", { status: 500 });
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return new Response("LOVABLE_API_KEY is not configured", { status: 500 });
-
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const lease = await acquireLease(supabaseAdmin, "build-reports");
-        if (!lease.ok) return Response.json({ skipped: lease.skipped });
-
-        try {
-          const { data: subs, error } = await supabaseAdmin
+          const { data: subs, error } = await admin
             .from("subscriptions")
             .select("shop_id, status, current_period_end")
             .in("status", ["trialing", "active", "past_due"]);
@@ -41,17 +35,17 @@ export const Route = createFileRoute("/api/public/jobs/build-reports")({
 
           for (const shopId of shopIds) {
             try {
-              const result = await buildShopReport(supabaseAdmin, apiKey, shopId);
+              const result = await buildShopReport(admin, apiKey, shopId);
               if (result.built) {
                 built += 1;
-                if (lease.paused) await resumeJob(supabaseAdmin, "build-reports");
+                if (lease.paused) await resumeJob(admin, "build-reports");
               } else {
                 skipped.push(shopId);
               }
             } catch (err) {
               const failure = classifyGatewayError(err);
               if (failure.kind === "pause") {
-                await pauseJob(supabaseAdmin, "build-reports", failure.reason);
+                await pauseJob(admin, "build-reports", failure.reason);
                 return Response.json({ built, paused: failure.reason });
               }
               if (failure.kind === "backoff") {
@@ -62,10 +56,7 @@ export const Route = createFileRoute("/api/public/jobs/build-reports")({
           }
 
           return Response.json({ built, skipped: skipped.length, model: FEEDBACK_MODEL });
-        } finally {
-          await releaseLease(supabaseAdmin, "build-reports");
-        }
-      },
+        }),
     },
   },
 });
