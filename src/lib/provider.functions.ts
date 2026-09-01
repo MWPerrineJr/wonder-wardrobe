@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { ProviderSelfPatch } from "@/lib/provider-profile";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -153,6 +154,35 @@ export const getMyProviderRange = createServerFn({ method: "POST" })
       },
       bookings: (bookings ?? []) as unknown as ProviderBooking[],
     };
+  });
+
+/** Providers may edit display fields only. Identity and shop assignment stay frozen. */
+export const updateMyProviderProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => ProviderSelfPatch.parse(input))
+  .handler(async ({ data, context }) => {
+    const patch: {
+      display_name?: string;
+      bio?: string | null;
+      avatar_url?: string | null;
+      specialties?: string[];
+    } = {};
+    if (data.displayName !== undefined) patch.display_name = data.displayName;
+    if (data.bio !== undefined) patch.bio = data.bio;
+    if (data.avatarUrl !== undefined) patch.avatar_url = data.avatarUrl ? data.avatarUrl : null;
+    if (data.specialties !== undefined) patch.specialties = data.specialties;
+    if (Object.keys(patch).length === 0) {
+      throw new Error("No profile fields to update");
+    }
+
+    const { data: saved, error } = await context.supabase
+      .from("providers")
+      .update(patch)
+      .eq("user_id", context.userId)
+      .select("id, display_name, bio, avatar_url, specialties")
+      .single();
+    if (error) throw dbError(error, "provider");
+    return saved;
   });
 
 export const setBookingStatus = createServerFn({ method: "POST" })

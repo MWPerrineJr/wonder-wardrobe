@@ -210,6 +210,7 @@ export const updateShop = createServerFn({ method: "POST" })
       .from("shops")
       .update(patch)
       .eq("id", data.shopId)
+      .eq("owner_id", context.userId)
       .select("id, name, description, address, cover_image_url, google_review_url, updated_at")
       .single();
     if (error) throw dbError(error, "owner");
