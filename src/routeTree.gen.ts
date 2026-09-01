@@ -28,6 +28,7 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth.google-calendar.return'
+import { Route as ApiPublicTmpWebhookCheckRouteImport } from './routes/api/public/tmp-webhook-check'
 import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/calendar-event'
 import { Route as AuthenticatedOwnerSubscribeRouteImport } from './routes/_authenticated/owner_.subscribe'
 import { Route as AuthenticatedOwnerFeedbackRouteImport } from './routes/_authenticated/owner_.feedback'
@@ -140,6 +141,12 @@ const OauthGoogleCalendarReturnRoute =
   OauthGoogleCalendarReturnRouteImport.update({
     id: '/oauth/google-calendar/return',
     path: '/oauth/google-calendar/return',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicTmpWebhookCheckRoute =
+  ApiPublicTmpWebhookCheckRouteImport.update({
+    id: '/api/public/tmp-webhook-check',
+    path: '/api/public/tmp-webhook-check',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicCalendarEventRoute = ApiPublicCalendarEventRouteImport.update({
@@ -261,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/tmp-webhook-check': typeof ApiPublicTmpWebhookCheckRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -296,6 +304,7 @@ export interface FileRoutesByTo {
   '/owner/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/owner/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/tmp-webhook-check': typeof ApiPublicTmpWebhookCheckRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -334,6 +343,7 @@ export interface FileRoutesById {
   '/_authenticated/owner_/feedback': typeof AuthenticatedOwnerFeedbackRoute
   '/_authenticated/owner_/subscribe': typeof AuthenticatedOwnerSubscribeRoute
   '/api/public/calendar-event': typeof ApiPublicCalendarEventRoute
+  '/api/public/tmp-webhook-check': typeof ApiPublicTmpWebhookCheckRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -372,6 +382,7 @@ export interface FileRouteTypes {
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/tmp-webhook-check'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/owner/feedback'
     | '/owner/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/tmp-webhook-check'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
@@ -444,6 +456,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner_/feedback'
     | '/_authenticated/owner_/subscribe'
     | '/api/public/calendar-event'
+    | '/api/public/tmp-webhook-check'
     | '/oauth/google-calendar/return'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/build-reports'
@@ -472,6 +485,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicCalendarEventRoute: typeof ApiPublicCalendarEventRoute
+  ApiPublicTmpWebhookCheckRoute: typeof ApiPublicTmpWebhookCheckRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicEmailsSurveyInviteRoute: typeof ApiPublicEmailsSurveyInviteRoute
   ApiPublicJobsBuildReportsRoute: typeof ApiPublicJobsBuildReportsRoute
@@ -616,6 +630,13 @@ declare module '@tanstack/react-router' {
       path: '/oauth/google-calendar/return'
       fullPath: '/oauth/google-calendar/return'
       preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/tmp-webhook-check': {
+      id: '/api/public/tmp-webhook-check'
+      path: '/api/public/tmp-webhook-check'
+      fullPath: '/api/public/tmp-webhook-check'
+      preLoaderRoute: typeof ApiPublicTmpWebhookCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/calendar-event': {
@@ -796,6 +817,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicCalendarEventRoute: ApiPublicCalendarEventRoute,
+  ApiPublicTmpWebhookCheckRoute: ApiPublicTmpWebhookCheckRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicEmailsSurveyInviteRoute: ApiPublicEmailsSurveyInviteRoute,
   ApiPublicJobsBuildReportsRoute: ApiPublicJobsBuildReportsRoute,
