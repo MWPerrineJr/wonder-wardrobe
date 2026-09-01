@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { classifyGatewayError, FEEDBACK_MODEL } from "@/lib/ai.server";
 import { analyzeReview } from "@/lib/feedback-analysis.server";
-import { acquireLease, isAuthorizedJobCall, pauseJob, releaseLease, resumeJob } from "@/lib/jobs.server";
+import { pauseJob, resumeJob, runScheduledJob } from "@/lib/jobs.server";
 
 const BATCH = 10;
 
@@ -14,20 +14,14 @@ const BATCH = 10;
 export const Route = createFileRoute("/api/public/jobs/enrich-feedback")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        if (!isAuthorizedJobCall(request)) return new Response("Unauthorized", { status: 401 });
+      POST: async ({ request }) =>
+        runScheduledJob(request, "enrich-feedback", async ({ admin, lease }) => {
+          const apiKey = process.env["LOVABLE_API_KEY"];
+          if (!apiKey) return new Response("LOVABLE_API_KEY is not configured", { status: 500 });
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return new Response("LOVABLE_API_KEY is not configured", { status: 500 });
+          const limit = lease.paused ? 1 : BATCH;
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const lease = await acquireLease(supabaseAdmin, "enrich-feedback");
-        if (!lease.ok) return Response.json({ skipped: lease.skipped });
-
-        const limit = lease.paused ? 1 : BATCH;
-
-        try {
-          const { data: rows, error } = await supabaseAdmin
+          const { data: rows, error } = await admin
             .from("customer_feedback")
             .select("id, rating, message, source")
             .is("enriched_at", null)
@@ -48,7 +42,7 @@ export const Route = createFileRoute("/api/public/jobs/enrich-feedback")({
                 message: row.message ?? "",
               });
 
-              await supabaseAdmin
+              await admin
                 .from("customer_feedback")
                 .update({
                   ...analysis,
@@ -60,11 +54,11 @@ export const Route = createFileRoute("/api/public/jobs/enrich-feedback")({
                 .is("enriched_at", null);
 
               enriched += 1;
-              if (lease.paused) await resumeJob(supabaseAdmin, "enrich-feedback");
+              if (lease.paused) await resumeJob(admin, "enrich-feedback");
             } catch (err) {
               const failure = classifyGatewayError(err);
               if (failure.kind === "pause") {
-                await pauseJob(supabaseAdmin, "enrich-feedback", failure.reason);
+                await pauseJob(admin, "enrich-feedback", failure.reason);
                 return Response.json({ enriched, paused: failure.reason }, { status: 200 });
               }
               if (failure.kind === "backoff") {
@@ -75,10 +69,7 @@ export const Route = createFileRoute("/api/public/jobs/enrich-feedback")({
           }
 
           return Response.json({ enriched, failed });
-        } finally {
-          await releaseLease(supabaseAdmin, "enrich-feedback");
-        }
-      },
+        }),
     },
   },
 });

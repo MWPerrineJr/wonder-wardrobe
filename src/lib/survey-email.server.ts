@@ -30,6 +30,9 @@ export async function sendSurveyInviteEmail(
   if (!appUrl) {
     return { status: "blocked", error: "APP_URL is not configured for this deployment." };
   }
+  if (!process.env["JOB_SECRET"] || process.env["JOB_SECRET"].length < 32) {
+    return { status: "blocked", error: "JOB_SECRET is not configured for this deployment." };
+  }
 
   const payload = {
     templateName: "survey-invite",
@@ -51,7 +54,7 @@ export async function sendSurveyInviteEmail(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: process.env["SUPABASE_ANON_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"] ?? "",
+        Authorization: `Bearer ${process.env["JOB_SECRET"] ?? ""}`,
       },
       body: JSON.stringify(payload),
     });

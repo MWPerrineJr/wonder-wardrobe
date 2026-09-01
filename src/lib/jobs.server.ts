@@ -2,14 +2,9 @@
 // leases and the pause/probe circuit breaker. Service-role only — never
 // imported from client-reachable modules.
 
-export type JobName = "send-surveys" | "enrich-feedback" | "build-reports";
+import { authorizeJobCall, jobAuthResponse } from "@/lib/jobs.auth";
 
-export function isAuthorizedJobCall(request: Request) {
-  const key = request.headers.get("apikey") ?? request.headers.get("x-api-key");
-  const expected =
-    process.env["SUPABASE_ANON_KEY"] ?? process.env["SUPABASE_PUBLISHABLE_KEY"] ?? "";
-  return Boolean(key) && Boolean(expected) && key === expected;
-}
+export type JobName = "send-surveys" | "enrich-feedback" | "build-reports";
 
 type Admin = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
 
@@ -19,6 +14,60 @@ export type JobLease =
   | { ok: false; skipped: "locked" };
 
 const LEASE_MINUTES = 10;
+
+type JobLog = Record<string, string | number | boolean | null | undefined>;
+
+/** Structured logs only. Never include Authorization, JOB_SECRET, or API keys. */
+export function logJobEvent(fields: JobLog) {
+  console.log(JSON.stringify({ component: "jobs", ts: new Date().toISOString(), ...fields }));
+}
+
+export async function runScheduledJob(
+  request: Request,
+  job: JobName,
+  handler: (ctx: {
+    request: Request;
+    admin: Admin;
+    lease: Extract<JobLease, { ok: true }>;
+  }) => Promise<Response>,
+): Promise<Response> {
+  const started = Date.now();
+  const auth = authorizeJobCall(request);
+  if (!auth.ok) {
+    logJobEvent({ event: "job.auth", job, ok: false, reason: auth.reason, status: auth.status });
+    return jobAuthResponse(auth);
+  }
+  logJobEvent({ event: "job.auth", job, ok: true });
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const lease = await acquireLease(supabaseAdmin, job);
+  if (!lease.ok) {
+    logJobEvent({ event: "job.skipped", job, skipped: lease.skipped, ms: Date.now() - started });
+    return Response.json({ skipped: lease.skipped });
+  }
+
+  try {
+    const response = await handler({ request, admin: supabaseAdmin, lease });
+    logJobEvent({
+      event: "job.complete",
+      job,
+      status: response.status,
+      paused: lease.paused,
+      ms: Date.now() - started,
+    });
+    return response;
+  } catch (error) {
+    logJobEvent({
+      event: "job.error",
+      job,
+      ms: Date.now() - started,
+      error: error instanceof Error ? error.message : "error",
+    });
+    throw error;
+  } finally {
+    await releaseLease(supabaseAdmin, job);
+  }
+}
 
 /**
  * Acquire the job lease. A second concurrent run sees a live lease and exits.
