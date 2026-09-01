@@ -6,8 +6,10 @@ import {
   canReleaseBookingHold,
   httpStatusForWebhookError,
   ledgerDecision,
+  parseStripeEnv,
   shouldApplySubscriptionEvent,
   shouldCaptureBookingPayment,
+  shouldReleaseBookingHold,
   WebhookError,
   type BookingLike,
 } from "./payments-webhook.logic.ts";
@@ -21,6 +23,15 @@ const booking: BookingLike = {
   amount_due_cents: 2500,
   payment_environment: "sandbox",
 };
+
+describe("parseStripeEnv", () => {
+  it("accepts only sandbox or live", () => {
+    assert.equal(parseStripeEnv("sandbox"), "sandbox");
+    assert.equal(parseStripeEnv("live"), "live");
+    assert.throws(() => parseStripeEnv(null), WebhookError);
+    assert.throws(() => parseStripeEnv("prod"), WebhookError);
+  });
+});
 
 describe("shouldCaptureBookingPayment", () => {
   it("does not confirm an unpaid asynchronous checkout", () => {
@@ -127,6 +138,12 @@ describe("booking verification", () => {
 });
 
 describe("booking hold release", () => {
+  it("releases holds only on expiration or async payment failure", () => {
+    assert.equal(shouldReleaseBookingHold("checkout.session.expired"), true);
+    assert.equal(shouldReleaseBookingHold("checkout.session.async_payment_failed"), true);
+    assert.equal(shouldReleaseBookingHold("checkout.session.completed"), false);
+  });
+
   it("does not cancel an already-paid booking", () => {
     assert.equal(
       canReleaseBookingHold({ ...booking, payment_status: "paid", status: "confirmed" }),
@@ -147,8 +164,18 @@ describe("booking hold release", () => {
 describe("subscription event ordering", () => {
   it("keeps the newest valid state when events arrive out of order", () => {
     const newer = "2026-09-01T12:00:00.000Z";
-    assert.equal(shouldApplySubscriptionEvent(Math.floor(Date.parse(newer) / 1000) - 60, { last_stripe_event_at: newer }), false);
-    assert.equal(shouldApplySubscriptionEvent(Math.floor(Date.parse(newer) / 1000) + 60, { last_stripe_event_at: newer }), true);
+    assert.equal(
+      shouldApplySubscriptionEvent(Math.floor(Date.parse(newer) / 1000) - 60, {
+        last_stripe_event_at: newer,
+      }),
+      false,
+    );
+    assert.equal(
+      shouldApplySubscriptionEvent(Math.floor(Date.parse(newer) / 1000) + 60, {
+        last_stripe_event_at: newer,
+      }),
+      true,
+    );
   });
 });
 
@@ -194,9 +221,6 @@ describe("ledger and HTTP mapping", () => {
 
   it("maps a database failure to 500 so Stripe retries", () => {
     assert.equal(httpStatusForWebhookError(new Error("upsert failed")), 500);
-    assert.equal(
-      httpStatusForWebhookError(new WebhookError("bad signature", "signature")),
-      400,
-    );
+    assert.equal(httpStatusForWebhookError(new WebhookError("bad signature", "signature")), 400);
   });
 });

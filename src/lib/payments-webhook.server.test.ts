@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  handlePaymentsWebhook,
-  type StripeEvent,
-} from "./payments-webhook.server.ts";
+import { handlePaymentsWebhook, type StripeEvent } from "./payments-webhook.server.ts";
 
 type Row = Record<string, unknown>;
 
@@ -82,18 +79,23 @@ function createMemoryAdmin(seed: Record<string, Row[]>, options: MemoryOptions =
         const matched = rows.filter((row) => matches(row, query.filters));
         for (const row of matched) Object.assign(row, query.payload);
         const data = matched.map((row) => ({ ...row }));
-        return mode === "maybeSingle" ? { data: data[0] ?? null, error: null } : { data, error: null };
+        return mode === "maybeSingle"
+          ? { data: data[0] ?? null, error: null }
+          : { data, error: null };
       }
 
       if (query.action === "upsert" && query.payload) {
         const existing = rows.find(
           (row) =>
-            row.shop_id === query.payload!.shop_id && row.environment === query.payload!.environment,
+            row.shop_id === query.payload!.shop_id &&
+            row.environment === query.payload!.environment,
         );
         if (existing) Object.assign(existing, query.payload);
         else rows.push({ id: `row-${rows.length + 1}`, ...query.payload });
         const data = [existing ?? rows[rows.length - 1]];
-        return mode === "maybeSingle" ? { data: data[0] ?? null, error: null } : { data, error: null };
+        return mode === "maybeSingle"
+          ? { data: data[0] ?? null, error: null }
+          : { data, error: null };
       }
 
       const found = rows.filter((row) => matches(row, query.filters));
@@ -118,11 +120,7 @@ const bookingRow = {
   hold_expires_at: "2026-09-01T12:00:00.000Z",
 };
 
-function sessionEvent(
-  type: string,
-  session: Record<string, unknown>,
-  id = "evt_1",
-): StripeEvent {
+function sessionEvent(type: string, session: Record<string, unknown>, id = "evt_1"): StripeEvent {
   return {
     id,
     type,
@@ -192,10 +190,7 @@ describe("handlePaymentsWebhook", () => {
       { bookings: [{ ...bookingRow }] },
       { selectError: { table: "stripe_webhook_events", message: "connection refused" } },
     );
-    const response = await post(
-      sessionEvent("checkout.session.completed", paidSession()),
-      admin,
-    );
+    const response = await post(sessionEvent("checkout.session.completed", paidSession()), admin);
     assert.equal(response.status, 500);
     assert.equal(admin.tables.bookings[0]?.payment_status, "awaiting_payment");
   });
@@ -225,15 +220,24 @@ describe("handlePaymentsWebhook", () => {
   it("does not confirm an unpaid asynchronous checkout", async () => {
     const admin = createMemoryAdmin({ bookings: [{ ...bookingRow }] });
     const response = await post(
-      sessionEvent(
-        "checkout.session.completed",
-        paidSession({ payment_status: "unpaid" }),
-      ),
+      sessionEvent("checkout.session.completed", paidSession({ payment_status: "unpaid" })),
       admin,
     );
     assert.equal(response.status, 200);
     assert.equal(admin.tables.bookings[0]?.payment_status, "awaiting_payment");
     assert.equal(admin.tables.stripe_webhook_events[0]?.status, "completed");
+  });
+
+  it("cancels an unpaid hold when checkout expires", async () => {
+    const admin = createMemoryAdmin({ bookings: [{ ...bookingRow }] });
+    const response = await post(
+      sessionEvent("checkout.session.expired", paidSession({ payment_status: "unpaid" })),
+      admin,
+    );
+    assert.equal(response.status, 200);
+    assert.equal(admin.tables.bookings[0]?.payment_status, "failed");
+    assert.equal(admin.tables.bookings[0]?.status, "cancelled");
+    assert.equal(admin.tables.bookings[0]?.hold_expires_at, null);
   });
 
   it("does not cancel an already-paid booking on a late expiration", async () => {

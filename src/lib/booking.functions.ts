@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { amountDueCents } from "@/lib/booking-money";
 import { canReserveSlot, DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
+import { toInstant } from "@/lib/booking-time";
 import { dbError } from "@/lib/db-error";
 import { configuredPaymentsEnv } from "@/lib/payments-env";
 import { RETURN_PATHS, resolveAppReturnUrl, withSearchParams } from "@/lib/return-url";
@@ -10,25 +12,30 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { CancellationPolicy } from "@/lib/cancellation";
 
-function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
-}
+export { amountDueCents } from "@/lib/booking-money";
 
-/** Naive local wall-clock date + time -> exact instant, using the caller's UTC offset. */
-function toInstant(date: string, time: string, tzOffsetMinutes: number) {
-  const [y, m, d] = date.split("-").map(Number);
-  const [hh, mm] = time.split(":").map(Number);
-  return new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0) + tzOffsetMinutes * 60_000);
+function publicClient() {
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 export type BookingContext = {
   shop: { id: string; slug: string; name: string; address: string | null };
-  providers: Array<{ id: string; display_name: string; avatar_url: string | null; specialties: string[] }>;
-  services: Array<{ id: string; name: string; description: string | null; duration_minutes: number; price_cents: number; category: string | null }>;
+  providers: Array<{
+    id: string;
+    display_name: string;
+    avatar_url: string | null;
+    specialties: string[];
+  }>;
+  services: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    duration_minutes: number;
+    price_cents: number;
+    category: string | null;
+  }>;
   hours: Array<{ weekday: number; open_time: string; close_time: string; is_closed: boolean }>;
   prepay: { mode: "off" | "deposit" | "full"; depositPercent: number; enabled: boolean };
   cancellation: CancellationPolicy;
@@ -38,18 +45,6 @@ export type BookingContext = {
 function paymentEnv(): "sandbox" | "live" {
   return configuredPaymentsEnv();
 }
-
-/** Amount the client must pay up front, in cents (0 when prepay is off). */
-export function amountDueCents(
-  priceCents: number,
-  mode: "off" | "deposit" | "full",
-  depositPercent: number,
-): number {
-  if (mode === "full") return priceCents;
-  if (mode === "deposit") return Math.max(50, Math.round((priceCents * depositPercent) / 100));
-  return 0;
-}
-
 
 export const getBookingContext = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => z.object({ slug: z.string().min(1) }).parse(input))
@@ -117,7 +112,6 @@ export const getBookingContext = createServerFn({ method: "GET" })
         rescheduleMinHours: shop.reschedule_min_hours ?? 24,
       },
     };
-
   });
 
 const SlotsInput = z.object({
@@ -144,7 +138,8 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
       .eq("id", data.serviceId)
       .maybeSingle();
     if (svcErr) throw dbError(svcErr, "booking");
-    if (!service || service.shop_id !== data.shopId) throw new Error("Service not found for this shop");
+    if (!service || service.shop_id !== data.shopId)
+      throw new Error("Service not found for this shop");
 
     const [y, m, d] = data.date.split("-").map(Number);
     const weekday = new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1)).getUTCDay();
@@ -270,7 +265,6 @@ export type CreateBookingResult = {
   amountDueCents: number;
 };
 
-
 export const createBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => CreateBookingInput.parse(input))
@@ -313,9 +307,7 @@ export const createBooking = createServerFn({ method: "POST" })
       ? amountDueCents(service.price_cents, mode, shopRow.deposit_percent ?? 25)
       : 0;
     const returnTo =
-      due > 0
-        ? resolveAppReturnUrl(data.returnUrl, { fallbackPath: RETURN_PATHS.booking })
-        : null;
+      due > 0 ? resolveAppReturnUrl(data.returnUrl, { fallbackPath: RETURN_PATHS.booking }) : null;
 
     const startsAt = toInstant(data.date, data.time, data.tzOffsetMinutes);
     if (startsAt.getTime() <= Date.now()) throw new Error("Pick a time in the future");
