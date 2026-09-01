@@ -75,6 +75,27 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       .single();
     if (shopError) throw dbError(shopError, "owner");
 
+    // Friendly welcome email — never block shop creation on delivery problems.
+    try {
+      const email = context.claims?.email as string | undefined;
+      if (email) {
+        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+        const { SITE_ORIGIN } = await import("@/lib/site-origin");
+        const { OWNER_CONTACT_EMAIL } = await import("@/lib/support");
+        await sendTemplateEmail("owner-welcome", email, {
+          idempotencyKey: `owner-welcome-${shop.id}`,
+          replyTo: OWNER_CONTACT_EMAIL,
+          templateData: {
+            ownerName: (context.claims?.["name"] as string | undefined) ?? null,
+            shopName: shop.name,
+            shopUrl: `${SITE_ORIGIN}/shop/${shop.slug}`,
+          },
+        });
+      }
+    } catch (err) {
+      console.error("owner-welcome email failed", err);
+    }
+
     if (data.services && data.services.length > 0) {
       const { data: savedServices, error: servicesError } = await supabaseAdmin
         .from("services")
