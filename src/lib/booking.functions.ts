@@ -103,14 +103,17 @@ export const getBookingContext = createServerFn({ method: "GET" })
     const mode = (shop.prepay_mode ?? "off") as "off" | "deposit" | "full";
     let chargesEnabled = false;
     if (mode !== "off") {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: acct } = await supabaseAdmin
-        .from("shop_payout_accounts")
-        .select("charges_enabled")
-        .eq("shop_id", shop.id)
-        .eq("environment", paymentEnv())
-        .maybeSingle();
-      chargesEnabled = acct?.charges_enabled ?? false;
+      const env = await paymentEnvOrNull();
+      if (env) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: acct } = await supabaseAdmin
+          .from("shop_payout_accounts")
+          .select("charges_enabled")
+          .eq("shop_id", shop.id)
+          .eq("environment", env)
+          .maybeSingle();
+        chargesEnabled = acct?.charges_enabled ?? false;
+      }
     }
 
     return {
