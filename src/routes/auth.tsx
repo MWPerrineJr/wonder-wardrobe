@@ -35,13 +35,56 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // Set once a confirmation email has been sent, or when sign-in is blocked
+  // because the address hasn't been confirmed yet.
+  const [pendingConfirmation, setPendingConfirmation] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+
+  async function handleResend() {
+    if (!pendingConfirmation) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingConfirmation,
+        options: {
+          emailRedirectTo: next ? window.location.origin + next : window.location.origin,
+        },
+      });
+      if (error) throw error;
+      toast.success("Confirmation link sent again. Check your inbox.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not resend the link");
+    } finally {
+      setResending(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    if (!email) {
+      toast.error("Enter your email first, then tap “Forgot password?”");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent. Check your inbox.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send the reset link");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     try {
       if (mode === "sign_up") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -50,6 +93,13 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        // With email confirmation required, signUp returns no session — the
+        // user is not signed in until they click the link.
+        if (!data.session) {
+          setPendingConfirmation(email);
+          setPassword("");
+          return;
+        }
         toast.success("Account created. You're signed in.");
         router.invalidate();
         if (next) {
@@ -59,7 +109,14 @@ function AuthPage() {
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (/not confirmed|confirm/i.test(error.message)) {
+            setPendingConfirmation(email);
+            setPassword("");
+            return;
+          }
+          throw error;
+        }
         toast.success("Welcome back.");
         router.invalidate();
         if (next) {
@@ -122,6 +179,33 @@ function AuthPage() {
 
         {!hydrated || loading ? (
           <div className="glass-panel rounded-xl p-8 text-center text-on-surface-variant">Loading…</div>
+        ) : pendingConfirmation ? (
+          <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
+            <h2 className="font-headline-sm text-headline-sm text-on-surface">Check your email</h2>
+            <p className="text-body-md text-on-surface-variant">
+              We sent a confirmation link to{" "}
+              <span className="font-bold text-on-surface">{pendingConfirmation}</span>. Click it to
+              verify your address, then sign in.
+            </p>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="w-full bg-primary text-on-primary font-label-md text-label-md py-3 rounded-lg font-bold hover:bg-primary/90 transition-all disabled:opacity-60"
+            >
+              {resending ? "Sending…" : "Resend confirmation link"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPendingConfirmation(null);
+                setMode("sign_in");
+              }}
+              className="w-full border border-border-subtle rounded-lg bg-surface hover:border-primary transition-colors py-3 text-on-surface font-label-md text-label-md"
+            >
+              Back to sign in
+            </button>
+          </div>
         ) : session ? (
           <div className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-4">
             <div className="text-body-md text-on-surface">
@@ -224,6 +308,16 @@ function AuthPage() {
             >
               {submitting ? "Please wait…" : mode === "sign_in" ? "Sign in" : "Create account"}
             </button>
+            {mode === "sign_in" && (
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={submitting}
+                className="text-center text-label-md font-label-md text-primary hover:underline disabled:opacity-60"
+              >
+                Forgot password?
+              </button>
+            )}
           </form>
 
           <p className="text-center text-body-md text-on-surface-variant">
