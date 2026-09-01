@@ -35,6 +35,7 @@ import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authe
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicJobsSendSurveysRouteImport } from './routes/api/public/jobs/send-surveys'
 import { Route as ApiPublicJobsEnrichFeedbackRouteImport } from './routes/api/public/jobs/enrich-feedback'
@@ -179,6 +180,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -241,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -272,6 +280,7 @@ export interface FileRoutesByTo {
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -306,6 +315,7 @@ export interface FileRoutesById {
   '/api/public/jobs/enrich-feedback': typeof ApiPublicJobsEnrichFeedbackRoute
   '/api/public/jobs/send-surveys': typeof ApiPublicJobsSendSurveysRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -340,6 +350,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
     | '/api/public/payments/webhook'
+    | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
     | '/api/public/payments/webhook'
+    | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/api/public/jobs/enrich-feedback'
     | '/api/public/jobs/send-surveys'
     | '/api/public/payments/webhook'
+    | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -428,6 +441,7 @@ export interface RootRouteChildren {
   ApiPublicJobsEnrichFeedbackRoute: typeof ApiPublicJobsEnrichFeedbackRoute
   ApiPublicJobsSendSurveysRoute: typeof ApiPublicJobsSendSurveysRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -614,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -720,6 +741,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicJobsEnrichFeedbackRoute: ApiPublicJobsEnrichFeedbackRoute,
   ApiPublicJobsSendSurveysRoute: ApiPublicJobsSendSurveysRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
