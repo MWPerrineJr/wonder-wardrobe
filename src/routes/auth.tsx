@@ -35,13 +35,56 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // Set once a confirmation email has been sent, or when sign-in is blocked
+  // because the address hasn't been confirmed yet.
+  const [pendingConfirmation, setPendingConfirmation] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+
+  async function handleResend() {
+    if (!pendingConfirmation) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingConfirmation,
+        options: {
+          emailRedirectTo: next ? window.location.origin + next : window.location.origin,
+        },
+      });
+      if (error) throw error;
+      toast.success("Confirmation link sent again. Check your inbox.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not resend the link");
+    } finally {
+      setResending(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    if (!email) {
+      toast.error("Enter your email first, then tap “Forgot password?”");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent. Check your inbox.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not send the reset link");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     try {
       if (mode === "sign_up") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -50,6 +93,13 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        // With email confirmation required, signUp returns no session — the
+        // user is not signed in until they click the link.
+        if (!data.session) {
+          setPendingConfirmation(email);
+          setPassword("");
+          return;
+        }
         toast.success("Account created. You're signed in.");
         router.invalidate();
         if (next) {
