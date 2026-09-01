@@ -4,6 +4,7 @@ import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
+import { resolveReturnUrl, returnPathSchema } from "@/lib/return-path";
 
 // Per-shop analytics subscription ($120/month or $1,000/year, 30-day trial).
 // Free tier: shop listing, public page, services, hours, calendar, bookings.
@@ -28,13 +29,13 @@ const checkoutInput = z.object({
     "analytics_enterprise_monthly",
     "analytics_enterprise_yearly",
   ]),
-  returnUrl: z.string().url(),
+  returnPath: returnPathSchema,
 });
 
 const portalInput = z.object({
   shopId: z.string().uuid(),
   environment: envSchema,
-  returnUrl: z.string().url().optional(),
+  returnPath: returnPathSchema.optional(),
 });
 
 const redeemInput = z.object({
@@ -245,7 +246,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         line_items: [{ price: price.id, quantity: 1 }],
         mode: "subscription",
         ui_mode: "embedded_page",
-        return_url: data.returnUrl,
+        return_url: resolveReturnUrl(data.returnPath),
         customer: customerId,
         managed_payments: { enabled: true },
         metadata: { userId, shop_id: shop.id, managed_payments: "true" },
@@ -344,7 +345,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
       const stripe = createStripeClient(data.environment);
       const portal = await stripe.billingPortal.sessions.create({
         customer: sub.stripe_customer_id,
-        ...(data.returnUrl ? { return_url: data.returnUrl } : {}),
+        ...(data.returnPath ? { return_url: resolveReturnUrl(data.returnPath) } : {}),
       });
       return { url: portal.url };
     } catch (err) {
