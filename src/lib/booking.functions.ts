@@ -224,7 +224,7 @@ const CreateBookingInput = z.object({
     .max(30)
     .regex(/^[+()\d\s.-]+$/, "Phone can only contain digits and + ( ) - . spaces"),
   notes: z.string().trim().max(500).optional().nullable(),
-  returnUrl: z.string().url().optional(),
+  returnPath: returnPathSchema.optional(),
 });
 
 export type SavedBooking = {
