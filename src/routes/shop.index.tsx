@@ -36,7 +36,7 @@ export const Route = createFileRoute("/shop/")({
         content: "Every shop on The Standing Chair. Open a shop's page to book your next appointment.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/shop" },
+      { property: "og:url", content: "https://thestandingchair.com/shop" },
       { name: "twitter:card", content: "summary" },
     ],
     links: [{ rel: "canonical", href: "/shop" }],
