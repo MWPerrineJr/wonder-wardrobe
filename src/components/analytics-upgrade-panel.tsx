@@ -301,7 +301,7 @@ export function CheckoutForm({
         shopId,
         environment: getStripeEnvironment(),
         priceId,
-        returnUrl: `${window.location.origin}/owner/feedback?billing=complete`,
+        returnPath: "/owner/feedback?billing=complete",
       },
     });
     if ("error" in result) throw new Error(result.error);
@@ -333,7 +333,7 @@ export function ManageBillingButton({
         data: {
           shopId,
           environment: getStripeEnvironment(),
-          returnUrl: `${window.location.origin}/owner/feedback`,
+          returnPath: "/owner/feedback",
         },
       });
       if ("error" in result) throw new Error(result.error);

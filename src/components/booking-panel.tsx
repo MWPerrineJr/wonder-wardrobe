@@ -83,7 +83,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim(),
           notes: notes.trim() || null,
-          returnUrl: `${window.location.origin}/account`,
+          returnPath: "/account",
         },
       }),
     onSuccess: (result) => {
