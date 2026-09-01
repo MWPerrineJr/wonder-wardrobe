@@ -919,6 +919,7 @@ export type Database = {
         | "skincare_facials"
         | "brows_lashes"
         | "spa_wellness"
+        | "esthetician"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1063,6 +1064,7 @@ export const Constants = {
         "skincare_facials",
         "brows_lashes",
         "spa_wellness",
+        "esthetician",
       ],
     },
   },
