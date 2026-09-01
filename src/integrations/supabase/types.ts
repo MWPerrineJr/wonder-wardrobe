@@ -16,25 +16,40 @@ export type Database = {
     Tables: {
       ai_job_state: {
         Row: {
+          consecutive_failures: number
+          items_on_date: string | null
+          items_today: number
           job_name: string
+          last_error: string | null
           last_run_at: string | null
           lease_until: string | null
+          paused_at: string | null
           paused_reason: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          consecutive_failures?: number
+          items_on_date?: string | null
+          items_today?: number
           job_name: string
+          last_error?: string | null
           last_run_at?: string | null
           lease_until?: string | null
+          paused_at?: string | null
           paused_reason?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          consecutive_failures?: number
+          items_on_date?: string | null
+          items_today?: number
           job_name?: string
+          last_error?: string | null
           last_run_at?: string | null
           lease_until?: string | null
+          paused_at?: string | null
           paused_reason?: string | null
           status?: string
           updated_at?: string
@@ -260,8 +275,13 @@ export type Database = {
           customer_name: string | null
           emotion: string | null
           enriched_at: string | null
+          enrichment_attempts: number
+          enrichment_error: string | null
+          enrichment_last_attempt_at: string | null
           enrichment_model: string | null
+          enrichment_next_attempt_at: string | null
           enrichment_raw: Json | null
+          enrichment_status: string
           explanation: string | null
           id: string
           key_phrases: string[]
@@ -284,8 +304,13 @@ export type Database = {
           customer_name?: string | null
           emotion?: string | null
           enriched_at?: string | null
+          enrichment_attempts?: number
+          enrichment_error?: string | null
+          enrichment_last_attempt_at?: string | null
           enrichment_model?: string | null
+          enrichment_next_attempt_at?: string | null
           enrichment_raw?: Json | null
+          enrichment_status?: string
           explanation?: string | null
           id?: string
           key_phrases?: string[]
@@ -308,8 +333,13 @@ export type Database = {
           customer_name?: string | null
           emotion?: string | null
           enriched_at?: string | null
+          enrichment_attempts?: number
+          enrichment_error?: string | null
+          enrichment_last_attempt_at?: string | null
           enrichment_model?: string | null
+          enrichment_next_attempt_at?: string | null
           enrichment_raw?: Json | null
+          enrichment_status?: string
           explanation?: string | null
           id?: string
           key_phrases?: string[]
@@ -786,7 +816,11 @@ export type Database = {
           customer_email: string
           customer_id: string | null
           customer_name: string | null
+          email_attempts: number
           email_error: string | null
+          email_idempotency_key: string
+          email_last_attempt_at: string | null
+          email_next_attempt_at: string | null
           email_status: string
           emailed_at: string | null
           expires_at: string
@@ -806,7 +840,10 @@ export type Database = {
           customer_email: string
           customer_id?: string | null
           customer_name?: string | null
+          email_attempts?: number
           email_error?: string | null
+          email_last_attempt_at?: string | null
+          email_next_attempt_at?: string | null
           email_status?: string
           emailed_at?: string | null
           expires_at?: string
@@ -826,7 +863,10 @@ export type Database = {
           customer_email?: string
           customer_id?: string | null
           customer_name?: string | null
+          email_attempts?: number
           email_error?: string | null
+          email_last_attempt_at?: string | null
+          email_next_attempt_at?: string | null
           email_status?: string
           emailed_at?: string | null
           expires_at?: string
@@ -894,7 +934,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      survey_invite_delivery_problems: {
+        Row: {
+          booking_id: string | null
+          customer_email: string | null
+          email_attempts: number | null
+          email_error: string | null
+          email_last_attempt_at: string | null
+          email_next_attempt_at: string | null
+          email_status: string | null
+          expires_at: string | null
+          id: string | null
+          sent_at: string | null
+          shop_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_survey_invite_by_token: {

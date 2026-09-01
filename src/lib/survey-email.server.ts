@@ -6,6 +6,8 @@
 // vanishing — the owner sees it in the delivery list and the row is retried
 // once email is live.
 
+import { surveyIdempotencyKey, sanitizeJobError } from "@/lib/job-retry";
+
 export type SurveyEmailOutcome = { status: "sent" | "blocked" | "failed"; error?: string };
 
 export type SurveyEmailInput = {
@@ -16,6 +18,7 @@ export type SurveyEmailInput = {
   customerEmail: string;
   serviceName: string | null;
   shopAddress: string | null;
+  idempotencyKey?: string;
 };
 
 export function surveyUrl(appUrl: string, token: string, rating?: number) {
@@ -37,7 +40,7 @@ export async function sendSurveyInviteEmail(
   const payload = {
     templateName: "survey-invite",
     recipientEmail: input.customerEmail,
-    idempotencyKey: `survey-invite-${input.token}`,
+    idempotencyKey: input.idempotencyKey ?? surveyIdempotencyKey(input.token),
     templateData: {
       shopName: input.shopName,
       providerName: input.providerName,
@@ -66,10 +69,10 @@ export async function sendSurveyInviteEmail(
       };
     }
     if (!response.ok) {
-      return { status: "failed", error: (await response.text()).slice(0, 400) };
+      return { status: "failed", error: sanitizeJobError(await response.text()) };
     }
     return { status: "sent" };
   } catch (error) {
-    return { status: "failed", error: error instanceof Error ? error.message : String(error) };
+    return { status: "failed", error: sanitizeJobError(error) };
   }
 }

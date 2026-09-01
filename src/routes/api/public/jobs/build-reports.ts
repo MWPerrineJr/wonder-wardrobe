@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { classifyGatewayError, FEEDBACK_MODEL } from "@/lib/ai.server";
-import { pauseJob, resumeJob, runScheduledJob } from "@/lib/jobs.server";
+import {
+  consumeJobBudget,
+  noteJobItemFailure,
+  noteJobSuccess,
+  pauseJob,
+  remainingJobBudget,
+  resumeJob,
+  runScheduledJob,
+} from "@/lib/jobs.server";
+import { REPORT_DAILY_CAP } from "@/lib/job-retry";
 import { buildShopReport } from "@/lib/shop-report.server";
 
 const MAX_SHOPS = 5;
@@ -19,6 +28,10 @@ export const Route = createFileRoute("/api/public/jobs/build-reports")({
           const apiKey = process.env["LOVABLE_API_KEY"];
           if (!apiKey) return new Response("LOVABLE_API_KEY is not configured", { status: 500 });
 
+          const cap = Number(process.env["AI_MAX_REPORTS_PER_DAY"]) || REPORT_DAILY_CAP;
+          const budget = await remainingJobBudget(admin, "build-reports", cap);
+          if (budget <= 0) return Response.json({ built: 0, capped: true });
+
           const { data: subs, error } = await admin
             .from("subscriptions")
             .select("shop_id, status, current_period_end")
@@ -27,7 +40,7 @@ export const Route = createFileRoute("/api/public/jobs/build-reports")({
 
           const shopIds = [...new Set((subs ?? []).map((s) => s.shop_id))].slice(
             0,
-            lease.paused ? 1 : MAX_SHOPS,
+            Math.min(lease.paused ? 1 : MAX_SHOPS, budget),
           );
 
           let built = 0;
@@ -35,15 +48,22 @@ export const Route = createFileRoute("/api/public/jobs/build-reports")({
 
           for (const shopId of shopIds) {
             try {
-              const result = await buildShopReport(admin, apiKey, shopId);
+              const result = await buildShopReport(admin, apiKey, shopId, {
+                onSpend: () => consumeJobBudget(admin, "build-reports", cap),
+              });
+              if (!result.built && result.reason === "capped") {
+                return Response.json({ built, capped: true });
+              }
               if (result.built) {
                 built += 1;
+                await noteJobSuccess(admin, "build-reports");
                 if (lease.paused) await resumeJob(admin, "build-reports");
               } else {
                 skipped.push(shopId);
               }
             } catch (err) {
               const failure = classifyGatewayError(err);
+              await noteJobItemFailure(admin, "build-reports", failure.reason);
               if (failure.kind === "pause") {
                 await pauseJob(admin, "build-reports", failure.reason);
                 return Response.json({ built, paused: failure.reason });

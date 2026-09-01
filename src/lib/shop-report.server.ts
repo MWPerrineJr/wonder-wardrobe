@@ -14,7 +14,7 @@ export async function buildShopReport(
   admin: Admin,
   apiKey: string,
   shopId: string,
-  options: { force?: boolean } = {},
+  options: { force?: boolean; onSpend?: () => Promise<boolean> } = {},
 ) {
   const windowStart = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
@@ -40,6 +40,10 @@ export async function buildShopReport(
 
   if (!options.force && latest && latest.feedback_count >= reviews.length) {
     return { built: false as const, reason: "no_new_feedback" };
+  }
+
+  if (options.onSpend && !(await options.onSpend())) {
+    return { built: false as const, reason: "capped" };
   }
 
   const report = await analyzeShopReport(apiKey, reviews);

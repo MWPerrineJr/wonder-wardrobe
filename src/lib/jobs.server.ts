@@ -3,6 +3,12 @@
 // imported from client-reachable modules.
 
 import { authorizeJobCall, jobAuthResponse } from "@/lib/jobs.auth";
+import {
+  CONSECUTIVE_FAILURE_ALERT,
+  remainingDailyBudget,
+  sanitizeJobError,
+  shouldAlertPaused,
+} from "@/lib/job-retry";
 
 export type JobName = "send-surveys" | "enrich-feedback" | "build-reports";
 
@@ -92,12 +98,22 @@ export async function acquireLease(admin: Admin, job: JobName): Promise<JobLease
     .update({ lease_until: leaseUntil, last_run_at: now.toISOString(), updated_at: now.toISOString() })
     .eq("job_name", job)
     .or(`lease_until.is.null,lease_until.lt.${now.toISOString()}`)
-    .select("status, paused_reason")
+    .select("status, paused_reason, paused_at")
     .maybeSingle();
 
   if (!claimed) return { ok: false, skipped: "locked" };
-  if (claimed.status === "paused")
+  if (claimed.status === "paused") {
+    if (shouldAlertPaused(claimed.paused_at)) {
+      logJobEvent({
+        event: "job.alert",
+        job,
+        alert: "still_paused",
+        reason: claimed.paused_reason,
+        paused_at: claimed.paused_at,
+      });
+    }
     return { ok: true, paused: true, probeOnly: true, reason: claimed.paused_reason ?? null };
+  }
   return { ok: true, paused: false, probeOnly: false };
 }
 
@@ -109,11 +125,15 @@ export async function releaseLease(admin: Admin, job: JobName) {
 }
 
 export async function pauseJob(admin: Admin, job: JobName, reason: string) {
+  const sanitized = sanitizeJobError(reason);
+  logJobEvent({ event: "job.alert", job, alert: "paused", reason: sanitized });
   await admin
     .from("ai_job_state")
     .update({
       status: "paused",
-      paused_reason: reason.slice(0, 500),
+      paused_reason: sanitized.slice(0, 500),
+      paused_at: new Date().toISOString(),
+      last_error: sanitized.slice(0, 500),
       lease_until: null,
       updated_at: new Date().toISOString(),
     })
@@ -123,6 +143,67 @@ export async function pauseJob(admin: Admin, job: JobName, reason: string) {
 export async function resumeJob(admin: Admin, job: JobName) {
   await admin
     .from("ai_job_state")
-    .update({ status: "idle", paused_reason: null, updated_at: new Date().toISOString() })
+    .update({
+      status: "idle",
+      paused_reason: null,
+      paused_at: null,
+      consecutive_failures: 0,
+      updated_at: new Date().toISOString(),
+    })
     .eq("job_name", job);
+}
+
+export async function noteJobSuccess(admin: Admin, job: JobName) {
+  await admin
+    .from("ai_job_state")
+    .update({ consecutive_failures: 0, last_error: null, updated_at: new Date().toISOString() })
+    .eq("job_name", job);
+}
+
+export async function noteJobItemFailure(admin: Admin, job: JobName, error: unknown) {
+  const sanitized = sanitizeJobError(error);
+  const { data } = await admin
+    .from("ai_job_state")
+    .select("consecutive_failures")
+    .eq("job_name", job)
+    .maybeSingle();
+  const next = (data?.consecutive_failures ?? 0) + 1;
+  if (next >= CONSECUTIVE_FAILURE_ALERT) {
+    logJobEvent({ event: "job.alert", job, alert: "repeated_failures", consecutive_failures: next, error: sanitized });
+  }
+  await admin
+    .from("ai_job_state")
+    .update({
+      consecutive_failures: next,
+      last_error: sanitized,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("job_name", job);
+}
+
+export async function remainingJobBudget(admin: Admin, job: JobName, cap: number): Promise<number> {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await admin
+    .from("ai_job_state")
+    .select("items_today, items_on_date")
+    .eq("job_name", job)
+    .maybeSingle();
+  return remainingDailyBudget(data?.items_today ?? 0, data?.items_on_date ?? null, cap, today);
+}
+
+export async function consumeJobBudget(admin: Admin, job: JobName, cap: number): Promise<boolean> {
+  const remaining = await remainingJobBudget(admin, job, cap);
+  if (remaining <= 0) return false;
+  const today = new Date().toISOString().slice(0, 10);
+  const { data } = await admin
+    .from("ai_job_state")
+    .select("items_today, items_on_date")
+    .eq("job_name", job)
+    .maybeSingle();
+  const used = data?.items_on_date === today ? (data.items_today ?? 0) : 0;
+  await admin
+    .from("ai_job_state")
+    .update({ items_today: used + 1, items_on_date: today, updated_at: new Date().toISOString() })
+    .eq("job_name", job);
+  return true;
 }

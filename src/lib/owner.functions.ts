@@ -226,7 +226,7 @@ export const listSurveyInvites = createServerFn({ method: "GET" })
     const { data: rows, error } = await context.supabase
       .from("survey_invites")
       .select(
-        "id, customer_name, customer_email, sent_at, emailed_at, email_status, email_error, responded_at, expires_at",
+        "id, customer_name, customer_email, sent_at, emailed_at, email_status, email_error, email_attempts, email_next_attempt_at, responded_at, expires_at",
       )
       .eq("shop_id", data.shopId)
       .order("sent_at", { ascending: false })
