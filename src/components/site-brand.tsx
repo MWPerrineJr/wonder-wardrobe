@@ -1,7 +1,5 @@
 import { Link } from "@tanstack/react-router";
 
-import pandaMark from "@/assets/pandagentic-mark.png.asset.json";
-
 export function SiteBrand() {
   return (
     <div className="flex flex-col">
@@ -18,12 +16,12 @@ export function SiteBrand() {
         className="font-label-sm text-label-sm text-text-muted hover:text-primary transition-colors inline-flex items-center gap-1"
       >
         <img
-          src={pandaMark.url}
-          alt="Pandagentic"
+          src="/panda-silhouette-on-matrix.png"
+          alt="Pandagentic matrix panda"
           loading="lazy"
-          width={16}
-          height={16}
-          className="h-4 w-4 shrink-0"
+          width={20}
+          height={20}
+          className="h-5 w-5 shrink-0 rounded-sm object-cover object-center"
         />
         built by pandagentic.ai
       </a>

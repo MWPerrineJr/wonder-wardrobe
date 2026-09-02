@@ -1,0 +1,85 @@
+/* The Standing Chair — Carbon Rust palette
+ * Standalone export. Import after the application's base theme.
+ */
+
+:root {
+  --color-primary: #9f5d43;
+  --color-on-primary: #fff8f4;
+  --color-primary-container: #4a2b21;
+  --color-on-primary-container: #f0c4b2;
+  --color-primary-fixed: #d49a82;
+  --color-primary-fixed-dim: #b8755a;
+  --color-on-primary-fixed: #24120c;
+  --color-on-primary-fixed-variant: #4c281c;
+  --color-secondary: #9ca1a2;
+  --color-on-secondary: #171a1c;
+  --color-secondary-container: #303538;
+  --color-on-secondary-container: #d9dcda;
+  --color-secondary-fixed: #c5c8c7;
+  --color-secondary-fixed-dim: #a4a8a8;
+  --color-on-secondary-fixed: #171a1c;
+  --color-on-secondary-fixed-variant: #3d4244;
+  --color-tertiary: #a88b78;
+  --color-on-tertiary: #1c1410;
+  --color-tertiary-container: #44352d;
+  --color-on-tertiary-container: #e3c9b8;
+  --color-tertiary-fixed: #d7b9a5;
+  --color-tertiary-fixed-dim: #b79580;
+  --color-on-tertiary-fixed: #21150f;
+  --color-on-tertiary-fixed-variant: #50392c;
+  --color-error: #e18a7c;
+  --color-on-error: #2c0b07;
+  --color-error-container: #55251f;
+  --color-on-error-container: #ffd9d2;
+  --color-background: #121416;
+  --color-on-background: #e3e1da;
+  --color-surface: #181b1d;
+  --color-on-surface: #e3e1da;
+  --color-surface-variant: #292e31;
+  --color-on-surface-variant: #bbbdbb;
+  --color-surface-dim: #0d0f10;
+  --color-surface-bright: #34393c;
+  --color-surface-deep: #0f1113;
+  --color-surface-elevated: #202426;
+  --color-surface-container-lowest: #0d0f10;
+  --color-surface-container-low: #15181a;
+  --color-surface-container: #1b1f21;
+  --color-surface-container-high: #23282a;
+  --color-surface-container-highest: #2b3033;
+  --color-surface-tint: #9f5d43;
+  --color-inverse-surface: #e3e1da;
+  --color-inverse-on-surface: #1a1d1f;
+  --color-inverse-primary: #7e442f;
+  --color-outline: #676d6e;
+  --color-outline-variant: #3a3f41;
+  --color-border-subtle: #34393b;
+  --color-text-muted: #929796;
+  --color-electric-blue: #82989b;
+  --color-classic-gold: #aa8264;
+  --color-popover: #202426;
+  --color-popover-foreground: #e3e1da;
+  --color-accent: #34241f;
+  --color-accent-foreground: #f2ded4;
+  --color-muted: #23282a;
+  --color-muted-foreground: #a7abaa;
+  --color-border: #3a3f41;
+  --color-input: #454b4d;
+  --color-ring: #b8755a;
+  --color-primary-foreground: #fff8f4;
+  --color-secondary-foreground: #171a1c;
+  --color-destructive: #c86555;
+  --color-destructive-foreground: #fff8f4;
+  --color-chart-1: #b8755a;
+  --color-chart-2: #82989b;
+  --color-chart-3: #a88b78;
+  --color-chart-4: #747f91;
+  --color-chart-5: #927883;
+  --color-chart-6: #777c7d;
+  --color-positive: #78a187;
+  --color-negative: #d87868;
+  --color-caution: #c49a5d;
+}
+
+.glass-panel {
+  background: rgb(24 27 29 / 90%);
+}
