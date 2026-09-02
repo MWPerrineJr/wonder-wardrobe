@@ -40,7 +40,7 @@ BEGIN
       tests.uid('service_a'),
       tests.uid('customer_b')
     ),
-    '%already booked%'
+    '%free at that time%'
   );
   RESET ROLE;
 
