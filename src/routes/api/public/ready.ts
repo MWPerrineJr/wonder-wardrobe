@@ -9,7 +9,8 @@ export const Route = createFileRoute("/api/public/ready")({
       GET: async () => {
         const diagnostic = inspectPaymentsConfig();
         const body = readinessReport(diagnostic.ok, diagnostic.issues);
-        return healthResponse(body, diagnostic.ok ? 200 : 503);
+        return healthResponse(body, diagnostic.serverOk ? 200 : 503);
+
       },
     },
   },

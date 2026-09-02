@@ -12,7 +12,7 @@ export const Route = createFileRoute("/api/public/jobs/booking-maintenance")({
     handlers: {
       POST: async ({ request }) =>
         runScheduledJob(request, "booking-maintenance", async ({ admin }) => {
-          const expired = await admin.rpc("expire_booking_holds");
+          const expired = await admin.rpc("expire_stale_booking_holds");
           if (expired.error) throw new Error(expired.error.message);
 
           let calendar = { synced: 0, skipped: 0, failed: 0 };
