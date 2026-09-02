@@ -19,8 +19,19 @@ export type ClientTokenKind = "test" | "live" | "missing" | "other";
 
 export type PaymentsDiagnostic = {
   environment: StripeEnv | null;
+  /** True when server configuration is complete. Only this may block requests. */
+  serverOk: boolean;
+  /** True when both server and client-bundle configuration are complete. */
   ok: boolean;
+  /** All issues (server + client bundle). */
   issues: string[];
+  /** Server-side configuration issues. Blocking. */
+  serverIssues: string[];
+  /**
+   * Client-bundle (VITE_*) issues. Never blocking at runtime: these values are
+   * compile-time only and are not present in the deployed worker environment.
+   */
+  clientIssues: string[];
   stripeKeyConfigured: boolean;
   webhookSecretConfigured: boolean;
   lovableApiKeyConfigured: boolean;
@@ -28,6 +39,7 @@ export type PaymentsDiagnostic = {
   vitePaymentsEnv: string | null;
   webhookPath: string | null;
 };
+
 
 type EnvBag = Record<string, string | undefined>;
 
