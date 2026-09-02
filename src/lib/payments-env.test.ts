@@ -96,7 +96,6 @@ describe("assertPaymentsConfig", () => {
     );
   });
 
-
   it("rejects VITE_PAYMENTS_ENV that disagrees with PAYMENTS_ENV", () => {
     assert.throws(
       () => assertPaymentsConfig({ ...sandbox, VITE_PAYMENTS_ENV: "live" }),

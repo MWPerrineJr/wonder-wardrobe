@@ -40,7 +40,6 @@ export type PaymentsDiagnostic = {
   webhookPath: string | null;
 };
 
-
 type EnvBag = Record<string, string | undefined>;
 
 function present(value: string | undefined): boolean {
@@ -141,7 +140,6 @@ export function assertPaymentsConfig(env: EnvBag = process.env): PaymentsConfig 
     throw new PaymentsConfigError(diagnostic.clientIssues[0]!);
   }
   return {
-
     env: diagnostic.environment,
     stripeKeyName:
       diagnostic.environment === "sandbox" ? "STRIPE_SANDBOX_API_KEY" : "STRIPE_LIVE_API_KEY",
