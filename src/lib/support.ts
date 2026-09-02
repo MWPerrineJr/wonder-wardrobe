@@ -10,7 +10,7 @@
  *
  * SENDER_LABEL is the friendly From name used on outgoing email.
  */
-export const SUPPORT_EMAIL = "support@thestandingchair.com";
+export const SUPPORT_EMAIL = "support@pandagentic.ai";
 export const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}`;
 export const OWNER_CONTACT_EMAIL = "michael@pandagentic.ai";
 export const OWNER_CONTACT_MAILTO = `mailto:${OWNER_CONTACT_EMAIL}`;
