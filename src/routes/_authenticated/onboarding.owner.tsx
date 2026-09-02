@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { createOwnerShop } from "@/lib/owner.functions";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 
-
 export const Route = createFileRoute("/_authenticated/onboarding/owner")({
   head: () => ({
     meta: [
@@ -50,7 +49,10 @@ function OnboardingOwnerPage() {
   }
   function addService() {
     if (services.length >= 10) return;
-    setServices((prev) => [...prev, { name: "", duration: "30", price: "0", category: "hair_barber" }]);
+    setServices((prev) => [
+      ...prev,
+      { name: "", duration: "30", price: "0", category: "hair_barber" },
+    ]);
   }
   function removeService(i: number) {
     setServices((prev) => prev.filter((_, idx) => idx !== i));
@@ -59,7 +61,6 @@ function OnboardingOwnerPage() {
   function toggleCategory(cat: ServiceCategory) {
     setCategories((prev) => (prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]));
   }
-
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -99,12 +100,14 @@ function OnboardingOwnerPage() {
     }
   }
 
-
   return (
     <div className="min-h-screen bg-background text-on-background px-4 py-12 font-body-md">
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-8">
-          <Link to="/" className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
+          <Link
+            to="/"
+            className="font-headline-md text-headline-md font-bold text-primary tracking-tight"
+          >
             The Standing Chair
           </Link>
           <h1 className="mt-6 font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
@@ -113,7 +116,6 @@ function OnboardingOwnerPage() {
           <p className="mt-2 text-on-surface-variant text-body-md">
             Tell us about your shop. You can add providers and services after this.
           </p>
-
         </div>
 
         <form
@@ -142,7 +144,9 @@ function OnboardingOwnerPage() {
               Shop URL
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-on-surface-variant text-body-md">thestandingchair.com/shop/</span>
+              <span className="text-on-surface-variant text-body-md">
+                thestandingchair.com/shop/
+              </span>
 
               <input
                 type="text"
@@ -184,7 +188,6 @@ function OnboardingOwnerPage() {
               rows={4}
               className="w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md"
               placeholder="A welcoming studio in the heart of downtown…"
-
             />
           </div>
 
@@ -212,7 +215,6 @@ function OnboardingOwnerPage() {
           </div>
 
           <div>
-
             <div className="flex items-center justify-between mb-2">
               <label className="font-label-md text-label-md text-on-surface-variant">
                 Starter services
@@ -257,7 +259,9 @@ function OnboardingOwnerPage() {
                   />
                   <select
                     value={s.category}
-                    onChange={(e) => updateService(i, { category: e.target.value as ServiceCategory })}
+                    onChange={(e) =>
+                      updateService(i, { category: e.target.value as ServiceCategory })
+                    }
                     className="col-span-2 bg-surface-container border border-border-subtle rounded p-2 text-on-surface focus:border-primary focus:outline-none text-body-md"
                   >
                     {SERVICE_CATEGORIES.map((cat) => (
@@ -277,7 +281,6 @@ function OnboardingOwnerPage() {
                 </div>
               ))}
             </div>
-
           </div>
 
           <button

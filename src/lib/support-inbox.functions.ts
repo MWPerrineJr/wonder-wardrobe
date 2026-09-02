@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
 import type {
   SupportInboxFilter,
@@ -10,7 +12,7 @@ import type {
 } from "@/lib/support-inbox.server";
 
 /** Only shop owners may touch the shared support mailbox. */
-async function assertOwner(context: { supabase: any; userId: string }) {
+async function assertOwner(context: { supabase: SupabaseClient<Database>; userId: string }) {
   const { data, error } = await context.supabase
     .from("shops")
     .select("id")
@@ -23,8 +25,7 @@ async function assertOwner(context: { supabase: any; userId: string }) {
 }
 
 export type SupportInboxStatus =
-  | { connected: false; reason: "not_connected" }
-  | { connected: true; email: string };
+  { connected: false; reason: "not_connected" } | { connected: true; email: string };
 
 export const getSupportInboxStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

@@ -23,14 +23,27 @@ Model: `openai/gpt-5.6-sol` via the Lovable AI Gateway.
 ## Safety rails
 
 Each job takes a single-flight lease in `ai_job_state`, processes a bounded batch,
-marks progress per row, and pauses itself on a billing/policy denial — then probes
-with a single item per run until it recovers.
+and pauses itself on a billing/policy denial — then probes with a single item per
+run until it recovers.
+
+Survey delivery selects **new** invitations and retryable `pending` / `failed` /
+`blocked` rows. Each invite keeps one idempotency key (`survey-invite-<token>`),
+an attempt count, last/next attempt timestamps, and a sanitized error. After 8
+failures the row is `dead_letter`. Owners can inspect `survey_invite_delivery_problems`
+(or the extra columns on the invite list) for stuck mail.
+
+AI enrichment stores per-row `enrichment_status` (`pending` / `failed` / `done` /
+`dead_letter`) with exponential backoff so a gateway outage does not hammer the
+same 10 rows. Daily caps default to 200 enrichments and 40 reports
+(`AI_MAX_ENRICH_PER_DAY`, `AI_MAX_REPORTS_PER_DAY`). Jobs emit a `job.alert` log
+when they stay paused for more than an hour or fail five items in a row.
 
 ## Schedules
 
-`pg_cron` calls `public.invoke_feedback_job(job_slug)`, which POSTs to the three
+`pg_cron` calls `public.invoke_feedback_job(job_slug)`, which POSTs to the job
 routes with `Authorization: Bearer <JOB_SECRET>`. The public Supabase key is
-not accepted.
+not accepted. Slugs: `send-surveys`, `enrich-feedback`, `build-reports`,
+`booking-maintenance` (expire unpaid holds + Google Calendar outbox).
 
 Set these before the jobs will run:
 
@@ -40,7 +53,7 @@ Set these before the jobs will run:
    `select vault.create_secret('paste-the-secret', 'job_secret');`
 3. Public app origin in `app_runtime_settings`:
    `insert into public.app_runtime_settings (key, value) values ('app_url', 'https://your-app.example')
-    on conflict (key) do update set value = excluded.value, updated_at = now();`
+ on conflict (key) do update set value = excluded.value, updated_at = now();`
 
 Inspect schedules with `select jobname, schedule from cron.job;`. After rotating
 `JOB_SECRET`, update the Vault secret to match; cron already reads Vault at
@@ -59,5 +72,5 @@ Owner dashboard → Shop details → **Google review link**: paste the Google
 
 Survey emails require an email domain configured for the project. Until then
 `/api/public/emails/survey-invite` answers 501 and each invite is stored with
-`email_status = 'blocked'`, so nothing is lost — once email is live those
-customers can be re-notified.
+`email_status = 'blocked'` and retried with backoff until email is live or the
+invite is dead-lettered.

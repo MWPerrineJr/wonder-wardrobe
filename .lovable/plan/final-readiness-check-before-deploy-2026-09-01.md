@@ -2,17 +2,17 @@
 
 ## What I already verified (read-only, just now)
 
-| Check | State |
-|---|---|
-| Build | `build OK`, no errors |
-| Git working tree | Clean — no uncommitted changes; latest commit `f43a843 Completed ops layer docs` |
-| `/api/public/health` | 200 `{"status":"ok"}` |
-| `/api/public/ready` | 200, `payments:"ok"`, `environment:"live"`, `issues: []` |
-| Cron jobs | 4 jobs, all active, all via `public.invoke_feedback_job(...)` — no keys in SQL |
-| `app_runtime_settings.app_url` | `https://thestandingchair.com` |
-| Stripe go-live | All 5 steps completed; live account `acct_1U5SYo…` ready |
-| Email sender `notify.pandagentic.ai` | Verified, auth emails enabled |
-| Security scans | No open findings, but every scanner is marked out-of-date (last runs Aug 18 – Sep 1) |
+| Check                                | State                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------ |
+| Build                                | `build OK`, no errors                                                                |
+| Git working tree                     | Clean — no uncommitted changes; latest commit `f43a843 Completed ops layer docs`     |
+| `/api/public/health`                 | 200 `{"status":"ok"}`                                                                |
+| `/api/public/ready`                  | 200, `payments:"ok"`, `environment:"live"`, `issues: []`                             |
+| Cron jobs                            | 4 jobs, all active, all via `public.invoke_feedback_job(...)` — no keys in SQL       |
+| `app_runtime_settings.app_url`       | `https://thestandingchair.com`                                                       |
+| Stripe go-live                       | All 5 steps completed; live account `acct_1U5SYo…` ready                             |
+| Email sender `notify.pandagentic.ai` | Verified, auth emails enabled                                                        |
+| Security scans                       | No open findings, but every scanner is marked out-of-date (last runs Aug 18 – Sep 1) |
 
 So nothing is currently blocking. The remaining work is fresh verification plus the deploy itself.
 

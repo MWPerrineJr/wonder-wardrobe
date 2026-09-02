@@ -16,7 +16,6 @@ import {
   type SavedBooking,
 } from "@/lib/booking.functions";
 
-
 function formatPrice(cents: number) {
   return `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
 }
@@ -42,7 +41,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
 
   const [providerId, setProviderId] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(ctx.services[0]?.id ?? null);
-  const [date, setDate] = useState<string>(() => isoDate(new Date(Date.now() + 24 * 60 * 60 * 1000)));
+  const [date, setDate] = useState<string>(() =>
+    isoDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+  );
   const [time, setTime] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -83,7 +84,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim(),
           notes: notes.trim() || null,
-          returnPath: "/account",
+          returnUrl: "/account",
         },
       }),
     onSuccess: (result) => {
@@ -108,7 +109,8 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
 
   const nameValid = customerName.trim().length >= 2;
   const phoneValid = /^[+()\d\s.-]{7,30}$/.test(customerPhone.trim());
-  const canSubmit = !!user && !!serviceId && !!time && nameValid && phoneValid && !mutation.isPending;
+  const canSubmit =
+    !!user && !!serviceId && !!time && nameValid && phoneValid && !mutation.isPending;
 
   if (confirmed) {
     const policy = ctx.cancellation ?? DEFAULT_CANCELLATION_POLICY;
@@ -136,14 +138,18 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           {confirmed.service?.name} at {confirmed.shop?.name}
         </p>
         <p className="text-on-surface-variant text-body-md">
-          {new Date(confirmed.starts_at).toLocaleString()} • {confirmed.service?.duration_minutes} mins
+          {new Date(confirmed.starts_at).toLocaleString()} • {confirmed.service?.duration_minutes}{" "}
+          mins
         </p>
         <p className="text-on-surface-variant text-body-md">
-          {confirmed.provider?.display_name ?? "No provider preference"} • {formatPrice(confirmed.price_cents)} •{" "}
-          {confirmed.status}
+          {confirmed.provider?.display_name ?? "No provider preference"} •{" "}
+          {formatPrice(confirmed.price_cents)} • {confirmed.status}
         </p>
         <div className="flex flex-wrap gap-3 mt-2">
-          <Link to="/account" className="bg-primary text-on-primary px-4 py-2 rounded font-bold text-label-md">
+          <Link
+            to="/account"
+            className="bg-primary text-on-primary px-4 py-2 rounded font-bold text-label-md"
+          >
             View my bookings
           </Link>
           <AddToCalendar event={calendarEvent} />
@@ -159,12 +165,13 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
     );
   }
 
-
   return (
     <div className="flex flex-col gap-10">
       {/* Step 1: provider */}
       <section className="glass-panel rounded-xl p-6 md:p-8">
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">1. Select provider</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">
+          1. Select provider
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <button
             type="button"
@@ -173,7 +180,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               providerId === null ? "border-primary" : "border-border-subtle hover:border-primary"
             }`}
           >
-            <span className="material-symbols-outlined text-[32px] text-on-surface-variant">group</span>
+            <span className="material-symbols-outlined text-[32px] text-on-surface-variant">
+              group
+            </span>
             <span className="font-label-md text-label-md text-on-surface">No preference</span>
           </button>
           {ctx.providers.map((provider) => (
@@ -182,17 +191,25 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               type="button"
               onClick={() => setProviderId(provider.id)}
               className={`flex flex-col items-center gap-3 p-4 rounded-lg border bg-surface-container transition-all ${
-                providerId === provider.id ? "border-primary" : "border-border-subtle hover:border-primary"
+                providerId === provider.id
+                  ? "border-primary"
+                  : "border-border-subtle hover:border-primary"
               }`}
             >
               <div className="w-16 h-16 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center text-primary">
                 {provider.avatar_url ? (
-                  <img src={provider.avatar_url} alt={provider.display_name} className="w-full h-full object-cover" />
+                  <img
+                    src={provider.avatar_url}
+                    alt={provider.display_name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   provider.display_name.charAt(0)
                 )}
               </div>
-              <span className="font-label-md text-label-md text-on-surface">{provider.display_name}</span>
+              <span className="font-label-md text-label-md text-on-surface">
+                {provider.display_name}
+              </span>
             </button>
           ))}
         </div>
@@ -203,10 +220,11 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
         )}
       </section>
 
-
       {/* Step 2: service */}
       <section className="glass-panel rounded-xl p-6 md:p-8">
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">2. Choose a service</h2>
+        <h2 className="font-headline-md text-headline-md text-on-surface mb-6">
+          2. Choose a service
+        </h2>
         <div className="flex flex-col gap-2">
           {ctx.services.length === 0 ? (
             <div className="p-4 rounded-lg bg-surface-container border border-border-subtle text-on-surface-variant text-body-md">
@@ -219,18 +237,23 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
                 type="button"
                 onClick={() => setServiceId(svc.id)}
                 className={`flex items-center justify-between text-left p-4 rounded-lg bg-surface-container border transition-all ${
-                  serviceId === svc.id ? "border-primary" : "border-border-subtle hover:border-primary/50"
+                  serviceId === svc.id
+                    ? "border-primary"
+                    : "border-border-subtle hover:border-primary/50"
                 }`}
               >
                 <span className="flex flex-col gap-1">
                   <span className="font-label-md text-label-md text-on-surface">{svc.name}</span>
                   <span className="font-body-md text-body-md text-on-surface-variant text-sm">
-                    {svc.duration_minutes} mins{svc.category ? ` • ${categoryLabel(svc.category)}` : ""}{svc.description ? ` • ${svc.description}` : ""}
+                    {svc.duration_minutes} mins
+                    {svc.category ? ` • ${categoryLabel(svc.category)}` : ""}
+                    {svc.description ? ` • ${svc.description}` : ""}
                   </span>
                 </span>
 
-
-                <span className={`font-headline-md text-headline-md ${serviceId === svc.id ? "text-primary" : "text-on-surface"}`}>
+                <span
+                  className={`font-headline-md text-headline-md ${serviceId === svc.id ? "text-primary" : "text-on-surface"}`}
+                >
                   {formatPrice(svc.price_cents)}
                 </span>
               </button>
@@ -243,7 +266,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
       <section className="glass-panel rounded-xl p-6 md:p-8 flex flex-col gap-6">
         <h2 className="font-headline-md text-headline-md text-on-surface">3. Date &amp; time</h2>
         <div>
-          <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Date</label>
+          <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
+            Date
+          </label>
           <input
             type="date"
             required
@@ -258,7 +283,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
             {loading ? "Checking your session…" : "Sign in to see live availability and book."}
           </p>
         ) : !serviceId ? (
-          <p className="text-on-surface-variant text-body-md">Choose a service to see open slots.</p>
+          <p className="text-on-surface-variant text-body-md">
+            Choose a service to see open slots.
+          </p>
         ) : slotsQuery.isPending ? (
           <p className="text-on-surface-variant text-body-md">Loading available times…</p>
         ) : slotsQuery.data?.closed ? (
@@ -290,7 +317,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
         <h2 className="font-headline-md text-headline-md text-on-surface">4. Your details</h2>
         {!user ? (
           <div className="flex flex-col gap-3">
-            <p className="text-on-surface-variant text-body-md">Sign in to book this appointment.</p>
+            <p className="text-on-surface-variant text-body-md">
+              Sign in to book this appointment.
+            </p>
             <Link
               to="/auth"
               search={{ next: `/shop/${slug}`, mode: undefined }}
@@ -299,7 +328,6 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               Sign in to book
             </Link>
           </div>
-
         ) : (
           <form
             className="flex flex-col gap-4"
@@ -309,7 +337,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
             }}
           >
             <div>
-              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Full name *</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
+                Full name *
+              </label>
               <input
                 required
                 type="text"
@@ -320,7 +350,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               />
             </div>
             <div>
-              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Phone number *</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
+                Phone number *
+              </label>
               <input
                 required
                 type="tel"
@@ -331,7 +363,9 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               />
             </div>
             <div>
-              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">Notes</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
+                Notes
+              </label>
               <textarea
                 rows={3}
                 value={notes}
@@ -341,11 +375,12 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
               />
             </div>
 
-
             <div className="border-t border-border-subtle pt-4 flex flex-col gap-2">
               <div className="flex justify-between text-body-md text-on-surface">
                 <span>{service ? service.name : "No service selected"}</span>
-                <span className="text-primary font-bold">{service ? formatPrice(service.price_cents) : "—"}</span>
+                <span className="text-primary font-bold">
+                  {service ? formatPrice(service.price_cents) : "—"}
+                </span>
               </div>
               <div className="text-on-surface-variant text-body-md">
                 {time

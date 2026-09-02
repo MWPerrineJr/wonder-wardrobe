@@ -25,6 +25,7 @@ Fix: make the sign-in page render a single stable shell during the first paint a
 The three new feature areas you called out — the analytics dashboard, the social-links tab, and the three subscription tiers — all live behind sign-in, and the preview session is signed out, so nothing there has been exercised end to end. Database state also shows zero subscription rows and zero comp grants, so the paid paths have never been run against real data.
 
 Fix (after you sign in to the preview once):
+
 - Walk the owner dashboard tab by tab: details, categories, services, hours, payments, links, share/QR, and the setup tour.
 - Save real social links and confirm they persist and appear on the public shop page.
 - Load `/owner/analytics` both without a plan (should show the upgrade panel) and with access, checking every chart renders with real bookings and does not break on empty ranges.

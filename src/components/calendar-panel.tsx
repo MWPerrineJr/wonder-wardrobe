@@ -13,10 +13,10 @@ const CONNECTOR_ID = "google_calendar";
 
 function waitForOAuthCompletion(popup: Window) {
   return new Promise<string | null>((resolve, reject) => {
-    let poll: number | undefined;
+    const state: { poll?: number } = {};
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
-      if (poll !== undefined) window.clearInterval(poll);
+      if (state.poll !== undefined) window.clearInterval(state.poll);
     };
     const onMessage = (event: MessageEvent) => {
       const type = event.data?.type;
@@ -36,7 +36,7 @@ function waitForOAuthCompletion(popup: Window) {
       reject(new Error("Google did not finish the connection."));
     };
     window.addEventListener("message", onMessage);
-    poll = window.setInterval(() => {
+    state.poll = window.setInterval(() => {
       if (!popup.closed) return;
       cleanup();
       reject(new Error("The Google window closed before the connection finished."));
@@ -145,9 +145,7 @@ export function CalendarPanel() {
         </div>
       )}
 
-      {status.isError && (
-        <p className="text-body-sm text-error">Could not load calendar status.</p>
-      )}
+      {status.isError && <p className="text-body-sm text-error">Could not load calendar status.</p>}
     </div>
   );
 }

@@ -1,9 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { requirePaymentsEnv } from "@/lib/payments-env";
+import { RETURN_PATHS, resolveAppReturnUrl } from "@/lib/return-url";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { resolveReturnUrl, returnPathSchema } from "@/lib/return-path";
 
 // Shop-owned payout accounts (Stripe Connect Express). Client prepayments are
 // charged on the platform and transferred straight to the shop's own account.
@@ -24,11 +27,12 @@ export const getPayoutAccount = createServerFn({ method: "GET" })
     z.object({ shopId: z.string().uuid(), environment: envSchema }).parse(input),
   )
   .handler(async ({ data, context }): Promise<PayoutAccount> => {
+    const environment = requirePaymentsEnv(data.environment);
     const { data: row, error } = await context.supabase
       .from("shop_payout_accounts")
       .select("stripe_account_id, charges_enabled, payouts_enabled, details_submitted")
       .eq("shop_id", data.shopId)
-      .eq("environment", data.environment)
+      .eq("environment", environment)
       .maybeSingle();
     if (error) throw dbError(error, "payouts");
     return {
@@ -41,7 +45,7 @@ export const getPayoutAccount = createServerFn({ method: "GET" })
   });
 
 async function requireOwnedShop(
-  supabase: { from: (t: "shops") => any },
+  supabase: SupabaseClient<Database>,
   userId: string,
   shopId: string,
 ): Promise<{ id: string; name: string }> {
@@ -65,23 +69,31 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
       .object({
         shopId: z.string().uuid(),
         environment: envSchema,
-        returnPath: returnPathSchema,
+        returnUrl: z.string().max(2048).optional(),
       })
       .parse(input),
   )
   .handler(async ({ data, context }): Promise<LinkResult> => {
     const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
+    const environment = requirePaymentsEnv(data.environment);
     const shop = await requireOwnedShop(context.supabase, context.userId, data.shopId);
 
+    let returnUrl: string;
     try {
-      const stripe = createStripeClient(data.environment);
+      returnUrl = resolveAppReturnUrl(data.returnUrl, { fallbackPath: RETURN_PATHS.payouts });
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
+    }
+
+    try {
+      const stripe = createStripeClient(environment);
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
       const { data: existing } = await context.supabase
         .from("shop_payout_accounts")
         .select("stripe_account_id")
         .eq("shop_id", shop.id)
-        .eq("environment", data.environment)
+        .eq("environment", environment)
         .maybeSingle();
 
       let accountId = existing?.stripe_account_id ?? null;
@@ -103,7 +115,7 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
         const { error } = await supabaseAdmin.from("shop_payout_accounts").upsert(
           {
             shop_id: shop.id,
-            environment: data.environment,
+            environment,
             stripe_account_id: accountId,
           },
           { onConflict: "shop_id,environment" },
@@ -114,8 +126,8 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
       const link = await stripe.accountLinks.create({
         account: accountId,
         type: "account_onboarding",
-        refresh_url: resolveReturnUrl(data.returnPath, { onboarding: "refresh" }),
-        return_url: resolveReturnUrl(data.returnPath, { onboarding: "done" }),
+        refresh_url: returnUrl,
+        return_url: returnUrl,
       });
       return { url: link.url };
     } catch (error) {
@@ -138,13 +150,14 @@ export const refreshPayoutAccount = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<PayoutAccount> => {
     const { createStripeClient } = await import("@/lib/stripe.server");
+    const environment = requirePaymentsEnv(data.environment);
     await requireOwnedShop(context.supabase, context.userId, data.shopId);
 
     const { data: row, error } = await context.supabase
       .from("shop_payout_accounts")
       .select("stripe_account_id")
       .eq("shop_id", data.shopId)
-      .eq("environment", data.environment)
+      .eq("environment", environment)
       .maybeSingle();
     if (error) throw dbError(error, "payouts");
     if (!row?.stripe_account_id) {
@@ -157,7 +170,7 @@ export const refreshPayoutAccount = createServerFn({ method: "POST" })
       };
     }
 
-    const stripe = createStripeClient(data.environment);
+    const stripe = createStripeClient(environment);
     const account = await stripe.accounts.retrieve(row.stripe_account_id);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
@@ -187,19 +200,20 @@ export const createPayoutLoginLink = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<LinkResult> => {
     const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
+    const environment = requirePaymentsEnv(data.environment);
     await requireOwnedShop(context.supabase, context.userId, data.shopId);
 
     const { data: row, error } = await context.supabase
       .from("shop_payout_accounts")
       .select("stripe_account_id")
       .eq("shop_id", data.shopId)
-      .eq("environment", data.environment)
+      .eq("environment", environment)
       .maybeSingle();
     if (error) throw dbError(error, "payouts");
     if (!row?.stripe_account_id) return { error: "Connect a payout account first." };
 
     try {
-      const stripe = createStripeClient(data.environment);
+      const stripe = createStripeClient(environment);
       const link = await stripe.accounts.createLoginLink(row.stripe_account_id);
       return { url: link.url };
     } catch (err) {

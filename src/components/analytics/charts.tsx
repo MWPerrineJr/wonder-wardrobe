@@ -119,7 +119,10 @@ export function RevenueTrend({ series }: { series: SeriesPoint[] }) {
 export function BookingsTrend({ series }: { series: SeriesPoint[] }) {
   const hasData = series.some((p) => p.total > 0);
   return (
-    <Panel title="Appointments by day" subtitle="Stacked by status, with lost-booking rate overlaid.">
+    <Panel
+      title="Appointments by day"
+      subtitle="Stacked by status, with lost-booking rate overlaid."
+    >
       {!hasData ? (
         <EmptyState message="No appointments booked in this period." />
       ) : (

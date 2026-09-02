@@ -1,0 +1,128 @@
+{
+  "name": "Standing Chair — Survey Sender",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 1 }]
+        }
+      },
+      "id": "schedule-1",
+      "name": "Every hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/pending_survey_targets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"lookback_days\": 7 }",
+        "options": {}
+      },
+      "id": "http-targets",
+      "name": "Get pending survey targets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_SUPABASE_SERVICE_ROLE_CREDENTIAL",
+          "name": "Supabase service role (apikey header)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "",
+        "options": {}
+      },
+      "id": "split-1",
+      "name": "One item per booking",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [440, 0],
+      "notesInFlow": true,
+      "notes": "If the RPC returns a single array item, split it. If items already arrive one-per-row, this node passes them through — set 'Field to split out' to the field holding the array if needed."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/survey_invites",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=representation" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ shop_id: $json.shop_id, booking_id: $json.booking_id, provider_id: $json.provider_id, customer_id: $json.customer_id, customer_name: $json.customer_name, customer_email: $json.customer_email }) }}",
+        "options": {}
+      },
+      "id": "http-invite",
+      "name": "Create survey invite",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_SUPABASE_SERVICE_ROLE_CREDENTIAL",
+          "name": "Supabase service role (apikey header)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// PostgREST returns the inserted row as a one-element array.\nconst rows = [];\nfor (const item of $input.all()) {\n  const invite = Array.isArray(item.json) ? item.json[0] : item.json;\n  const target = $('One item per booking').itemMatching(rows.length)?.json ?? {};\n  const appUrl = $env.APP_URL ?? 'https://REPLACE-WITH-YOUR-APP-DOMAIN';\n  rows.push({\n    json: {\n      to: invite.customer_email,\n      customerName: invite.customer_name ?? 'there',\n      shopName: target.shop_name ?? 'the shop',\n      providerName: target.provider_name ?? null,\n      serviceName: target.service_name ?? null,\n      surveyUrl: `${appUrl}/survey/${invite.token}`,\n    },\n  });\n}\nreturn rows;"
+      },
+      "id": "code-email",
+      "name": "Build survey email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "=How was your visit to {{ $json.shopName }}?",
+        "emailType": "html",
+        "message": "=<p>Hi {{ $json.customerName }},</p><p>Thanks for visiting {{ $json.shopName }}{{ $json.providerName ? ' and seeing ' + $json.providerName : '' }}. We'd love to hear how it went — it takes less than a minute.</p><p><a href=\"{{ $json.surveyUrl }}\" style=\"display:inline-block;padding:12px 24px;background:#1a3c5e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold\">Share your feedback</a></p><p>Or copy this link: {{ $json.surveyUrl }}</p><p>— {{ $json.shopName }} via The Standing Chair</p>",
+        "options": {}
+      },
+      "id": "gmail-1",
+      "name": "Send survey email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1100, 0],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_WITH_GMAIL_CREDENTIAL",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every hour": { "main": [[{ "node": "Get pending survey targets", "type": "main", "index": 0 }]] },
+    "Get pending survey targets": { "main": [[{ "node": "One item per booking", "type": "main", "index": 0 }]] },
+    "One item per booking": { "main": [[{ "node": "Create survey invite", "type": "main", "index": 0 }]] },
+    "Create survey invite": { "main": [[{ "node": "Build survey email", "type": "main", "index": 0 }]] },
+    "Build survey email": { "main": [[{ "node": "Send survey email", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

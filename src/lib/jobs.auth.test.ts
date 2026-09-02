@@ -49,7 +49,10 @@ describe("authorizeJobCall", () => {
   });
 
   it("returns 401 when the Authorization header is missing", () => {
-    const result = authorizeJobCall(requestWith({}), { secret: SECRET, publishableKey: PUBLISHABLE });
+    const result = authorizeJobCall(requestWith({}), {
+      secret: SECRET,
+      publishableKey: PUBLISHABLE,
+    });
     assert.equal(result.ok, false);
     if (!result.ok) {
       assert.equal(result.status, 401);
@@ -103,7 +106,10 @@ describe("authorizeJobCall", () => {
 
   it("rate-limits repeated failures from the same client", () => {
     const buckets = new Map<string, JobRateLimitBucket>();
-    const headers = { Authorization: `Bearer ${"b".repeat(32)}`, "cf-connecting-ip": "203.0.113.9" };
+    const headers = {
+      Authorization: `Bearer ${"b".repeat(32)}`,
+      "cf-connecting-ip": "203.0.113.9",
+    };
     let last = authorizeJobCall(requestWith(headers), {
       secret: SECRET,
       publishableKey: PUBLISHABLE,

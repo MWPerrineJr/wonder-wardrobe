@@ -9,7 +9,11 @@ export default defineTool({
     "List upcoming or historical bookings for a shop owned by the signed-in user, optionally filtered by date range.",
   inputSchema: {
     shop_id: z.string().uuid().describe("The shop UUID."),
-    from: z.string().datetime().optional().describe("ISO timestamp lower bound (starts_at >= from)."),
+    from: z
+      .string()
+      .datetime()
+      .optional()
+      .describe("ISO timestamp lower bound (starts_at >= from)."),
     to: z.string().datetime().optional().describe("ISO timestamp upper bound (starts_at <= to)."),
     limit: z.number().int().min(1).max(200).optional().describe("Max rows to return (default 50)."),
   },

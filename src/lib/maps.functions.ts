@@ -23,9 +23,7 @@ export const getMapEmbedUrl = createServerFn({ method: "GET" })
     if (request) {
       const requestUrl = new URL(request.url);
       const sandboxHost =
-        requestUrl.hostname === "localhost"
-          ? request.headers.get("x-forwarded-host")
-          : null;
+        requestUrl.hostname === "localhost" ? request.headers.get("x-forwarded-host") : null;
       origin = sandboxHost ? `https://${sandboxHost}` : requestUrl.origin;
     }
 

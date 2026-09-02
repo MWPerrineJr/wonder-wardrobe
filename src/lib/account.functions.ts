@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { configuredPaymentsEnv } from "@/lib/payments-env";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { refundForCancellation, type CancellationPolicy } from "@/lib/cancellation";
@@ -92,7 +93,7 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       .from("bookings")
       .select(
         `id, starts_at, amount_paid_cents, payment_status, stripe_payment_intent_id,
-         provider_id, google_event_id,
+         payment_environment, provider_id, google_event_id,
          shop:shops(cancel_free_hours, late_cancel_fee_percent)`,
       )
       .eq("id", data.bookingId)
@@ -119,21 +120,18 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
       console.error("[account] calendar cleanup skipped", e);
     }
 
-
-    const shopPolicy = (before as unknown as {
-      shop?: { cancel_free_hours?: number; late_cancel_fee_percent?: number } | null;
-    }).shop;
+    const shopPolicy = (
+      before as unknown as {
+        shop?: { cancel_free_hours?: number; late_cancel_fee_percent?: number } | null;
+      }
+    ).shop;
     const policy: CancellationPolicy = {
       freeHours: shopPolicy?.cancel_free_hours ?? 24,
       lateFeePercent: shopPolicy?.late_cancel_fee_percent ?? 50,
       rescheduleAllowed: true,
       rescheduleMinHours: 24,
     };
-    const outcome = refundForCancellation(
-      before.amount_paid_cents ?? 0,
-      before.starts_at,
-      policy,
-    );
+    const outcome = refundForCancellation(before.amount_paid_cents ?? 0, before.starts_at, policy);
 
     const paid = before.payment_status === "paid" && (before.amount_paid_cents ?? 0) > 0;
     if (!paid || outcome.refundCents <= 0) {
@@ -146,10 +144,17 @@ export const cancelMyBooking = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const env = process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
+    const configured = configuredPaymentsEnv();
+    const chargedIn =
+      before.payment_environment === "live" || before.payment_environment === "sandbox"
+        ? before.payment_environment
+        : configured;
+    const env = chargedIn;
     let refundError: string | null = null;
     let refunded = 0;
-    if (before.stripe_payment_intent_id) {
+    if (env !== configured) {
+      refundError = `This booking was charged in ${env} mode; this deployment is ${configured}`;
+    } else if (before.stripe_payment_intent_id) {
       const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
       try {
         const stripe = createStripeClient(env);
@@ -197,18 +202,20 @@ export const listMyBookings = createServerFn({ method: "GET" })
       .order("starts_at", { ascending: false });
     if (error) throw error;
     return (data ?? []).map((row) => {
-      const shop = (row as unknown as {
-        shop?: {
-          id: string;
-          name: string;
-          slug: string | null;
-          address?: string | null;
-          cancel_free_hours?: number;
-          late_cancel_fee_percent?: number;
-          reschedule_allowed?: boolean;
-          reschedule_min_hours?: number;
-        } | null;
-      }).shop;
+      const shop = (
+        row as unknown as {
+          shop?: {
+            id: string;
+            name: string;
+            slug: string | null;
+            address?: string | null;
+            cancel_free_hours?: number;
+            late_cancel_fee_percent?: number;
+            reschedule_allowed?: boolean;
+            reschedule_min_hours?: number;
+          } | null;
+        }
+      ).shop;
       return {
         ...(row as unknown as MyBooking),
         shop: shop

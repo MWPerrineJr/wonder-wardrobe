@@ -39,7 +39,7 @@ export const getSurveyInvite = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => z.object({ token: z.string().uuid() }).parse(input))
   .handler(async ({ data }): Promise<SurveyInviteView> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: invite, error } = await (supabaseAdmin as any)
+    const { data: invite, error } = await supabaseAdmin
       .rpc("get_survey_invite_by_token", { _token: data.token })
       .maybeSingle();
     if (error) throw dbError(error, "survey");
@@ -67,7 +67,7 @@ export const submitSurveyFeedback = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: saved, error } = await (supabaseAdmin as any)
+    const { data: saved, error } = await supabaseAdmin
       .rpc("submit_survey_feedback", {
         _token: data.token,
         _rating: data.rating,

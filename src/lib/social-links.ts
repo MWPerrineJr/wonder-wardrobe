@@ -1,12 +1,6 @@
 import { z } from "zod";
 
-export type SocialPlatform =
-  | "instagram"
-  | "facebook"
-  | "tiktok"
-  | "x"
-  | "youtube"
-  | "website";
+export type SocialPlatform = "instagram" | "facebook" | "tiktok" | "x" | "youtube" | "website";
 
 export type CustomLink = { label: string; url: string };
 
@@ -155,7 +149,10 @@ export const customLinkSchema = z.object({
 });
 
 export function normalizeCustomLinks(raw: unknown): CustomLink[] {
-  const parsed = z.array(customLinkSchema).max(5, "You can add up to 5 custom links").parse(raw ?? []);
+  const parsed = z
+    .array(customLinkSchema)
+    .max(5, "You can add up to 5 custom links")
+    .parse(raw ?? []);
   return parsed.map((link) => {
     const url = normalizeSocial("website", link.url);
     if (!url) throw new Error(`Add a link for "${link.label}"`);
@@ -179,6 +176,7 @@ export function sameAsUrls(
   links: Partial<Omit<ShopLinks, "social_links">> | null | undefined,
 ): string[] {
   if (!links) return [];
-  return PLATFORMS.map((p) => links[p.column as keyof typeof links])
-    .filter((v): v is string => typeof v === "string" && v.startsWith("https://"));
+  return PLATFORMS.map((p) => links[p.column as keyof typeof links]).filter(
+    (v): v is string => typeof v === "string" && v.startsWith("https://"),
+  );
 }

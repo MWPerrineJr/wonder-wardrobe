@@ -1,4 +1,10 @@
-import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -277,7 +283,9 @@ function SupportInboxPage() {
                             setReply("");
                           }}
                           className={`w-full text-left px-5 py-4 flex flex-col gap-1 transition-colors ${
-                            selectedId === t.id ? "bg-surface-container" : "hover:bg-surface-container/60"
+                            selectedId === t.id
+                              ? "bg-surface-container"
+                              : "hover:bg-surface-container/60"
                           }`}
                         >
                           <div className="flex items-center justify-between gap-3">
@@ -292,9 +300,14 @@ function SupportInboxPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             {t.unread && (
-                              <span className="h-2 w-2 rounded-full bg-primary shrink-0" aria-hidden />
+                              <span
+                                className="h-2 w-2 rounded-full bg-primary shrink-0"
+                                aria-hidden
+                              />
                             )}
-                            <span className="truncate text-on-surface text-body-md">{t.subject}</span>
+                            <span className="truncate text-on-surface text-body-md">
+                              {t.subject}
+                            </span>
                           </div>
                           <span className="truncate text-on-surface-variant text-body-sm">
                             {t.snippet}

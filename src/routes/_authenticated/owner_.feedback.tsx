@@ -21,10 +21,7 @@ import {
   updateFeedbackStatus,
   type FeedbackRow,
 } from "@/lib/feedback.functions";
-import {
-  AnalyticsUpgradePanel,
-  ManageBillingButton,
-} from "@/components/analytics-upgrade-panel";
+import { AnalyticsUpgradePanel, ManageBillingButton } from "@/components/analytics-upgrade-panel";
 import { PaymentTestModeBanner } from "@/components/payment-test-banner";
 import { getStripeEnvironment } from "@/lib/stripe";
 

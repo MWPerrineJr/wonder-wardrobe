@@ -14,7 +14,7 @@ export async function buildShopReport(
   admin: Admin,
   apiKey: string,
   shopId: string,
-  options: { force?: boolean } = {},
+  options: { force?: boolean; onSpend?: () => Promise<boolean> } = {},
 ) {
   const windowStart = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
@@ -42,6 +42,10 @@ export async function buildShopReport(
     return { built: false as const, reason: "no_new_feedback" };
   }
 
+  if (options.onSpend && !(await options.onSpend())) {
+    return { built: false as const, reason: "capped" };
+  }
+
   const report = await analyzeShopReport(apiKey, reviews);
 
   const { data: scored } = await admin
@@ -52,7 +56,9 @@ export async function buildShopReport(
     .not("sentiment_score", "is", null);
   const scores = (scored ?? []).map((r) => Number(r.sentiment_score));
   const overall =
-    scores.length > 0 ? Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)) : null;
+    scores.length > 0
+      ? Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2))
+      : null;
 
   const { data: saved, error: insErr } = await admin
     .from("feedback_reports")

@@ -1,68 +1,51 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { amountDueCents } from "@/lib/booking-money";
+import { canReserveSlot, DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
+import { toInstant } from "@/lib/booking-time";
 import { dbError } from "@/lib/db-error";
+import { configuredPaymentsEnv } from "@/lib/payments-env";
+import { RETURN_PATHS, resolveAppReturnUrl, withSearchParams } from "@/lib/return-url";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { CancellationPolicy } from "@/lib/cancellation";
-import { resolveReturnUrl, returnPathSchema } from "@/lib/return-path";
+import type Stripe from "stripe";
+
+export { amountDueCents } from "@/lib/booking-money";
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
-}
-
-/** Naive local wall-clock date + time -> exact instant, using the caller's UTC offset. */
-function toInstant(date: string, time: string, tzOffsetMinutes: number) {
-  const [y, m, d] = date.split("-").map(Number);
-  const [hh, mm] = time.split(":").map(Number);
-  return new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0) + tzOffsetMinutes * 60_000);
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 export type BookingContext = {
   shop: { id: string; slug: string; name: string; address: string | null };
-  providers: Array<{ id: string; display_name: string; avatar_url: string | null; specialties: string[] }>;
-  services: Array<{ id: string; name: string; description: string | null; duration_minutes: number; price_cents: number; category: string | null }>;
+  providers: Array<{
+    id: string;
+    display_name: string;
+    avatar_url: string | null;
+    specialties: string[];
+  }>;
+  services: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    duration_minutes: number;
+    price_cents: number;
+    category: string | null;
+  }>;
   hours: Array<{ weekday: number; open_time: string; close_time: string; is_closed: boolean }>;
   prepay: { mode: "off" | "deposit" | "full"; depositPercent: number; enabled: boolean };
   cancellation: CancellationPolicy;
 };
 
-/**
- * Which payments environment this deployment charges in. Declared through
- * PAYMENTS_ENV and validated against the credentials that are actually present,
- * so a half-configured deployment can never take real money by accident.
- */
-async function paymentEnv(): Promise<"sandbox" | "live"> {
-  const { resolvePaymentEnv } = await import("@/lib/stripe.server");
-  return resolvePaymentEnv();
+/** Which payments environment this deployment charges in. */
+function paymentEnv(): "sandbox" | "live" {
+  return configuredPaymentsEnv();
 }
-
-/** Same, but null instead of throwing — for read paths that must still render. */
-async function paymentEnvOrNull(): Promise<"sandbox" | "live" | null> {
-  try {
-    return await paymentEnv();
-  } catch (e) {
-    console.error("[booking] payments not configured:", e instanceof Error ? e.message : e);
-    return null;
-  }
-}
-
-/** Amount the client must pay up front, in cents (0 when prepay is off). */
-export function amountDueCents(
-  priceCents: number,
-  mode: "off" | "deposit" | "full",
-  depositPercent: number,
-): number {
-  if (mode === "full") return priceCents;
-  if (mode === "deposit") return Math.max(50, Math.round((priceCents * depositPercent) / 100));
-  return 0;
-}
-
 
 export const getBookingContext = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => z.object({ slug: z.string().min(1) }).parse(input))
@@ -103,17 +86,14 @@ export const getBookingContext = createServerFn({ method: "GET" })
     const mode = (shop.prepay_mode ?? "off") as "off" | "deposit" | "full";
     let chargesEnabled = false;
     if (mode !== "off") {
-      const env = await paymentEnvOrNull();
-      if (env) {
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: acct } = await supabaseAdmin
-          .from("shop_payout_accounts")
-          .select("charges_enabled")
-          .eq("shop_id", shop.id)
-          .eq("environment", env)
-          .maybeSingle();
-        chargesEnabled = acct?.charges_enabled ?? false;
-      }
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: acct } = await supabaseAdmin
+        .from("shop_payout_accounts")
+        .select("charges_enabled")
+        .eq("shop_id", shop.id)
+        .eq("environment", paymentEnv())
+        .maybeSingle();
+      chargesEnabled = acct?.charges_enabled ?? false;
     }
 
     return {
@@ -133,7 +113,6 @@ export const getBookingContext = createServerFn({ method: "GET" })
         rescheduleMinHours: shop.reschedule_min_hours ?? 24,
       },
     };
-
   });
 
 const SlotsInput = z.object({
@@ -160,7 +139,8 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
       .eq("id", data.serviceId)
       .maybeSingle();
     if (svcErr) throw dbError(svcErr, "booking");
-    if (!service || service.shop_id !== data.shopId) throw new Error("Service not found for this shop");
+    if (!service || service.shop_id !== data.shopId)
+      throw new Error("Service not found for this shop");
 
     const [y, m, d] = data.date.split("-").map(Number);
     const weekday = new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1)).getUTCDay();
@@ -183,35 +163,46 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
     const openM = toMinutes(open);
     const closeM = toMinutes(close);
 
-    // Busy ranges for the chosen provider require reading other customers' rows,
-    // so use the privileged client and return only opaque time ranges.
-    let busy: Array<{ start: number; end: number }> = [];
-    if (data.providerId) {
-      const dayStart = toInstant(data.date, "00:00", data.tzOffsetMinutes);
-      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: rows, error } = await supabaseAdmin
-        .from("bookings")
-        .select("starts_at, ends_at")
-        .eq("provider_id", data.providerId)
-        .in("status", ["pending", "confirmed"])
-        .gte("starts_at", dayStart.toISOString())
-        .lt("starts_at", dayEnd.toISOString());
-      if (error) throw dbError(error, "booking");
-      busy = (rows ?? []).map((r) => ({
-        start: new Date(r.starts_at).getTime(),
-        end: new Date(r.ends_at).getTime(),
-      }));
+    const { data: providerRows, error: provErr } = await pub
+      .from("providers")
+      .select("id")
+      .eq("shop_id", data.shopId)
+      .eq("is_active", true);
+    if (provErr) throw dbError(provErr, "booking");
+    const activeProviderCount = (providerRows ?? []).length;
 
+    const dayStart = toInstant(data.date, "00:00", data.tzOffsetMinutes);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
+
+    // Occupying bookings for any customer require the privileged client.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("bookings")
+      .select("starts_at, ends_at, provider_id, status, hold_expires_at")
+      .eq("shop_id", data.shopId)
+      .in("status", ["pending", "confirmed"])
+      .gte("starts_at", dayStart.toISOString())
+      .lt("starts_at", dayEnd.toISOString());
+    if (error) throw dbError(error, "booking");
+    const occupying = (rows ?? []).map((row) => ({
+      providerId: row.provider_id,
+      start: new Date(row.starts_at).getTime(),
+      end: new Date(row.ends_at).getTime(),
+      status: row.status,
+      holdExpiresAt: row.hold_expires_at,
+    }));
+
+    let googleBusy: Array<{ start: number; end: number }> = [];
+    if (data.providerId) {
       // Personal commitments already on the provider's own Google Calendar also
-      // block slots. Returns [] when Google is unreachable or not connected, so
-      // availability keeps working from shop hours plus existing bookings.
+      // block slots. Returns [] when Google is unreachable or not connected.
       const { listGoogleBusy } = await import("@/server/googleCalendar.server");
-      busy = busy.concat(
-        await listGoogleBusy(data.providerId, dayStart.toISOString(), dayEnd.toISOString()),
+      googleBusy = await listGoogleBusy(
+        data.providerId,
+        dayStart.toISOString(),
+        dayEnd.toISOString(),
       );
     }
-
 
     const now = Date.now();
     const slots: string[] = [];
@@ -222,7 +213,16 @@ export const getAvailableSlots = createServerFn({ method: "POST" })
       const start = toInstant(data.date, time, data.tzOffsetMinutes).getTime();
       const end = start + service.duration_minutes * 60_000;
       if (start <= now) continue;
-      if (busy.some((b) => start < b.end && end > b.start)) continue;
+      const reservation = canReserveSlot({
+        existing: occupying,
+        activeProviderCount,
+        providerId: data.providerId ?? null,
+        start,
+        end,
+        nowMs: now,
+      });
+      if (!reservation.ok) continue;
+      if (googleBusy.some((b) => start < b.end && end > b.start)) continue;
       slots.push(time);
     }
     return { slots, closed: false };
@@ -243,7 +243,7 @@ const CreateBookingInput = z.object({
     .max(30)
     .regex(/^[+()\d\s.-]+$/, "Phone can only contain digits and + ( ) - . spaces"),
   notes: z.string().trim().max(500).optional().nullable(),
-  returnPath: returnPathSchema.optional(),
+  returnUrl: z.string().max(2048).optional(),
 });
 
 export type SavedBooking = {
@@ -265,7 +265,6 @@ export type CreateBookingResult = {
   checkoutUrl: string | null;
   amountDueCents: number;
 };
-
 
 export const createBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -292,11 +291,10 @@ export const createBooking = createServerFn({ method: "POST" })
     if (shopErr) throw dbError(shopErr, "booking");
     if (!shopRow) throw new Error("Shop not found");
 
+    const env = paymentEnv();
     const mode = (shopRow.prepay_mode ?? "off") as "off" | "deposit" | "full";
-    // Only resolve (and require) payment credentials when this shop charges up front.
-    const env = mode === "off" ? null : await paymentEnv();
     let payoutAccountId: string | null = null;
-    if (mode !== "off" && env) {
+    if (mode !== "off") {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: acct } = await supabaseAdmin
         .from("shop_payout_accounts")
@@ -309,6 +307,8 @@ export const createBooking = createServerFn({ method: "POST" })
     const due = payoutAccountId
       ? amountDueCents(service.price_cents, mode, shopRow.deposit_percent ?? 25)
       : 0;
+    const returnTo =
+      due > 0 ? resolveAppReturnUrl(data.returnUrl, { fallbackPath: RETURN_PATHS.booking }) : null;
 
     const startsAt = toInstant(data.date, data.time, data.tzOffsetMinutes);
     if (startsAt.getTime() <= Date.now()) throw new Error("Pick a time in the future");
@@ -329,6 +329,9 @@ export const createBooking = createServerFn({ method: "POST" })
         notes: data.notes || null,
         status: "pending",
         payment_status: due > 0 ? "awaiting_payment" : "not_required",
+        amount_due_cents: due > 0 ? due : null,
+        payment_environment: due > 0 ? env : null,
+        hold_expires_at: due > 0 ? holdExpiryIso(new Date(), bookingHoldMinutes()) : null,
       })
       .select(
         `id, starts_at, ends_at, status, price_cents, customer_name, customer_phone, notes,
@@ -340,31 +343,12 @@ export const createBooking = createServerFn({ method: "POST" })
     if (error) throw dbError(error, "booking");
     const booking = saved as unknown as SavedBooking;
 
-    // Mirror onto the provider's Google Calendar when they've connected it.
-    // Never let a Google failure fail the booking.
-    try {
-      const { syncBookingToCalendar } = await import("@/server/googleCalendar.server");
-      await syncBookingToCalendar(booking.id, data.providerId ?? null, {
-        summary: `${booking.service?.name ?? "Appointment"} — ${shopRow.name}`,
-        description: [
-          data.customerName ? `Client: ${data.customerName}` : null,
-          data.customerPhone ? `Phone: ${data.customerPhone}` : null,
-          data.notes ? `Notes: ${data.notes}` : null,
-        ]
-          .filter(Boolean)
-          .join("\n"),
-        location: null,
-        startsAt: booking.starts_at,
-        endsAt: booking.ends_at,
-      });
-    } catch (e) {
-      console.error("[booking] calendar sync skipped", e);
-    }
+    // Calendar sync waits until the booking is confirmed (paid, or the
+    // provider confirms a no-prepay visit). See booking-calendar.server.ts.
 
-    if (due <= 0 || !payoutAccountId || !env) {
+    if (due <= 0 || !payoutAccountId || !returnTo) {
       return { booking, checkoutUrl: null, amountDueCents: 0 };
     }
-
 
     const { createStripeClient, getStripeErrorMessage } = await import("@/lib/stripe.server");
     try {
@@ -387,24 +371,55 @@ export const createBooking = createServerFn({ method: "POST" })
           metadata: { booking_id: booking.id, shop_id: shopRow.id },
         },
         metadata: { booking_id: booking.id, shop_id: shopRow.id },
-        success_url: resolveReturnUrl(data.returnPath ?? "/account", {
-          paid: "1",
-          booking: booking.id,
-        }),
-        cancel_url: resolveReturnUrl(data.returnPath ?? "/account", {
-          paid: "0",
-          booking: booking.id,
-        }),
-      } as any);
+        success_url: withSearchParams(returnTo, { paid: "1", booking: booking.id }),
+        cancel_url: withSearchParams(returnTo, { paid: "0", booking: booking.id }),
+      } satisfies Stripe.Checkout.SessionCreateParams);
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin
+      const attached = await supabaseAdmin
         .from("bookings")
-        .update({ stripe_checkout_session_id: session.id })
-        .eq("id", booking.id);
+        .update({
+          stripe_checkout_session_id: session.id,
+          amount_due_cents: due,
+          payment_environment: env,
+        })
+        .eq("id", booking.id)
+        .eq("status", "pending")
+        .eq("payment_status", "awaiting_payment")
+        .select("id");
+      if (attached.error) throw dbError(attached.error, "booking");
+      if (!attached.data?.length) throw new Error("Could not attach checkout session to booking");
 
       return { booking, checkoutUrl: session.url ?? null, amountDueCents: due };
     } catch (e) {
+      await cancelUnpaidHold(booking.id);
       throw new Error(getStripeErrorMessage(e));
     }
   });
+
+function bookingHoldMinutes(): number {
+  const n = Number(process.env["BOOKING_HOLD_MINUTES"]);
+  return Number.isFinite(n) && n >= 5 && n <= 120 ? n : DEFAULT_HOLD_MINUTES;
+}
+
+async function cancelUnpaidHold(bookingId: string): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const released = await supabaseAdmin
+    .from("bookings")
+    .update({
+      status: "cancelled",
+      payment_status: "failed",
+      hold_expires_at: null,
+    })
+    .eq("id", bookingId)
+    .eq("status", "pending")
+    .eq("payment_status", "awaiting_payment")
+    .select("id");
+  if (released.error) {
+    console.error("[booking] hold release failed", released.error);
+    return;
+  }
+  if (!released.data?.length) {
+    console.error("[booking] hold release matched zero rows", bookingId);
+  }
+}

@@ -124,7 +124,11 @@ function AccountPage() {
           {!editing ? (
             <div className="flex items-center gap-4">
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover" />
+                <img
+                  src={profile.avatar_url}
+                  alt=""
+                  className="h-14 w-14 rounded-full object-cover"
+                />
               ) : (
                 <div className="h-14 w-14 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-xl">
                   {initial}
@@ -153,7 +157,9 @@ function AccountPage() {
               className="grid grid-cols-1 gap-4"
             >
               <div>
-                <label className="block text-label-md text-on-surface-variant mb-1">Full name</label>
+                <label className="block text-label-md text-on-surface-variant mb-1">
+                  Full name
+                </label>
                 <input
                   type="text"
                   value={fullName}
@@ -175,7 +181,9 @@ function AccountPage() {
                 />
               </div>
               <div>
-                <label className="block text-label-md text-on-surface-variant mb-1">Avatar URL</label>
+                <label className="block text-label-md text-on-surface-variant mb-1">
+                  Avatar URL
+                </label>
                 <input
                   type="url"
                   value={avatarUrl}
@@ -288,7 +296,8 @@ function BookingRow({ b }: { b: MyBooking }) {
   const timeStr = start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   const price = b.price_cents != null ? `$${(b.price_cents / 100).toFixed(2)}` : null;
   const policy = b.cancellation ?? DEFAULT_CANCELLATION_POLICY;
-  const canCancel = (b.status === "pending" || b.status === "confirmed") && start.getTime() > Date.now();
+  const canCancel =
+    (b.status === "pending" || b.status === "confirmed") && start.getTime() > Date.now();
   const paid = b.payment_status === "paid" ? (b.amount_paid_cents ?? 0) : 0;
   const outcome = refundForCancellation(paid, b.starts_at, policy);
   const upcoming = start.getTime() > Date.now() && b.status !== "cancelled";

@@ -1,11 +1,9 @@
 import { callAsAppUser } from "@/integrations/lovable/appUserConnector";
-import {
-  getConnectionKeyForUser,
-  touchLastSynced,
-} from "@/server/appUserConnections.server";
+import { getConnectionKeyForUser, touchLastSynced } from "@/server/appUserConnections.server";
 
 /**
- * Server-only Google Calendar helpers used by booking/cancel flows.
+ * Server-only Google Calendar helpers used by confirmed-booking outbox and
+ * cancel/reschedule flows.
  * Every function is best-effort: a Google failure is logged and swallowed so a
  * booking never fails because a provider's calendar was unreachable.
  */
@@ -24,11 +22,7 @@ export function calendarClientApiKey(): string | null {
   return process.env["GOOGLE_CALENDAR_APP_USER_CONNECTOR_CLIENT_API_KEY"] ?? null;
 }
 
-async function call(
-  connectionAPIKey: string,
-  path: string,
-  init?: RequestInit,
-): Promise<Response> {
+async function call(connectionAPIKey: string, path: string, init?: RequestInit): Promise<Response> {
   return callAsAppUser({
     gatewayBaseUrl: GATEWAY_BASE_URL,
     connectionAPIKey,
@@ -78,13 +72,13 @@ export async function syncBookingToCalendar(
   bookingId: string,
   providerId: string | null | undefined,
   event: CalendarEventPayload,
-): Promise<void> {
-  if (!providerId) return;
+): Promise<"synced" | "skipped" | "failed"> {
+  if (!providerId) return "skipped";
   try {
     const userId = await providerUserId(providerId);
-    if (!userId) return;
+    if (!userId) return "skipped";
     const connectionAPIKey = await getConnectionKeyForUser(userId, CALENDAR_CONNECTOR_ID);
-    if (!connectionAPIKey) return;
+    if (!connectionAPIKey) return "skipped";
 
     const res = await call(connectionAPIKey, "/calendar/v3/calendars/primary/events", {
       method: "POST",
@@ -99,19 +93,18 @@ export async function syncBookingToCalendar(
     });
     if (!res.ok) {
       console.error("[gcal] event insert failed", res.status, (await res.text()).slice(0, 300));
-      return;
+      return "failed";
     }
     const body = (await res.json()) as { id?: string };
     if (body.id) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin
-        .from("bookings")
-        .update({ google_event_id: body.id })
-        .eq("id", bookingId);
+      await supabaseAdmin.from("bookings").update({ google_event_id: body.id }).eq("id", bookingId);
     }
     await touchLastSynced(userId, CALENDAR_CONNECTOR_ID);
+    return "synced";
   } catch (e) {
     console.error("[gcal] sync error", e);
+    return "failed";
   }
 }
 

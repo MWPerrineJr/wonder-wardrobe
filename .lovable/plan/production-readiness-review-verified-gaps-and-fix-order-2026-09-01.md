@@ -20,6 +20,7 @@ returns success. Stripe treats the event as delivered and never retries, so a
 transient database hiccup permanently loses a payment update.
 
 Also missing:
+
 - No record of processed events, so a replayed event re-runs its effects.
 - `checkout.session.completed` is treated as paid without checking that the session
   actually reports a paid status — a delayed payment method can confirm an unpaid booking.

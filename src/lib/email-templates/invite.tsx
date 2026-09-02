@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from "react";
 
 import {
   Body,
@@ -11,7 +11,7 @@ import {
   Link,
   Preview,
   Text,
-} from '@react-email/components'
+} from "@react-email/components";
 
 import {
   BRAND,
@@ -25,12 +25,12 @@ import {
   main,
   text,
   wordmark,
-} from './brand'
+} from "./brand";
 
 interface InviteEmailProps {
-  siteName: string
-  siteUrl: string
-  confirmationUrl: string
+  siteName: string;
+  siteUrl: string;
+  confirmationUrl: string;
 }
 
 export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailProps) => (
@@ -44,7 +44,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
         <Text style={wordmark}>{siteName}</Text>
         <Heading style={h1}>You've been invited</Heading>
         <Text style={text}>
-          You've been invited to join{' '}
+          You've been invited to join{" "}
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
           </Link>
@@ -58,7 +58,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
           If you weren't expecting this invitation, you can safely ignore this email.
         </Text>
         <Text style={footer}>
-          Questions?{' '}
+          Questions?{" "}
           <Link href={`mailto:${BRAND.supportEmail}`} style={link}>
             {BRAND.supportEmail}
           </Link>
@@ -66,6 +66,6 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
       </Container>
     </Body>
   </Html>
-)
+);
 
-export default InviteEmail
+export default InviteEmail;

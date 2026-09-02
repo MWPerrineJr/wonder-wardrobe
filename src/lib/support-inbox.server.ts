@@ -55,9 +55,7 @@ async function gmailFetch<T>(
 
   const res = await fetch(url, {
     method: init.method ?? "GET",
-    headers: gatewayHeaders(
-      init.body ? { "Content-Type": "application/json" } : {},
-    ),
+    headers: gatewayHeaders(init.body ? { "Content-Type": "application/json" } : {}),
     body: init.body ? JSON.stringify(init.body) : undefined,
   });
 
@@ -309,10 +307,20 @@ export async function getThread(threadId: string): Promise<SupportThreadDetail> 
   };
 }
 
-const b64 = (s: string) =>
-  Buffer.from(s, "utf8").toString("base64");
-const mimeHeader = (v: string) =>
-  /^[\x00-\x7F]*$/.test(v) ? v : `=?UTF-8?B?${b64(v)}?=`;
+const b64 = (s: string) => Buffer.from(s, "utf8").toString("base64");
+
+export function sanitizeHeader(value: string): string {
+  return value.replace(/[\r\n]+/g, " ").trim();
+}
+
+function mimeHeader(value: string): string {
+  const sanitized = sanitizeHeader(value);
+  const printableAscii = Array.from(sanitized).every((character) => {
+    const code = character.charCodeAt(0);
+    return code >= 0x20 && code <= 0x7e;
+  });
+  return printableAscii ? sanitized : `=?UTF-8?B?${b64(sanitized)}?=`;
+}
 
 export async function sendReply(input: {
   threadId: string;
@@ -323,19 +331,16 @@ export async function sendReply(input: {
   references: string | null;
 }): Promise<{ id: string }> {
   const lines = [
-    `To: ${input.to}`,
+    `To: ${sanitizeHeader(input.to)}`,
     `Subject: ${mimeHeader(input.subject.startsWith("Re:") ? input.subject : `Re: ${input.subject}`)}`,
     "MIME-Version: 1.0",
     'Content-Type: text/plain; charset="UTF-8"',
   ];
-  if (input.inReplyTo) lines.push(`In-Reply-To: ${input.inReplyTo}`);
-  if (input.references) lines.push(`References: ${input.references}`);
+  if (input.inReplyTo) lines.push(`In-Reply-To: ${sanitizeHeader(input.inReplyTo)}`);
+  if (input.references) lines.push(`References: ${sanitizeHeader(input.references)}`);
   lines.push("", input.body);
 
-  const raw = b64(lines.join("\r\n"))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  const raw = b64(lines.join("\r\n")).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
   return gmailFetch<{ id: string }>("/users/me/messages/send", {
     method: "POST",

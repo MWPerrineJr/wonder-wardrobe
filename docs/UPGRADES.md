@@ -1,55 +1,48 @@
-# Upgrades and dependency policy
+# Planned dependency upgrades
 
-## Cadence
+These upgrades are **not** part of the current release. They need visual
+checks before the versions move.
 
-- **Weekly:** `bun update --dry-run` review; apply patch-level updates.
-- **Monthly:** minor versions for non-framework packages; run the security
-  dependency scan.
-- **Quarterly:** major versions, one package family per pull request.
-- **Immediately:** anything with a known high/critical advisory.
+## Current pins
 
-## Runtime constraints that gate every upgrade
+| Package                                        | Current range | Why it is deferred                                                   |
+| ---------------------------------------------- | ------------- | -------------------------------------------------------------------- |
+| `@react-email/components`                      | `^1.0.12`     | Renders every transactional email. Layout, dark-mode CSS, and button |
+| hrefs can shift between minor versions.        |
+| `@react-email/render`                          | `^2.0.10`     | Controls HTML and plaintext output sent through Lovable email.       |
+| `recharts`                                     | `^2.15.4`     | Powers Feedback Intelligence charts. Axis ticks, tooltips, and       |
+| responsive containers often change appearance. |
 
-The server runs on a Cloudflare-style worker, not Node. Before adding or
-upgrading a dependency that runs server-side, confirm it does not need native
-addons, `child_process`, `fs.watch`, or runtime module resolution. Symptoms of
-a bad pick: `[unenv] X is not implemented yet!`, `__dirname is not defined`, or
-"works in dev, fails in production".
+`esbuild` is upgraded separately via `package.json` `overrides` (`0.28.1`) to
+clear GHSA-g7r4-m6w7-qqqr. That change does not affect email or chart pixels.
 
-## Pinned families — upgrade deliberately
+## React Email plan
 
-| Family | Why it is sensitive |
-|---|---|
-| `@tanstack/react-start`, `@tanstack/react-router` | Route tree and server-function APIs change together; upgrade both, then re-check every `createFileRoute` path. |
-| `react`, `react-dom` | Must move together; watch for hydration regressions on `/` and `/shop/$slug`. |
-| `stripe` | `apiVersion` in `src/lib/stripe.server.ts` is pinned; bump it only after reading the Stripe changelog for checkout and Connect. |
-| `@supabase/supabase-js` | Auth/claims behaviour is relied on by `auth-middleware.ts`. |
-| `tailwindcss` v4 | Theme tokens live in `src/styles.css`; no `tailwind.config.js`. |
-| `recharts` | Analytics charts; check responsive scaling after upgrades. |
+1. Snapshot the current HTML for each registered template:
+   - `owner-welcome` (`src/lib/email-templates/`)
+   - Auth templates used by `/lovable/email/auth/preview` (signup, invite,
+     magic link, recovery, email change, reauthentication)
+2. Upgrade `@react-email/components` and `@react-email/render` together.
+3. Re-render the same `previewData` / sample props and diff HTML (and
+   plaintext from `render(..., { plainText: true })`).
+4. Send one sandbox message per template to a real inbox and check Gmail,
+   Apple Mail, and Outlook web: heading, button, and footer wrapping.
+5. Only then merge. If the HTML diff is more than whitespace, treat it as a
+   product change and attach screenshots to the PR.
 
-Generated files are never edited by hand: `src/routeTree.gen.ts`,
-`src/integrations/supabase/types.ts`, and the other generated Supabase
-integration modules.
+Do not bump these packages in the same PR as an unrelated feature.
 
-## Procedure
+## Recharts plan
 
-1. Branch, upgrade one family, `bun install`.
-2. Typecheck and run tests (`bunx vitest run`).
-3. Smoke the critical paths: sign in, browse a shop, book with a deposit,
-   cancel, owner dashboard, analytics, feedback, calendar sync.
-4. Confirm `/api/public/ready` still returns `200`.
-5. Run the security dependency scan.
-6. Deploy to preview, verify `/owner/diagnostics`, then publish.
+1. Capture screenshots of `/owner/feedback` (and any other analytics route
+   that mounts a chart) at desktop and a 390px viewport, with a known fixture
+   shop.
+2. Upgrade `recharts` one minor at a time toward v3 only after reading the
+   [migration notes](https://github.com/recharts/recharts/releases).
+3. Re-screenshot the same pages with the same data. Fail the upgrade if axis
+   labels, legend, or empty states moved.
+4. Keep unit tests on any pure data mappers; they will not catch visual
+   regressions.
 
-## Database migrations
-
-Migrations are additive and forward-only. Never edit an applied migration; add
-a new one. Any new `public` table needs `GRANT`s plus RLS policies in the same
-migration, and time-dependent rules use triggers rather than `CHECK`
-constraints.
-
-## Rollback
-
-Redeploy the previous build. Because migrations are additive, an older build
-runs against the newer schema. If a release must be stopped mid-incident,
-pause the jobs in `public.ai_job_state` and set `PAYMENTS_ENV=sandbox`.
+Until that pass exists, leave `recharts` on the 2.x line already in the
+lockfile.

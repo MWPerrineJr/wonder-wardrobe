@@ -94,7 +94,16 @@ export function buildIcs(event: CalendarEvent): string {
   if (description) lines.push(`DESCRIPTION:${escapeIcs(description)}`);
   if (event.location) lines.push(`LOCATION:${escapeIcs(event.location)}`);
   if (event.url) lines.push(`URL:${event.url}`);
-  lines.push("STATUS:CONFIRMED", "BEGIN:VALARM", "TRIGGER:-PT2H", "ACTION:DISPLAY", "DESCRIPTION:Appointment reminder", "END:VALARM", "END:VEVENT", "END:VCALENDAR");
+  lines.push(
+    "STATUS:CONFIRMED",
+    "BEGIN:VALARM",
+    "TRIGGER:-PT2H",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:Appointment reminder",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  );
   return lines.map(fold).join("\r\n");
 }
 

@@ -8,6 +8,7 @@ Every visible mention of "Crown & Cut" becomes "The Standing Chair": logo/wordma
 Internals also rename (as chosen): the agent-integration server name/title and tool descriptions, and the guest-mode browser key (`cnc_guest` -> `tsc_guest`, meaning the welcome overlay shows once more per visitor). No database tables, columns, or existing rows are touched.
 
 **2. Clean modern look**
+
 - Palette: Warm Stone — page background #FAF8F5, ink #1C1917, muted amber accent #8A7A5C, soft borders/surfaces #E7E2D9. The old dark-gold (#735c00 / #D4AF37) accents are replaced everywhere with the new accent so nothing hardcoded is left behind.
 - Typography: Outfit for headings, Figtree for body, loaded in the app shell (replacing Montserrat/Inter).
 - Layout: split-screen homepage — left column carries the headline, subhead, and search; right column carries a large shop/brand visual. Below it, shop results stay in a clean card grid.

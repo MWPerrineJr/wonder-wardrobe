@@ -1,10 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { RETURN_PATHS, resolveAppReturnUrl } from "@/lib/return-url";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requirePaymentsEnv } from "@/lib/payments-env";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
-import { resolveReturnUrl, returnPathSchema } from "@/lib/return-path";
+import type Stripe from "stripe";
 
 // Per-shop analytics subscription ($120/month or $1,000/year, 30-day trial).
 // Free tier: shop listing, public page, services, hours, calendar, bookings.
@@ -29,13 +33,13 @@ const checkoutInput = z.object({
     "analytics_enterprise_monthly",
     "analytics_enterprise_yearly",
   ]),
-  returnPath: returnPathSchema,
+  returnUrl: z.string().max(2048).optional(),
 });
 
 const portalInput = z.object({
   shopId: z.string().uuid(),
   environment: envSchema,
-  returnPath: returnPathSchema.optional(),
+  returnUrl: z.string().max(2048).optional(),
 });
 
 const redeemInput = z.object({
@@ -67,6 +71,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => statusInput.parse(input))
   .handler(async ({ data, context }): Promise<BillingStatus> => {
     const { supabase } = context;
+    const environment = requirePaymentsEnv(data.environment);
 
     const [
       { data: active, error: fnErr },
@@ -76,13 +81,13 @@ export const getBillingStatus = createServerFn({ method: "GET" })
     ] = await Promise.all([
       supabase.rpc("shop_has_active_analytics", {
         _shop_id: data.shopId,
-        _env: data.environment,
+        _env: environment,
       }),
       supabase
         .from("subscriptions")
         .select("status, price_id, current_period_end, cancel_at_period_end")
         .eq("shop_id", data.shopId)
-        .eq("environment", data.environment)
+        .eq("environment", environment)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
@@ -91,11 +96,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
         .select("id", { count: "exact", head: true })
         .eq("shop_id", data.shopId)
         .eq("is_active", true),
-      (supabase as any)
-        .from("comp_grants")
-        .select("redeemed_at")
-        .eq("shop_id", data.shopId)
-        .maybeSingle(),
+      supabase.from("comp_grants").select("redeemed_at").eq("shop_id", data.shopId).maybeSingle(),
     ]);
     if (fnErr) throw dbError(fnErr, "billing");
     if (subErr) throw dbError(subErr, "billing");
@@ -124,7 +125,7 @@ export const redeemCompCode = createServerFn({ method: "POST" })
     await requireOwnedShop(supabase, userId, data.shopId);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: outcome, error } = await (supabaseAdmin as any).rpc("redeem_comp_code", {
+    const { data: outcome, error } = await supabaseAdmin.rpc("redeem_comp_code", {
       _shop_id: data.shopId,
       _code: data.code.toUpperCase(),
       _user_id: userId,
@@ -140,7 +141,7 @@ export const redeemCompCode = createServerFn({ method: "POST" })
 
 /** Owner check through the caller's own RLS-scoped client. */
 async function requireOwnedShop(
-  supabase: { from: (t: "shops") => any },
+  supabase: SupabaseClient<Database>,
   userId: string,
   shopId: string,
 ): Promise<{ id: string; name: string }> {
@@ -196,11 +197,11 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => checkoutInput.parse(input))
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
     const { userId, supabase } = context;
-    const environment: StripeEnv = data.environment;
+    const environment: StripeEnv = requirePaymentsEnv(data.environment);
 
     const shop = await requireOwnedShop(supabase, userId, data.shopId);
 
-    const { data: grant, error: grantErr } = await (supabase as any)
+    const { data: grant, error: grantErr } = await supabase
       .from("comp_grants")
       .select("shop_id")
       .eq("shop_id", shop.id)
@@ -225,6 +226,15 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       );
     }
 
+    let returnUrl: string;
+    try {
+      returnUrl = resolveAppReturnUrl(data.returnUrl, {
+        fallbackPath: RETURN_PATHS.billingCheckout,
+      });
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
+    }
+
     try {
       const stripe = createStripeClient(environment);
       const {
@@ -246,7 +256,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         line_items: [{ price: price.id, quantity: 1 }],
         mode: "subscription",
         ui_mode: "embedded_page",
-        return_url: resolveReturnUrl(data.returnPath),
+        return_url: returnUrl,
         customer: customerId,
         managed_payments: { enabled: true },
         metadata: { userId, shop_id: shop.id, managed_payments: "true" },
@@ -254,7 +264,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
           trial_period_days: TRIAL_DAYS,
           metadata: { userId, shop_id: shop.id },
         },
-      } as any);
+      } as Stripe.Checkout.SessionCreateParams);
 
       return { clientSecret: session.client_secret ?? "" };
     } catch (error) {
@@ -265,8 +275,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 type PortalResult = { url: string } | { error: string };
 
 type CancelResult =
-  | { ok: true; cancelAtPeriodEnd: boolean; currentPeriodEnd: string | null }
-  | { error: string };
+  { ok: true; cancelAtPeriodEnd: boolean; currentPeriodEnd: string | null } | { error: string };
 
 /**
  * Cancel (or un-cancel) the shop's analytics subscription at the end of the
@@ -278,6 +287,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => cancelInput.parse(input))
   .handler(async ({ data, context }): Promise<CancelResult> => {
     const { userId, supabase } = context;
+    const environment = requirePaymentsEnv(data.environment);
 
     await requireOwnedShop(supabase, userId, data.shopId);
 
@@ -285,7 +295,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
       .from("subscriptions")
       .select("stripe_subscription_id, status")
       .eq("shop_id", data.shopId)
-      .eq("environment", data.environment)
+      .eq("environment", environment)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -298,13 +308,12 @@ export const cancelSubscription = createServerFn({ method: "POST" })
     const resume = data.resume === true;
 
     try {
-      const stripe = createStripeClient(data.environment);
+      const stripe = createStripeClient(environment);
       const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
         cancel_at_period_end: !resume,
       });
 
-      const periodEnd = (updated as unknown as { current_period_end?: number })
-        .current_period_end;
+      const periodEnd = (updated as unknown as { current_period_end?: number }).current_period_end;
       const currentPeriodEnd = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
 
       await supabase
@@ -314,7 +323,7 @@ export const cancelSubscription = createServerFn({ method: "POST" })
           ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
         })
         .eq("shop_id", data.shopId)
-        .eq("environment", data.environment);
+        .eq("environment", environment);
 
       return { ok: true, cancelAtPeriodEnd: !resume, currentPeriodEnd };
     } catch (err) {
@@ -327,6 +336,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => portalInput.parse(input))
   .handler(async ({ data, context }): Promise<PortalResult> => {
     const { userId, supabase } = context;
+    const environment = requirePaymentsEnv(data.environment);
 
     await requireOwnedShop(supabase, userId, data.shopId);
 
@@ -334,18 +344,27 @@ export const createPortalSession = createServerFn({ method: "POST" })
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("shop_id", data.shopId)
-      .eq("environment", data.environment)
+      .eq("environment", environment)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     if (error) throw dbError(error, "billing");
     if (!sub?.stripe_customer_id) throw new Error("No billing record for this shop yet.");
 
+    let returnUrl: string;
     try {
-      const stripe = createStripeClient(data.environment);
+      returnUrl = resolveAppReturnUrl(data.returnUrl, {
+        fallbackPath: RETURN_PATHS.billingPortal,
+      });
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
+    }
+
+    try {
+      const stripe = createStripeClient(environment);
       const portal = await stripe.billingPortal.sessions.create({
         customer: sub.stripe_customer_id,
-        ...(data.returnPath ? { return_url: resolveReturnUrl(data.returnPath) } : {}),
+        return_url: returnUrl,
       });
       return { url: portal.url };
     } catch (err) {

@@ -7,6 +7,7 @@ Two additions for shop owners: social media / contact links on their public page
 Today there is no way for an owner to add social links (only `google_review_url` exists).
 
 **New "Links" tab on the owner dashboard**
+
 - Fields for Instagram, Facebook, TikTok, X (Twitter), YouTube — each accepts a full URL or a handle (`@mikesdudes`), normalized to a proper profile URL on save.
 - Website, phone, and WhatsApp fields for direct contact.
 - Up to 5 free-form links (custom label + URL) for anything else — Linktree, menus, gift cards.
@@ -14,12 +15,14 @@ Today there is no way for an owner to add social links (only `google_review_url`
 - Saved with the same awaited-write pattern as the rest of the dashboard: validate, save, confirm from the database, then toast.
 
 **On the public shop page (`/shop/<slug>`)**
+
 - Icon row under the shop hero: recognizable icon per platform, label-based buttons for custom links, tap-to-call and WhatsApp chat links on mobile.
 - Only links the owner filled in are shown; empty state shows nothing (no broken icons).
 - Links open in a new tab with `rel="noreferrer"`; phone/WhatsApp use `tel:` / `wa.me`.
 - Social profiles are added to the page's JSON-LD `sameAs` so search engines connect the shop to its accounts.
 
 **Validation rules**
+
 - URLs must be `https://` (or `http://` rejected), max 300 characters, host-checked per platform so an Instagram field can't hold a random link.
 - Phone limited to digits and `+ ( ) - .`; WhatsApp normalized to digits for `wa.me`.
 - Custom link labels max 30 characters, plain text only.

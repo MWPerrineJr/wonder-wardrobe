@@ -3,6 +3,7 @@ Update Google Calendar App User Connector credentials
 Goal: Swap the currently linked Google Calendar OAuth client credentials for the project after the user rotated them in Google Cloud Console.
 
 Plan
+
 1. Open the Google Calendar App User Connector setup card in the chat using `connector_app_user--connect_client` for `google_calendar`.
 2. The user selects or creates the new client and pastes the updated Client ID and Client secret into the Lovable UI.
 3. Confirm the Google Cloud OAuth web client has exactly `https://connector-gateway.lovable.dev/api/v1/app-users/oauth2/callback` as an authorized redirect URI and the required scopes on the consent screen:

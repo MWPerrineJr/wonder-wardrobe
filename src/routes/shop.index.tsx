@@ -28,12 +28,14 @@ export const Route = createFileRoute("/shop/")({
       { title: "Browse businesses — The Standing Chair" },
       {
         name: "description",
-        content: "Every shop on The Standing Chair. Open a shop's page to book your next appointment.",
+        content:
+          "Every shop on The Standing Chair. Open a shop's page to book your next appointment.",
       },
       { property: "og:title", content: "Browse businesses — The Standing Chair" },
       {
         property: "og:description",
-        content: "Every shop on The Standing Chair. Open a shop's page to book your next appointment.",
+        content:
+          "Every shop on The Standing Chair. Open a shop's page to book your next appointment.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://thestandingchair.com/shop" },
@@ -42,7 +44,9 @@ export const Route = createFileRoute("/shop/")({
     links: [{ rel: "canonical", href: "/shop" }],
   }),
   errorComponent: ({ error }) => (
-    <div className="p-8 bg-background min-h-screen text-on-surface">Couldn't load shops: {error.message}</div>
+    <div className="p-8 bg-background min-h-screen text-on-surface">
+      Couldn't load shops: {error.message}
+    </div>
   ),
   notFoundComponent: () => <div className="p-8">Not found.</div>,
   component: ShopIndex,
@@ -59,7 +63,10 @@ function ShopIndex() {
       <header className="border-b border-border-subtle">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop h-16 flex items-center justify-between">
           <SiteBrand />
-          <Link to="/" className="text-on-surface-variant hover:text-primary font-label-md text-label-md">
+          <Link
+            to="/"
+            className="text-on-surface-variant hover:text-primary font-label-md text-label-md"
+          >
             Marketplace
           </Link>
         </div>
@@ -105,7 +112,9 @@ function ShopIndex() {
                 <div className="flex flex-col">
                   <h2 className="font-headline-md text-[20px] text-on-surface">{s.name}</h2>
                   {s.address && (
-                    <span className="font-body-md text-body-md text-on-surface-variant">{s.address}</span>
+                    <span className="font-body-md text-body-md text-on-surface-variant">
+                      {s.address}
+                    </span>
                   )}
                 </div>
               </Link>

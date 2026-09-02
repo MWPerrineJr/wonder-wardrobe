@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
+import { requirePaymentsEnv } from "@/lib/payments-env";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -41,13 +42,14 @@ export const listFeedback = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => filtersSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
+    const environment = requirePaymentsEnv(data.environment);
 
     // Analytics is the paid plan: without an active subscription the page
     // renders an upgrade prompt instead of data. Checked server-side so the
     // gate can't be bypassed by calling the function directly.
     const { data: hasAnalytics, error: gateErr } = await supabase.rpc("shop_has_active_analytics", {
       _shop_id: data.shopId,
-      _env: data.environment,
+      _env: environment,
     });
     if (gateErr) throw dbError(gateErr, "feedback");
     if (!hasAnalytics) {
@@ -201,10 +203,12 @@ export const regenerateShopReport = createServerFn({ method: "POST" })
     if (shopErr) throw dbError(shopErr, "feedback");
     if (!shop || shop.owner_id !== userId) throw new Error("Not your shop");
 
-    const { data: hasAnalytics, error: gateErr } = await supabase.rpc(
-      "shop_has_active_analytics",
-      { _shop_id: data.shopId, _env: data.environment },
-    );
+    const environment = requirePaymentsEnv(data.environment);
+
+    const { data: hasAnalytics, error: gateErr } = await supabase.rpc("shop_has_active_analytics", {
+      _shop_id: data.shopId,
+      _env: environment,
+    });
     if (gateErr) throw dbError(gateErr, "feedback");
     if (!hasAnalytics) throw new Error("The analytics plan is required to generate reports.");
 

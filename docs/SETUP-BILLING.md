@@ -2,16 +2,16 @@
 
 ## Plans
 
-| | Free | Solo (1 provider) | Team (2 providers) | Enterprise (3+) |
-|---|---|---|---|---|
-| Price | $0 | $120/mo or $1,000/yr | $200/mo or $2,000/yr | $250/mo or $2,500/yr |
-| Free trial | — | 1 month | 1 month | 1 month |
-| Public shop page + shareable booking link | ✅ | ✅ | ✅ | ✅ |
-| Service listings, hours, provider calendar, bookings | ✅ | ✅ | ✅ | ✅ |
-| Post-visit email surveys | — | ✅ | ✅ | ✅ |
-| AI sentiment / emotion / urgency analysis | — | ✅ | ✅ | ✅ |
-| Summaries, key phrases, recommended replies | — | ✅ | ✅ | ✅ |
-| Feedback KPIs and business analytics | — | ✅ | ✅ | ✅ |
+|                                                      | Free | Solo (1 provider)    | Team (2 providers)   | Enterprise (3+)      |
+| ---------------------------------------------------- | ---- | -------------------- | -------------------- | -------------------- |
+| Price                                                | $0   | $120/mo or $1,000/yr | $200/mo or $2,000/yr | $250/mo or $2,500/yr |
+| Free trial                                           | —    | 1 month              | 1 month              | 1 month              |
+| Public shop page + shareable booking link            | ✅   | ✅                   | ✅                   | ✅                   |
+| Service listings, hours, provider calendar, bookings | ✅   | ✅                   | ✅                   | ✅                   |
+| Post-visit email surveys                             | —    | ✅                   | ✅                   | ✅                   |
+| AI sentiment / emotion / urgency analysis            | —    | ✅                   | ✅                   | ✅                   |
+| Summaries, key phrases, recommended replies          | —    | ✅                   | ✅                   | ✅                   |
+| Feedback KPIs and business analytics                 | —    | ✅                   | ✅                   | ✅                   |
 
 One subscription per shop. Gate any future analytics feature with the same
 `shop_has_active_analytics()` check.
@@ -61,17 +61,39 @@ Revoke access by deleting the shop's `comp_grants` row.
 - `src/lib/billing.functions.ts` — `getBillingStatus`, `createCheckoutSession`
   (embedded checkout, 30-day trial, end-to-end tax/compliance handling enabled),
   `createPortalSession`. All owner-verified through RLS before any provider call.
-- `src/routes/api/public/payments/webhook.ts` — signature-verified receiver that
-  upserts `public.subscriptions` keyed by `(shop_id, environment)`.
+  Stripe `return_url`, `success_url`, and Connect `refresh_url` values are built
+  on the server from `APP_URL` (plus optional `APP_URL_ALLOWLIST` for preview
+  origins). Clients may send a relative path such as `/owner/feedback`; absolute
+  URLs to other sites are rejected.
+- `src/routes/api/public/payments/webhook.ts` — signature-verified receiver at
+  `/api/public/payments/webhook?env=sandbox|live`. Events are claimed in
+  `public.stripe_webhook_events` before any booking or subscription mutation.
+  Stripe gets **2xx** for successful or already-completed deliveries, **400**
+  for a bad signature or malformed payload, and **5xx** when the database
+  fails so Stripe retries. Booking Checkout is marked paid only when
+  `payment_status` is `paid` (or `async_payment_succeeded` arrives), and only
+  if booking id, shop id, session id, environment, amount, and currency match.
 - `src/components/analytics-upgrade-panel.tsx` — plan comparison, monthly/annual
   toggle, inline checkout form, and Manage billing.
 
 ## Test vs live
 
-`subscriptions.environment` separates test and live records. The database gate
-`shop_has_active_analytics(shop_id, env)` defaults to `live`, so test-mode
-subscriptions unlock analytics in the preview only, never on the published site.
-Surveys (`pending_survey_targets`) only ever consider live subscriptions.
+Set `PAYMENTS_ENV=sandbox` or `PAYMENTS_ENV=live` on the host. The process
+will not start until that value is set and the matching Stripe connection id,
+webhook secret, and `LOVABLE_API_KEY` are present. A live key sitting in the
+environment does **not** switch the deployment to live.
+
+Also set `VITE_PAYMENTS_ENV` to the same value (required when
+`VITE_PAYMENTS_CLIENT_TOKEN` is not a `pk_test_` / `pk_live_` key). Point
+Stripe at `/api/public/payments/webhook?env=<PAYMENTS_ENV>` — a webhook for
+the other mode is rejected.
+
+`subscriptions.environment` still separates test and live rows. The database
+gate `shop_has_active_analytics(shop_id, env)` is called with this
+deployment's `PAYMENTS_ENV`. Surveys (`pending_survey_targets`) only ever
+consider live subscriptions.
+
+Owners can confirm the mode at `/owner/diagnostics`.
 
 ## Testing in the preview
 
@@ -85,6 +107,6 @@ Surveys (`pending_survey_targets`) only ever consider live subscriptions.
 
 ## Going live
 
-Complete the go-live steps in the Payments tab (claim the account, finish
-verification, install the app on the live account). Live keys and the live
-webhook are provisioned automatically — nothing to configure in code.
+Complete the go-live steps in the Payments tab, then set `PAYMENTS_ENV=live`
+and `VITE_PAYMENTS_ENV=live` with the live connection id and live webhook
+secret. Do not rely on `STRIPE_LIVE_API_KEY` existing as the switch.

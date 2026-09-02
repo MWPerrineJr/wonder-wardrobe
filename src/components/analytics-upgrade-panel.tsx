@@ -84,8 +84,8 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
         </h2>
         <p className="text-on-surface-variant text-body-md max-w-xl">
           Listing your services and taking bookings is free, forever. Survey automation, AI feedback
-          analysis and business analytics are part of the Analytics plan — start with a{" "}
-          1-month free trial. Pricing scales with the number of providers in your shop
+          analysis and business analytics are part of the Analytics plan — start with a 1-month free
+          trial. Pricing scales with the number of providers in your shop
           {providerCount > 0 ? ` (you have ${providerCount}).` : "."}
         </p>
       </div>
@@ -171,13 +171,7 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
   );
 }
 
-function LifetimeAccessPanel({
-  status,
-  shopId,
-}: {
-  status: BillingStatus;
-  shopId: string;
-}) {
+function LifetimeAccessPanel({ status, shopId }: { status: BillingStatus; shopId: string }) {
   const since = status.lifetimeSince;
   return (
     <section className="flex flex-col gap-6">
@@ -198,8 +192,8 @@ function LifetimeAccessPanel({
       {status.status && (
         <div className="flex flex-col gap-2">
           <p className="text-label-md text-on-surface-variant text-center">
-            You still have a paid subscription on file. Cancel it so you're not charged — your access
-            stays either way.
+            You still have a paid subscription on file. Cancel it so you're not charged — your
+            access stays either way.
           </p>
           <SubscriptionStatusCard shopId={shopId} status={status} />
         </div>
@@ -288,20 +282,14 @@ function FeatureList({ items }: { items: readonly string[] }) {
   );
 }
 
-export function CheckoutForm({
-  shopId,
-  priceId,
-}: {
-  shopId: string;
-  priceId: AnalyticsPriceId;
-}) {
+export function CheckoutForm({ shopId, priceId }: { shopId: string; priceId: AnalyticsPriceId }) {
   const fetchClientSecret = useCallback(async () => {
     const result = await createCheckoutSession({
       data: {
         shopId,
         environment: getStripeEnvironment(),
         priceId,
-        returnPath: "/owner/feedback?billing=complete",
+        returnUrl: "/owner/feedback?billing=complete",
       },
     });
     if ("error" in result) throw new Error(result.error);
@@ -333,7 +321,7 @@ export function ManageBillingButton({
         data: {
           shopId,
           environment: getStripeEnvironment(),
-          returnPath: "/owner/feedback",
+          returnUrl: "/owner/feedback",
         },
       });
       if ("error" in result) throw new Error(result.error);

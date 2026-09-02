@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { updateShop } from "@/lib/owner.functions";
@@ -9,13 +10,18 @@ import {
   refreshPayoutAccount,
   startPayoutOnboarding,
 } from "@/lib/payouts.functions";
+import { getPaymentsDiagnostics } from "@/lib/payments-diagnostics.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { policySentences } from "@/lib/cancellation";
 
 const MODES = [
   { value: "off", label: "No prepayment", hint: "Clients pay in person." },
   { value: "deposit", label: "Deposit at booking", hint: "Hold the slot with a partial payment." },
-  { value: "full", label: "Full price upfront", hint: "Clients pay the whole service when booking." },
+  {
+    value: "full",
+    label: "Full price upfront",
+    hint: "Clients pay the whole service when booking.",
+  },
 ] as const;
 
 type Mode = (typeof MODES)[number]["value"];
@@ -39,6 +45,10 @@ export function PaymentsPanel({
 }) {
   const qc = useQueryClient();
   const environment = getStripeEnvironment();
+  const diagnosticsQuery = useQuery({
+    queryKey: ["payments-diagnostics"],
+    queryFn: () => getPaymentsDiagnostics(),
+  });
   const [mode, setMode] = useState<Mode>(prepayMode);
   const [percent, setPercent] = useState(depositPercent || 50);
   const [freeHours, setFreeHours] = useState(cancelFreeHours);
@@ -53,7 +63,6 @@ export function PaymentsPanel({
     setFeePercent(lateCancelFeePercent);
     setReschedule(rescheduleAllowed);
     setRescheduleHours(rescheduleMinHours);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     shopId,
     prepayMode,
@@ -86,7 +95,7 @@ export function PaymentsPanel({
         data: {
           shopId,
           environment,
-          returnPath: "/owner?payouts=return",
+          returnUrl: "/owner?payouts=return",
         },
       }),
     onSuccess: (res) => {
@@ -150,9 +159,21 @@ export function PaymentsPanel({
         <div className="flex flex-col gap-1">
           <h2 className="font-headline-md text-headline-md text-on-surface">Payout account</h2>
           <p className="text-on-surface-variant text-body-md">
-            Connect your own payment account so client prepayments land directly in your bank —
-            The Standing Chair never holds your money.
+            Connect your own payment account so client prepayments land directly in your bank — The
+            Standing Chair never holds your money.
           </p>
+          {diagnosticsQuery.data && (
+            <p className="text-on-surface-variant font-label-sm text-label-sm">
+              This deployment is in{" "}
+              <span className="font-bold text-on-surface">
+                {diagnosticsQuery.data.environment ?? "unconfigured"}
+              </span>{" "}
+              payment mode.{" "}
+              <Link to="/owner/diagnostics" className="underline">
+                View diagnostics
+              </Link>
+            </p>
+          )}
         </div>
 
         {accountQuery.isPending ? (
@@ -218,7 +239,9 @@ export function PaymentsPanel({
 
       <section className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col gap-4 shadow-sm">
         <div className="flex flex-col gap-1">
-          <h2 className="font-headline-md text-headline-md text-on-surface">Prepayment at booking</h2>
+          <h2 className="font-headline-md text-headline-md text-on-surface">
+            Prepayment at booking
+          </h2>
           <p className="text-on-surface-variant text-body-md">
             Choose what clients pay when they book. Prepayment only shows on your booking page once
             your payout account is ready.
@@ -283,9 +306,7 @@ export function PaymentsPanel({
 
       <section className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col gap-4 shadow-sm">
         <div className="flex flex-col gap-1">
-          <h2 className="font-headline-md text-headline-md text-on-surface">
-            Cancellation policy
-          </h2>
+          <h2 className="font-headline-md text-headline-md text-on-surface">Cancellation policy</h2>
           <p className="text-on-surface-variant text-body-md">
             These rules run automatically. Cancellations inside your free window are refunded in
             full; later ones keep your fee and refund the rest.
@@ -350,9 +371,7 @@ export function PaymentsPanel({
         )}
 
         <div className="border border-border-subtle rounded-lg p-4 flex flex-col gap-1">
-          <span className="font-label-md text-label-md text-on-surface">
-            What clients will see
-          </span>
+          <span className="font-label-md text-label-md text-on-surface">What clients will see</span>
           {policySentences({
             freeHours,
             lateFeePercent: feePercent,

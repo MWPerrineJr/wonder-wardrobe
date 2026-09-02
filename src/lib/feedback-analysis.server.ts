@@ -96,7 +96,12 @@ const REPORT_SYSTEM = [
 
 export async function analyzeShopReport(
   apiKey: string,
-  rows: { rating: number | null; message: string | null; created_at: string; source: string | null }[],
+  rows: {
+    rating: number | null;
+    message: string | null;
+    created_at: string;
+    source: string | null;
+  }[],
 ): Promise<ShopReport> {
   const gateway = createGateway(apiKey);
   const body = rows

@@ -67,7 +67,6 @@ export function SubscriptionStatusCard({
   const yearly = status.priceId?.endsWith("_yearly");
   const endsOn = formatDate(status.currentPeriodEnd);
 
-
   return (
     <div className="bg-surface border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">

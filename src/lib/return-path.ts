@@ -9,14 +9,19 @@ import { CANONICAL_ORIGIN } from "./site-origin.ts";
  * the server composes the final URL against the deployment's own origin.
  */
 
-const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+function hasControlCharacters(value: string): boolean {
+  return Array.from(value).some((character) => {
+    const code = character.charCodeAt(0);
+    return code <= 0x1f || code === 0x7f;
+  });
+}
 
 /** Normalize a client-supplied return path, or return null when unusable. */
 export function normalizeReturnPath(input: unknown): string | null {
   if (typeof input !== "string") return null;
   const raw = input.trim();
   if (!raw || raw.length > 512) return null;
-  if (CONTROL_CHARS.test(raw)) return null;
+  if (hasControlCharacters(raw)) return null;
   // Reject anything that could escape the current origin.
   if (!raw.startsWith("/")) return null;
   if (raw.startsWith("//")) return null;
@@ -25,19 +30,17 @@ export function normalizeReturnPath(input: unknown): string | null {
   return raw;
 }
 
-export const returnPathSchema = z
-  .string()
-  .transform((value, ctx) => {
-    const normalized = normalizeReturnPath(value);
-    if (!normalized) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Return path must be a relative path on this site, e.g. /owner?tab=payments",
-      });
-      return z.NEVER;
-    }
-    return normalized;
-  });
+export const returnPathSchema = z.string().transform((value, ctx) => {
+  const normalized = normalizeReturnPath(value);
+  if (!normalized) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Return path must be a relative path on this site, e.g. /owner?tab=payments",
+    });
+    return z.NEVER;
+  }
+  return normalized;
+});
 
 /** Server-side base origin for hosted-flow return URLs. Always https in production. */
 export function returnUrlBase(): string {

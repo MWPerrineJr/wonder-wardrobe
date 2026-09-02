@@ -3,15 +3,10 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_FAILURES = 20;
 
 export type JobAuthReason =
-  | "missing_server_secret"
-  | "insecure_secret"
-  | "missing_bearer"
-  | "mismatch"
-  | "rate_limited";
+  "missing_server_secret" | "insecure_secret" | "missing_bearer" | "mismatch" | "rate_limited";
 
 export type JobAuthResult =
-  | { ok: true }
-  | { ok: false; status: 401 | 429 | 503; reason: JobAuthReason };
+  { ok: true } | { ok: false; status: 401 | 429 | 503; reason: JobAuthReason };
 
 export type JobRateLimitBucket = { count: number; resetAt: number };
 

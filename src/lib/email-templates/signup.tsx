@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from "react";
 
 import {
   Body,
@@ -11,7 +11,7 @@ import {
   Link,
   Preview,
   Text,
-} from '@react-email/components'
+} from "@react-email/components";
 
 import {
   BRAND,
@@ -25,13 +25,13 @@ import {
   main,
   text,
   wordmark,
-} from './brand'
+} from "./brand";
 
 interface SignupEmailProps {
-  siteName: string
-  siteUrl: string
-  recipient: string
-  confirmationUrl: string
+  siteName: string;
+  siteUrl: string;
+  recipient: string;
+  confirmationUrl: string;
 }
 
 export const SignupEmail = ({
@@ -50,17 +50,17 @@ export const SignupEmail = ({
         <Text style={wordmark}>{siteName}</Text>
         <Heading style={h1}>Confirm your email</Heading>
         <Text style={text}>
-          Welcome to{' '}
+          Welcome to{" "}
           <Link href={siteUrl} style={link}>
             <strong>{siteName}</strong>
           </Link>
           . One quick step and your account is ready.
         </Text>
         <Text style={text}>
-          Confirm{' '}
+          Confirm{" "}
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
-          </Link>{' '}
+          </Link>{" "}
           to finish signing up:
         </Text>
         <Button className="dm-btn" style={button} href={confirmationUrl}>
@@ -71,7 +71,7 @@ export const SignupEmail = ({
           If you didn't create an account, you can safely ignore this email.
         </Text>
         <Text style={footer}>
-          Questions?{' '}
+          Questions?{" "}
           <Link href={`mailto:${BRAND.supportEmail}`} style={link}>
             {BRAND.supportEmail}
           </Link>
@@ -79,6 +79,6 @@ export const SignupEmail = ({
       </Container>
     </Body>
   </Html>
-)
+);
 
-export default SignupEmail
+export default SignupEmail;

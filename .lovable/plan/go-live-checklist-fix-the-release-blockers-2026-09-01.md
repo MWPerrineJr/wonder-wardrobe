@@ -4,14 +4,14 @@ Your latest Git commits (JOB_SECRET job auth, deployment fix plan) are in the wo
 
 ## What I verified just now
 
-| Check | State |
-|---|---|
-| Email sender `notify.pandagentic.ai` | Verified, auth emails enabled |
-| Security scans | No open findings |
-| `JOB_SECRET` in project secrets | **Missing** — all three job endpoints will refuse every call (503) |
-| `APP_URL` in env | **Not set** — survey email dispatch returns "blocked" |
+| Check                                               | State                                                                                             |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Email sender `notify.pandagentic.ai`                | Verified, auth emails enabled                                                                     |
+| Security scans                                      | No open findings                                                                                  |
+| `JOB_SECRET` in project secrets                     | **Missing** — all three job endpoints will refuse every call (503)                                |
+| `APP_URL` in env                                    | **Not set** — survey email dispatch returns "blocked"                                             |
 | Migration `20260901190000_secure_job_scheduler.sql` | **Not applied** — `app_runtime_settings` and `invoke_feedback_job()` do not exist in the database |
-| Live cron jobs | Still POST the **public publishable key** to the dev project URL |
+| Live cron jobs                                      | Still POST the **public publishable key** to the dev project URL                                  |
 
 So today: surveys, AI feedback enrichment, and daily reports are all effectively dead in production, and the old insecure cron commands are still scheduled.
 

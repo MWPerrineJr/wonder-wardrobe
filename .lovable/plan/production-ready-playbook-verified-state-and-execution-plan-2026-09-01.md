@@ -4,19 +4,19 @@ I checked the actual project tree and the live backend before writing this. The 
 
 ## Verified now
 
-| Item | State |
-|---|---|
-| Cron jobs | 3 jobs, all `SELECT public.invoke_feedback_job(...)` — the old publishable-key `http_post` commands are gone |
-| Vault `job_secret` | Exists |
-| `app_runtime_settings.app_url` | `https://thestandingchair.com` |
-| `payment_events` ledger, webhook idempotency, return-path validation, booking holds (`expire_stale_booking_holds`) | In code and applied |
-| Secrets present | `JOB_SECRET`, `APP_URL`, `PAYMENTS_ENV`, both Stripe connections, both webhook secrets, Maps, Calendar connector, connection key, `LOVABLE_API_KEY` |
-| `health.ts`, `ready.ts`, `jobs/booking-maintenance.ts` | **Missing** |
-| `/owner/diagnostics` | **Missing** |
-| `src/lib/log.ts`, `docs/OPERATIONS.md`, `docs/UPGRADES.md` | **Missing** |
-| `booking_calendar_outbox` table + `booking-maintenance` cron job | **Missing** |
-| `validate_booking` | Exists as the overlap trigger but is **not** `SECURITY DEFINER` |
-| `VITE_PAYMENTS_ENV` | **Not set**; `PAYMENTS_ENV` is currently `live` |
+| Item                                                                                                               | State                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cron jobs                                                                                                          | 3 jobs, all `SELECT public.invoke_feedback_job(...)` — the old publishable-key `http_post` commands are gone                                        |
+| Vault `job_secret`                                                                                                 | Exists                                                                                                                                              |
+| `app_runtime_settings.app_url`                                                                                     | `https://thestandingchair.com`                                                                                                                      |
+| `payment_events` ledger, webhook idempotency, return-path validation, booking holds (`expire_stale_booking_holds`) | In code and applied                                                                                                                                 |
+| Secrets present                                                                                                    | `JOB_SECRET`, `APP_URL`, `PAYMENTS_ENV`, both Stripe connections, both webhook secrets, Maps, Calendar connector, connection key, `LOVABLE_API_KEY` |
+| `health.ts`, `ready.ts`, `jobs/booking-maintenance.ts`                                                             | **Missing**                                                                                                                                         |
+| `/owner/diagnostics`                                                                                               | **Missing**                                                                                                                                         |
+| `src/lib/log.ts`, `docs/OPERATIONS.md`, `docs/UPGRADES.md`                                                         | **Missing**                                                                                                                                         |
+| `booking_calendar_outbox` table + `booking-maintenance` cron job                                                   | **Missing**                                                                                                                                         |
+| `validate_booking`                                                                                                 | Exists as the overlap trigger but is **not** `SECURITY DEFINER`                                                                                     |
+| `VITE_PAYMENTS_ENV`                                                                                                | **Not set**; `PAYMENTS_ENV` is currently `live`                                                                                                     |
 
 So the missing Phase 7–10 pieces will be built here as new commits (no history rewrite), then configuration and verification follow.
 

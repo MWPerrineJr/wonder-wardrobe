@@ -29,15 +29,15 @@ Review The Standing Chair application for errors, logic defects, security weakne
 
 The following checks were run against the reviewed checkout:
 
-| Check | Result | Notes |
-|---|---:|---|
-| Production build | Passed | Generated Cloudflare-module Nitro output |
-| TypeScript (`tsc --noEmit`) | Passed | No compilation errors |
-| Clean install (`npm ci`) | Failed | `package.json` and `package-lock.json` are out of sync |
-| Lint | Failed | 1,739 findings: 1,722 errors and 17 warnings; predominantly formatting |
-| Dependency audit | Warning | One low-severity transitive `esbuild` advisory; no moderate, high, or critical findings |
-| Automated tests | Unavailable | No test script or test suite was present |
-| CI workflow | Unavailable | No repository CI workflow was present |
+| Check                         |        Result | Notes                                                                                       |
+| ----------------------------- | ------------: | ------------------------------------------------------------------------------------------- |
+| Production build              |        Passed | Generated Cloudflare-module Nitro output                                                    |
+| TypeScript (`tsc --noEmit`)   |        Passed | No compilation errors                                                                       |
+| Clean install (`npm ci`)      |        Failed | `package.json` and `package-lock.json` are out of sync                                      |
+| Lint                          |        Failed | 1,739 findings: 1,722 errors and 17 warnings; predominantly formatting                      |
+| Dependency audit              |       Warning | One low-severity transitive `esbuild` advisory; no moderate, high, or critical findings     |
+| Automated tests               |   Unavailable | No test script or test suite was present                                                    |
+| CI workflow                   |   Unavailable | No repository CI workflow was present                                                       |
 | Live integration verification | Not performed | Production credentials, live Supabase access, and external account access were not supplied |
 
 The production build automatically modified generated file `src/routeTree.gen.ts`. No manual application-code fixes were made during this review.

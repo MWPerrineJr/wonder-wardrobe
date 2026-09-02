@@ -1,6 +1,7 @@
 // Server-only Stripe access. All calls are routed through the Lovable
 // connector gateway, which holds the real Stripe secret key — the
 // STRIPE_*_API_KEY values in this project are gateway connection ids.
+import { configuredPaymentsEnv, requirePaymentsEnv, type StripeEnv } from "./payments-env.ts";
 import Stripe from "stripe";
 
 const getEnv = (key: string): string => {
@@ -9,84 +10,16 @@ const getEnv = (key: string): string => {
   return value;
 };
 
-export type StripeEnv = "sandbox" | "live";
+export type { StripeEnv } from "./payments-env.ts";
 
 const GATEWAY_STRIPE_BASE = "https://connector-gateway.lovable.dev/stripe";
 
-export function getConnectionApiKey(env: StripeEnv): string {
-  return env === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
+export function getConnectionApiKey(env: StripeEnv = configuredPaymentsEnv()): string {
+  const mode = requirePaymentsEnv(env);
+  return mode === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
 }
 
-const WEBHOOK_SECRET_KEYS: Record<StripeEnv, string> = {
-  sandbox: "PAYMENTS_SANDBOX_WEBHOOK_SECRET",
-  live: "PAYMENTS_LIVE_WEBHOOK_SECRET",
-};
-
-const CONNECTION_KEYS: Record<StripeEnv, string> = {
-  sandbox: "STRIPE_SANDBOX_API_KEY",
-  live: "STRIPE_LIVE_API_KEY",
-};
-
-/** Which credentials are missing for an environment (empty = fully configured). */
-export function missingPaymentConfig(env: StripeEnv): string[] {
-  return [CONNECTION_KEYS[env], WEBHOOK_SECRET_KEYS[env], "LOVABLE_API_KEY"].filter(
-    (key) => !process.env[key],
-  );
-}
-
-/**
- * The payment environment is declared, not inferred: set PAYMENTS_ENV=sandbox|live.
- * Without it we fall back to credential presence for backwards compatibility, but
- * either way the matching connection key and webhook secret must both exist — a
- * half-configured deployment fails loudly instead of quietly taking (or dropping)
- * real money.
- */
-export function resolvePaymentEnv(): StripeEnv {
-  const raw = process.env["PAYMENTS_ENV"]?.trim().toLowerCase();
-  let env: StripeEnv;
-  if (raw === "live" || raw === "sandbox") {
-    env = raw;
-  } else if (raw) {
-    throw new Error('PAYMENTS_ENV must be either "sandbox" or "live"');
-  } else {
-    env = process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
-  }
-  const missing = missingPaymentConfig(env);
-  if (missing.length) {
-    throw new Error(`Payments are not fully configured for ${env}: missing ${missing.join(", ")}`);
-  }
-  return env;
-}
-
-export type PaymentEnvReport = {
-  environment: StripeEnv;
-  declared: boolean;
-  configured: boolean;
-  missing: string[];
-  error: string | null;
-};
-
-/** Non-throwing view of payment configuration, for owner-facing diagnostics. */
-export function describePaymentEnv(): PaymentEnvReport {
-  const raw = process.env["PAYMENTS_ENV"]?.trim().toLowerCase();
-  const declared = raw === "live" || raw === "sandbox";
-  try {
-    const environment = resolvePaymentEnv();
-    return { environment, declared, configured: true, missing: [], error: null };
-  } catch (error) {
-    const environment: StripeEnv =
-      raw === "live" ? "live" : raw === "sandbox" ? "sandbox" : process.env["STRIPE_LIVE_API_KEY"] ? "live" : "sandbox";
-    return {
-      environment,
-      declared,
-      configured: false,
-      missing: missingPaymentConfig(environment),
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
-}
-
-export function createStripeClient(env: StripeEnv): Stripe {
+export function createStripeClient(env: StripeEnv = configuredPaymentsEnv()): Stripe {
   const connectionApiKey = getConnectionApiKey(env);
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
 
@@ -146,18 +79,18 @@ export function getStripeErrorMessage(error: unknown): string {
   return "Stripe request failed";
 }
 
-export type StripeWebhookEvent = {
-  id: string;
-  type: string;
-  created?: number;
-  data: { object: any };
-};
-
 /** Verify a webhook signature (HMAC-SHA256 over "<timestamp>.<body>"). */
-export async function verifyWebhook(req: Request, env: StripeEnv): Promise<StripeWebhookEvent> {
+export async function verifyWebhook(
+  req: Request,
+  env: StripeEnv = configuredPaymentsEnv(),
+): Promise<Record<string, unknown>> {
+  const mode = requirePaymentsEnv(env);
   const signature = req.headers.get("stripe-signature");
   const body = await req.text();
-  const secret = getEnv(WEBHOOK_SECRET_KEYS[env]);
+  const secret =
+    mode === "sandbox"
+      ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
+      : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
 
   if (!signature || !body) throw new Error("Missing signature or body");
 
@@ -191,5 +124,5 @@ export async function verifyWebhook(req: Request, env: StripeEnv): Promise<Strip
 
   if (!v1Signatures.includes(expected)) throw new Error("Invalid webhook signature");
 
-  return JSON.parse(body);
+  return JSON.parse(body) as Record<string, unknown>;
 }

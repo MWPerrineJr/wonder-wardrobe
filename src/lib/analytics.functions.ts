@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { dbError } from "@/lib/db-error";
+import { requirePaymentsEnv } from "@/lib/payments-env";
 import { emptyAnalytics, type ShopAnalytics } from "@/lib/analytics-types";
 
 const analyticsInput = z.object({
@@ -27,12 +28,14 @@ export const getShopAnalytics = createServerFn({ method: "GET" })
     if (shopErr) throw dbError(shopErr, "analytics");
     if (!shop || shop.owner_id !== userId) throw new Error("Not your shop");
 
+    const environment = requirePaymentsEnv(data.environment);
+
     // Business analytics is part of the paid plan — gated server-side so the
     // function can't be called directly to bypass the upgrade screen.
-    const { data: hasAnalytics, error: gateErr } = await supabase.rpc(
-      "shop_has_active_analytics",
-      { _shop_id: data.shopId, _env: data.environment },
-    );
+    const { data: hasAnalytics, error: gateErr } = await supabase.rpc("shop_has_active_analytics", {
+      _shop_id: data.shopId,
+      _env: environment,
+    });
     if (gateErr) throw dbError(gateErr, "analytics");
     if (!hasAnalytics) return emptyAnalytics(data.days);
 
