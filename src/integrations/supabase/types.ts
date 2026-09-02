@@ -356,8 +356,13 @@ export type Database = {
           customer_name: string | null
           emotion: string | null
           enriched_at: string | null
+          enrichment_attempts: number
+          enrichment_error: string | null
+          enrichment_last_attempt_at: string | null
           enrichment_model: string | null
+          enrichment_next_attempt_at: string | null
           enrichment_raw: Json | null
+          enrichment_status: string
           explanation: string | null
           id: string
           key_phrases: string[]
@@ -380,8 +385,13 @@ export type Database = {
           customer_name?: string | null
           emotion?: string | null
           enriched_at?: string | null
+          enrichment_attempts?: number
+          enrichment_error?: string | null
+          enrichment_last_attempt_at?: string | null
           enrichment_model?: string | null
+          enrichment_next_attempt_at?: string | null
           enrichment_raw?: Json | null
+          enrichment_status?: string
           explanation?: string | null
           id?: string
           key_phrases?: string[]
@@ -404,8 +414,13 @@ export type Database = {
           customer_name?: string | null
           emotion?: string | null
           enriched_at?: string | null
+          enrichment_attempts?: number
+          enrichment_error?: string | null
+          enrichment_last_attempt_at?: string | null
           enrichment_model?: string | null
+          enrichment_next_attempt_at?: string | null
           enrichment_raw?: Json | null
+          enrichment_status?: string
           explanation?: string | null
           id?: string
           key_phrases?: string[]
@@ -924,6 +939,9 @@ export type Database = {
           delivery_terminal: boolean
           email_attempts: number
           email_error: string | null
+          email_idempotency_key: string | null
+          email_last_attempt_at: string | null
+          email_next_attempt_at: string | null
           email_status: string
           emailed_at: string | null
           expires_at: string
@@ -948,6 +966,9 @@ export type Database = {
           delivery_terminal?: boolean
           email_attempts?: number
           email_error?: string | null
+          email_idempotency_key?: string | null
+          email_last_attempt_at?: string | null
+          email_next_attempt_at?: string | null
           email_status?: string
           emailed_at?: string | null
           expires_at?: string
@@ -972,6 +993,9 @@ export type Database = {
           delivery_terminal?: boolean
           email_attempts?: number
           email_error?: string | null
+          email_idempotency_key?: string | null
+          email_last_attempt_at?: string | null
+          email_next_attempt_at?: string | null
           email_status?: string
           emailed_at?: string | null
           expires_at?: string
@@ -1041,7 +1065,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      survey_invite_delivery_problems: {
+        Row: {
+          booking_id: string | null
+          customer_email: string | null
+          email_attempts: number | null
+          email_error: string | null
+          email_last_attempt_at: string | null
+          email_next_attempt_at: string | null
+          email_status: string | null
+          expires_at: string | null
+          id: string | null
+          sent_at: string | null
+          shop_id: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          customer_email?: string | null
+          email_attempts?: number | null
+          email_error?: string | null
+          email_last_attempt_at?: string | null
+          email_next_attempt_at?: string | null
+          email_status?: string | null
+          expires_at?: string | null
+          id?: string | null
+          sent_at?: string | null
+          shop_id?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          customer_email?: string | null
+          email_attempts?: number | null
+          email_error?: string | null
+          email_last_attempt_at?: string | null
+          email_next_attempt_at?: string | null
+          email_status?: string | null
+          expires_at?: string | null
+          id?: string | null
+          sent_at?: string | null
+          shop_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_invites_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_invites_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       expire_stale_booking_holds: { Args: never; Returns: number }
