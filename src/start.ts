@@ -18,12 +18,13 @@ const paymentsConfigMiddleware = createMiddleware().server(async ({ next }) => {
   }
   logPaymentsConfigOnce();
   const diagnostic = inspectPaymentsConfig();
-  if (!diagnostic.ok) {
-    return new Response(diagnostic.issues.join("\n"), {
+  if (!diagnostic.serverOk) {
+    return new Response(diagnostic.serverIssues.join("\n"), {
       status: 503,
       headers: { "content-type": "text/plain; charset=utf-8" },
     });
   }
+
   return next();
 });
 
