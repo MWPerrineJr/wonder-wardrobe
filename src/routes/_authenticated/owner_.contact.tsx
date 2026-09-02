@@ -71,6 +71,9 @@ function ContactPage() {
               <Link to="/owner/feedback" className="text-on-surface-variant hover:text-on-surface">
                 Feedback
               </Link>
+              <Link to="/owner/support" className="text-on-surface-variant hover:text-on-surface">
+                Support
+              </Link>
               <Link to="/owner/subscribe" className="text-on-surface-variant hover:text-on-surface">
                 Plans
               </Link>
