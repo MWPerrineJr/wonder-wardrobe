@@ -76,18 +76,20 @@ export default {
     const diagnostic = inspectPaymentsConfig();
     if (path === "/api/public/ready") {
       const body = readinessReport(diagnostic.ok, diagnostic.issues);
-      return finalize(healthResponse(body, diagnostic.ok ? 200 : 503), tagged, requestId);
+      return finalize(healthResponse(body, diagnostic.serverOk ? 200 : 503), tagged, requestId);
     }
 
-    if (!diagnostic.ok) {
+    // Only server-side misconfiguration may block the site. VITE_* values are
+    // compile-time only and never present in the deployed worker environment.
+    if (!diagnostic.serverOk) {
       logEvent("error", {
         component: "payments",
         event: "config_incomplete",
         request_id: requestId,
-        error: diagnostic.issues.join("; "),
+        error: diagnostic.serverIssues.join("; "),
       });
       return finalize(
-        new Response(diagnostic.issues.join("\n"), {
+        new Response(diagnostic.serverIssues.join("\n"), {
           status: 503,
           headers: { "content-type": "text/plain; charset=utf-8" },
         }),
@@ -95,6 +97,7 @@ export default {
         requestId,
       );
     }
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(tagged, env, ctx);

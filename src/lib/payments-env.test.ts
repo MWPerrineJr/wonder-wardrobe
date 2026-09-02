@@ -75,18 +75,27 @@ describe("assertPaymentsConfig", () => {
     );
   });
 
-  it("requires VITE_PAYMENTS_ENV when the publishable token is not a Stripe pk_ key", () => {
-    assert.throws(
-      () =>
-        assertPaymentsConfig({
-          PAYMENTS_ENV: "sandbox",
-          STRIPE_SANDBOX_API_KEY: "conn_sandbox",
-          PAYMENTS_SANDBOX_WEBHOOK_SECRET: "whsec_sandbox",
-          LOVABLE_API_KEY: "lovable_key",
-        }),
-      PaymentsConfigError,
+  it("does not block the server when the VITE_* build vars are absent at runtime", () => {
+    const diagnostic = inspectPaymentsConfig({
+      PAYMENTS_ENV: "sandbox",
+      STRIPE_SANDBOX_API_KEY: "conn_sandbox",
+      PAYMENTS_SANDBOX_WEBHOOK_SECRET: "whsec_sandbox",
+      LOVABLE_API_KEY: "lovable_key",
+    });
+    assert.equal(diagnostic.serverOk, true);
+    assert.deepEqual(diagnostic.serverIssues, []);
+    assert.deepEqual(diagnostic.clientIssues, []);
+    assert.equal(
+      assertPaymentsConfig({
+        PAYMENTS_ENV: "sandbox",
+        STRIPE_SANDBOX_API_KEY: "conn_sandbox",
+        PAYMENTS_SANDBOX_WEBHOOK_SECRET: "whsec_sandbox",
+        LOVABLE_API_KEY: "lovable_key",
+      }).env,
+      "sandbox",
     );
   });
+
 
   it("rejects VITE_PAYMENTS_ENV that disagrees with PAYMENTS_ENV", () => {
     assert.throws(
