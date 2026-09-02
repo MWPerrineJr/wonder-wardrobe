@@ -64,35 +64,36 @@ export function parsePaymentsEnv(raw: string | undefined | null): StripeEnv {
 }
 
 export function inspectPaymentsConfig(env: EnvBag = process.env): PaymentsDiagnostic {
-  const issues: string[] = [];
+  const serverIssues: string[] = [];
+  const clientIssues: string[] = [];
   let environment: StripeEnv | null = null;
 
   try {
     environment = parsePaymentsEnv(env["PAYMENTS_ENV"]);
   } catch (error) {
-    issues.push(error instanceof Error ? error.message : String(error));
+    serverIssues.push(error instanceof Error ? error.message : String(error));
   }
 
+  // VITE_* values are compile-time only: they are baked into the browser bundle
+  // and are absent from the deployed server environment. Report mismatches when
+  // they are visible, but never let them take the site down at runtime.
   const vitePaymentsEnv = env["VITE_PAYMENTS_ENV"]?.trim() || null;
   if (vitePaymentsEnv && vitePaymentsEnv !== "sandbox" && vitePaymentsEnv !== "live") {
-    issues.push("VITE_PAYMENTS_ENV must be sandbox or live when set");
+    clientIssues.push("VITE_PAYMENTS_ENV must be sandbox or live when set");
   } else if (environment && vitePaymentsEnv && vitePaymentsEnv !== environment) {
-    issues.push(`VITE_PAYMENTS_ENV=${vitePaymentsEnv} does not match PAYMENTS_ENV=${environment}`);
+    clientIssues.push(
+      `VITE_PAYMENTS_ENV=${vitePaymentsEnv} does not match PAYMENTS_ENV=${environment}`,
+    );
   }
 
   const tokenKind = clientTokenKind(env["VITE_PAYMENTS_CLIENT_TOKEN"]);
-  if (
-    environment &&
-    (tokenKind === "missing" || tokenKind === "other") &&
-    vitePaymentsEnv !== environment
-  ) {
-    issues.push(`Set VITE_PAYMENTS_ENV=${environment} so the client matches PAYMENTS_ENV`);
-  }
   if (environment === "sandbox" && tokenKind === "live") {
-    issues.push("PAYMENTS_ENV=sandbox but VITE_PAYMENTS_CLIENT_TOKEN is a live publishable key");
+    clientIssues.push(
+      "PAYMENTS_ENV=sandbox but VITE_PAYMENTS_CLIENT_TOKEN is a live publishable key",
+    );
   }
   if (environment === "live" && tokenKind === "test") {
-    issues.push("PAYMENTS_ENV=live but VITE_PAYMENTS_CLIENT_TOKEN is a test publishable key");
+    clientIssues.push("PAYMENTS_ENV=live but VITE_PAYMENTS_CLIENT_TOKEN is a test publishable key");
   }
 
   const sandboxKey = present(env["STRIPE_SANDBOX_API_KEY"]);
@@ -102,19 +103,25 @@ export function inspectPaymentsConfig(env: EnvBag = process.env): PaymentsDiagno
   const lovable = present(env["LOVABLE_API_KEY"]);
 
   if (environment === "sandbox") {
-    if (!sandboxKey) issues.push("PAYMENTS_ENV=sandbox requires STRIPE_SANDBOX_API_KEY");
-    if (!sandboxWhsec) issues.push("PAYMENTS_ENV=sandbox requires PAYMENTS_SANDBOX_WEBHOOK_SECRET");
+    if (!sandboxKey) serverIssues.push("PAYMENTS_ENV=sandbox requires STRIPE_SANDBOX_API_KEY");
+    if (!sandboxWhsec)
+      serverIssues.push("PAYMENTS_ENV=sandbox requires PAYMENTS_SANDBOX_WEBHOOK_SECRET");
   }
   if (environment === "live") {
-    if (!liveKey) issues.push("PAYMENTS_ENV=live requires STRIPE_LIVE_API_KEY");
-    if (!liveWhsec) issues.push("PAYMENTS_ENV=live requires PAYMENTS_LIVE_WEBHOOK_SECRET");
+    if (!liveKey) serverIssues.push("PAYMENTS_ENV=live requires STRIPE_LIVE_API_KEY");
+    if (!liveWhsec) serverIssues.push("PAYMENTS_ENV=live requires PAYMENTS_LIVE_WEBHOOK_SECRET");
   }
-  if (environment && !lovable) issues.push("LOVABLE_API_KEY is not configured");
+  if (environment && !lovable) serverIssues.push("LOVABLE_API_KEY is not configured");
+
+  const serverOk = serverIssues.length === 0 && environment !== null;
 
   return {
     environment,
-    ok: issues.length === 0 && environment !== null,
-    issues,
+    serverOk,
+    ok: serverOk && clientIssues.length === 0,
+    issues: [...serverIssues, ...clientIssues],
+    serverIssues,
+    clientIssues,
     stripeKeyConfigured: environment === "live" ? liveKey : sandboxKey,
     webhookSecretConfigured: environment === "live" ? liveWhsec : sandboxWhsec,
     lovableApiKeyConfigured: lovable,
@@ -126,10 +133,15 @@ export function inspectPaymentsConfig(env: EnvBag = process.env): PaymentsDiagno
 
 export function assertPaymentsConfig(env: EnvBag = process.env): PaymentsConfig {
   const diagnostic = inspectPaymentsConfig(env);
-  if (!diagnostic.ok || !diagnostic.environment) {
-    throw new PaymentsConfigError(diagnostic.issues[0] ?? "Payments are not configured");
+  if (!diagnostic.serverOk || !diagnostic.environment) {
+    throw new PaymentsConfigError(diagnostic.serverIssues[0] ?? "Payments are not configured");
+  }
+  // A visible client/server mode mismatch still blocks charging.
+  if (diagnostic.clientIssues.length > 0) {
+    throw new PaymentsConfigError(diagnostic.clientIssues[0]!);
   }
   return {
+
     env: diagnostic.environment,
     stripeKeyName:
       diagnostic.environment === "sandbox" ? "STRIPE_SANDBOX_API_KEY" : "STRIPE_LIVE_API_KEY",
