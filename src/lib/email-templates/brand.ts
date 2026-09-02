@@ -11,7 +11,7 @@ export const BRAND = {
   faint: "#8a8580",
   surface: "#faf8f5",
   hairline: "#e7e2da",
-  supportEmail: "support@pandagentic.ai",
+  supportEmail: "support@thestandingchair.com",
 };
 
 export const main = {
