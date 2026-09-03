@@ -26,6 +26,11 @@ export type OwnerSignupRow = {
   trialSource: TrialSource;
   trialSourceLabel: string;
   signupTrialEndsAt: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  firstTouchAt: string | null;
 };
 
 export type SourceCount = { value: string; label: string; count: number };
