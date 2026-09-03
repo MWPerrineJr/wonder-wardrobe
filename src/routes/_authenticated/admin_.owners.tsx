@@ -174,6 +174,41 @@ function AdminOwnersPage() {
         </div>
       )}
 
+      {(data.campaignSources.length > 0 || data.campaigns.length > 0) && (
+        <div className="bg-surface border border-border-subtle rounded-xl p-5 flex flex-col gap-4">
+          <div>
+            <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-3">
+              Campaign link source
+            </p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {data.campaignSources.map((s) => (
+                <div key={s.value} className="flex items-baseline gap-2">
+                  <span className="font-headline-md text-headline-md text-on-surface">
+                    {s.count}
+                  </span>
+                  <span className="text-body-md text-on-surface-variant">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-3">
+              Campaign
+            </p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {data.campaigns.map((s) => (
+                <div key={s.value} className="flex items-baseline gap-2">
+                  <span className="font-headline-md text-headline-md text-on-surface">
+                    {s.count}
+                  </span>
+                  <span className="text-body-md text-on-surface-variant">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <button
