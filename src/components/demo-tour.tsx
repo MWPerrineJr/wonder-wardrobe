@@ -129,7 +129,7 @@ export function DemoTour({
                 {tier.providers} · {tier.yearlyLabel} annually
               </p>
               <p className="text-label-sm text-on-surface-variant mt-1">
-                1-month free trial. Cancel any time in one click.
+                90-day free trial. Cancel any time in one click.
               </p>
             </div>
           ))}

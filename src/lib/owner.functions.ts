@@ -85,6 +85,21 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       .single();
     if (shopError) throw dbError(shopError, "owner");
 
+    // Owner signup registry — tracking must never block shop creation.
+    try {
+      const { error: signupError } = await supabaseAdmin.from("owner_signups").insert({
+        shop_id: shop.id,
+        owner_id: context.userId,
+        owner_email: (context.claims?.email as string | undefined) ?? null,
+        owner_name: (context.claims?.["name"] as string | undefined) ?? null,
+        shop_name: shop.name,
+        shop_slug: shop.slug,
+      });
+      if (signupError) console.error("owner_signups insert failed", signupError.message);
+    } catch (err) {
+      console.error("owner_signups insert failed", err);
+    }
+
     // Friendly welcome email — never block shop creation on delivery problems.
     try {
       const email = context.claims?.email as string | undefined;

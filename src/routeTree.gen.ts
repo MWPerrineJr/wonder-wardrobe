@@ -29,6 +29,7 @@ import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as SurveyTokenRouteImport } from './routes/survey.$token'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as AuthenticatedAdminOwnersRouteImport } from './routes/_authenticated/admin_.owners'
 import { Route as AuthenticatedOnboardingOwnerRouteImport } from './routes/_authenticated/onboarding.owner'
 import { Route as AuthenticatedOwnerAnalyticsRouteImport } from './routes/_authenticated/owner_.analytics'
 import { Route as AuthenticatedOwnerContactRouteImport } from './routes/_authenticated/owner_.contact'
@@ -151,6 +152,12 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     id: '/.mcp/invoke-tool/$tool',
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAdminOwnersRoute =
+  AuthenticatedAdminOwnersRouteImport.update({
+    id: '/admin_/owners',
+    path: '/admin/owners',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedOnboardingOwnerRoute =
   AuthenticatedOnboardingOwnerRouteImport.update({
@@ -288,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/shop/': typeof ShopIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/owners': typeof AuthenticatedAdminOwnersRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/contact': typeof AuthenticatedOwnerContactRoute
@@ -328,6 +336,7 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/owners': typeof AuthenticatedAdminOwnersRoute
   '/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/owner/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/owner/contact': typeof AuthenticatedOwnerContactRoute
@@ -371,6 +380,7 @@ export interface FileRoutesById {
   '/shop/': typeof ShopIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin_/owners': typeof AuthenticatedAdminOwnersRoute
   '/_authenticated/onboarding/owner': typeof AuthenticatedOnboardingOwnerRoute
   '/_authenticated/owner_/analytics': typeof AuthenticatedOwnerAnalyticsRoute
   '/_authenticated/owner_/contact': typeof AuthenticatedOwnerContactRoute
@@ -414,6 +424,7 @@ export interface FileRouteTypes {
     | '/shop/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/owners'
     | '/onboarding/owner'
     | '/owner/analytics'
     | '/owner/contact'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/owners'
     | '/onboarding/owner'
     | '/owner/analytics'
     | '/owner/contact'
@@ -496,6 +508,7 @@ export interface FileRouteTypes {
     | '/shop/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin_/owners'
     | '/_authenticated/onboarding/owner'
     | '/_authenticated/owner_/analytics'
     | '/_authenticated/owner_/contact'
@@ -691,6 +704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin_/owners': {
+      id: '/_authenticated/admin_/owners'
+      path: '/admin/owners'
+      fullPath: '/admin/owners'
+      preLoaderRoute: typeof AuthenticatedAdminOwnersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding/owner': {
       id: '/_authenticated/onboarding/owner'
       path: '/onboarding/owner'
@@ -837,6 +857,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRoute
+  AuthenticatedAdminOwnersRoute: typeof AuthenticatedAdminOwnersRoute
   AuthenticatedOnboardingOwnerRoute: typeof AuthenticatedOnboardingOwnerRoute
   AuthenticatedOwnerAnalyticsRoute: typeof AuthenticatedOwnerAnalyticsRoute
   AuthenticatedOwnerContactRoute: typeof AuthenticatedOwnerContactRoute
@@ -849,6 +870,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedOwnerRoute: AuthenticatedOwnerRoute,
+  AuthenticatedAdminOwnersRoute: AuthenticatedAdminOwnersRoute,
   AuthenticatedOnboardingOwnerRoute: AuthenticatedOnboardingOwnerRoute,
   AuthenticatedOwnerAnalyticsRoute: AuthenticatedOwnerAnalyticsRoute,
   AuthenticatedOwnerContactRoute: AuthenticatedOwnerContactRoute,

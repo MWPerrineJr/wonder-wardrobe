@@ -170,3 +170,23 @@ export function ledgerDecision(
   if (Number.isFinite(updated) && nowMs - updated > STALE_PROCESSING_MS) return "process";
   return "busy";
 }
+
+export type OwnerPlanState = "none" | "trialing" | "active" | "past_due" | "canceled" | "lifetime";
+
+/** Maps a Stripe subscription status onto the owner-signup registry plan state. */
+export function ownerPlanState(status: string): OwnerPlanState {
+  switch (status) {
+    case "trialing":
+      return "trialing";
+    case "active":
+      return "active";
+    case "past_due":
+    case "unpaid":
+      return "past_due";
+    case "canceled":
+    case "incomplete_expired":
+      return "canceled";
+    default:
+      return "none";
+  }
+}

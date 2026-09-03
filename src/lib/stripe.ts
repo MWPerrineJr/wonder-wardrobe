@@ -1,5 +1,7 @@
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 
+import { TRIAL_DAYS } from "@/lib/trial";
+
 type StripeEnv = "sandbox" | "live";
 
 const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
@@ -30,7 +32,7 @@ export function getStripeEnvironment(): StripeEnv {
   return paymentsEnvironment();
 }
 
-export const TRIAL_DAYS = 30;
+export { TRIAL_DAYS };
 
 export type PlanTierId = "solo" | "team" | "enterprise";
 export type AnalyticsPriceId =

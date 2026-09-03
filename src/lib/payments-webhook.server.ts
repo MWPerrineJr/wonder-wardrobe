@@ -7,6 +7,7 @@ import {
   checkoutMetadata,
   httpStatusForWebhookError,
   ledgerDecision,
+  ownerPlanState,
   parseStripeEnv,
   paymentIntentId,
   sanitizeWebhookError,
@@ -198,6 +199,28 @@ async function releaseBooking(
   requireOk(result, "Booking release failed");
 }
 
+/** Keeps the owner-signup registry in step with billing. Never blocks the webhook. */
+async function syncOwnerSignup(
+  admin: Admin,
+  shopId: string,
+  patch: {
+    plan_state: string;
+    trial_started_at?: string | null;
+    trial_ends_at?: string | null;
+    stripe_subscription_id?: string | null;
+  },
+) {
+  try {
+    const { error } = await admin
+      .from("owner_signups")
+      .update({ ...patch, last_synced_at: new Date().toISOString() })
+      .eq("shop_id", shopId);
+    if (error) console.error("owner_signups sync failed", error.message);
+  } catch (err) {
+    console.error("owner_signups sync failed", err);
+  }
+}
+
 async function upsertSubscription(
   admin: Admin,
   env: StripeEnv,
@@ -268,6 +291,17 @@ async function upsertSubscription(
   requireOk(result, "Subscription upsert failed");
   if (!result.data?.length)
     throw new WebhookError("Subscription upsert matched zero rows", "retryable");
+
+  await syncOwnerSignup(admin, shopId, {
+    plan_state: ownerPlanState(payload.status),
+    trial_started_at: isoFromUnix(
+      typeof subscription.trial_start === "number" ? subscription.trial_start : null,
+    ),
+    trial_ends_at: isoFromUnix(
+      typeof subscription.trial_end === "number" ? subscription.trial_end : null,
+    ),
+    stripe_subscription_id: payload.stripe_subscription_id || null,
+  });
 }
 
 async function markCanceled(
@@ -281,7 +315,7 @@ async function markCanceled(
 
   const existing = await admin
     .from("subscriptions")
-    .select("id, last_stripe_event_at, status")
+    .select("id, last_stripe_event_at, status, shop_id")
     .eq("stripe_subscription_id", subId)
     .eq("environment", env)
     .maybeSingle();
@@ -301,6 +335,8 @@ async function markCanceled(
   requireOk(result, "Subscription cancel update failed");
   if (!result.data?.length)
     throw new WebhookError("Subscription cancel matched zero rows", "retryable");
+
+  await syncOwnerSignup(admin, existing.data.shop_id, { plan_state: "canceled" });
 }
 
 async function syncPayoutAccount(admin: Admin, env: StripeEnv, account: Record<string, unknown>) {
