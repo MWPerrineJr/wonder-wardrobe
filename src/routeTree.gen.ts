@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BarberRouteImport } from './routes/barber'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OwnersRouteImport } from './routes/owners'
 import { Route as ProviderRouteImport } from './routes/provider'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ShopRouteImport } from './routes/shop'
@@ -73,6 +74,11 @@ const BarberRoute = BarberRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnersRoute = OwnersRouteImport.update({
+  id: '/owners',
+  path: '/owners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProviderRoute = ProviderRouteImport.update({
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
   '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
+  '/owners': typeof OwnersRoute
   '/provider': typeof ProviderRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRouteWithChildren
@@ -322,6 +329,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
+  '/owners': typeof OwnersRoute
   '/provider': typeof ProviderRoute
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -365,6 +373,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteWithChildren
   '/barber': typeof BarberRoute
   '/mcp': typeof McpRoute
+  '/owners': typeof OwnersRoute
   '/provider': typeof ProviderRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRouteWithChildren
@@ -409,6 +418,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/barber'
     | '/mcp'
+    | '/owners'
     | '/provider'
     | '/reset-password'
     | '/shop'
@@ -451,6 +461,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/barber'
     | '/mcp'
+    | '/owners'
     | '/provider'
     | '/reset-password'
     | '/.mcp/list-tools'
@@ -493,6 +504,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/barber'
     | '/mcp'
+    | '/owners'
     | '/provider'
     | '/reset-password'
     | '/shop'
@@ -537,6 +549,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   BarberRoute: typeof BarberRoute
   McpRoute: typeof McpRoute
+  OwnersRoute: typeof OwnersRoute
   ProviderRoute: typeof ProviderRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRouteWithChildren
@@ -597,6 +610,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owners': {
+      id: '/owners'
+      path: '/owners'
+      fullPath: '/owners'
+      preLoaderRoute: typeof OwnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/provider': {
@@ -911,6 +931,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   BarberRoute: BarberRoute,
   McpRoute: McpRoute,
+  OwnersRoute: OwnersRoute,
   ProviderRoute: ProviderRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRouteWithChildren,

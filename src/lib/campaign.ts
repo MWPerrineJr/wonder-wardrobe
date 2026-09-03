@@ -1,9 +1,10 @@
 /**
  * Campaign (UTM) attribution capture.
  *
- * Sign-up campaign links point at /onboarding/owner, which sits behind the auth
- * gate — the redirect to /auth drops the query string. So we capture the campaign
- * on the very first page view, keep it in localStorage (first touch wins, 30-day
+ * Sign-up campaign links point at /owners, a public landing page that leads
+ * into /onboarding/owner. The onboarding route sits behind the auth gate, so
+ * the redirect to /auth would drop the query string. We capture the campaign on
+ * the very first page view, keep it in localStorage (first touch wins, 30-day
  * TTL) and attach it to the owner signup record when the shop is created.
  */
 
@@ -160,5 +161,5 @@ export const CAMPAIGN_LINKS = [
 ].map(({ source, label }) => ({
   source,
   label,
-  path: `/onboarding/owner?utm_source=${source}&utm_medium=social&utm_campaign=founding-shops&utm_content=week1-launch`,
+  path: `/owners?utm_source=${source}&utm_medium=social&utm_campaign=founding-shops&utm_content=week1-launch`,
 }));
