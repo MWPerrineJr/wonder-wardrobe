@@ -14,6 +14,7 @@ import {
   SurveyPanel,
   UtilizationHeatmap,
 } from "@/components/analytics/charts";
+import { AnalyticsInsights } from "@/components/analytics/insights";
 import { KpiCard, money, pct } from "@/components/analytics/shared";
 import { PaymentTestModeBanner } from "@/components/payment-test-banner";
 import { getShopAnalytics } from "@/lib/analytics.functions";
