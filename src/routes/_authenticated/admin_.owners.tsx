@@ -126,6 +126,22 @@ function AdminOwnersPage() {
         <Stat label="Trials ending ≤14d" value={data.totals.trialsEndingSoon} />
       </div>
 
+      {data.sources.length > 0 && (
+        <div className="bg-surface border border-border-subtle rounded-xl p-5">
+          <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-3">
+            How they heard about us
+          </p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {data.sources.map((s) => (
+              <div key={s.value} className="flex items-baseline gap-2">
+                <span className="font-headline-md text-headline-md text-on-surface">{s.count}</span>
+                <span className="text-body-md text-on-surface-variant">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <button
@@ -147,7 +163,7 @@ function AdminOwnersPage() {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-border-subtle">
-              {["Signed up", "Shop", "Owner", "Email", "Plan", "Trial"].map((h) => (
+              {["Signed up", "Shop", "Owner", "Email", "Plan", "Trial", "Source"].map((h) => (
                 <th
                   key={h}
                   className="text-label-md text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap"
@@ -160,7 +176,7 @@ function AdminOwnersPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-on-surface-variant text-body-md">
+                <td colSpan={7} className="px-4 py-8 text-on-surface-variant text-body-md">
                   No signups to show yet.
                 </td>
               </tr>
@@ -182,6 +198,13 @@ function AdminOwnersPage() {
                 </td>
                 <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">
                   {trialCell(r)}
+                </td>
+                <td
+                  className="px-4 py-3 text-on-surface-variant whitespace-nowrap"
+                  title={r.heardAboutDetail ?? undefined}
+                >
+                  {r.heardAboutLabel}
+                  {r.heardAboutDetail ? " *" : ""}
                 </td>
               </tr>
             ))}

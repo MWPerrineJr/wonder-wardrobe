@@ -2,6 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import {
+  HEARD_ABOUT_SOURCES,
+  wantsHeardAboutDetail,
+  type HeardAboutSource,
+} from "@/lib/attribution";
 import { createOwnerShop } from "@/lib/owner.functions";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 
@@ -35,6 +40,8 @@ function OnboardingOwnerPage() {
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [heardAbout, setHeardAbout] = useState<HeardAboutSource | null>(null);
+  const [heardAboutDetail, setHeardAboutDetail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [services, setServices] = useState<
     Array<{ name: string; duration: string; price: string; category: ServiceCategory }>
@@ -88,6 +95,10 @@ function OnboardingOwnerPage() {
           description: description || null,
           address: address || null,
           categories,
+          heard_about: heardAbout,
+          heard_about_detail: wantsHeardAboutDetail(heardAbout)
+            ? heardAboutDetail.trim().slice(0, 120) || null
+            : null,
           services: cleanedServices,
         },
       });
@@ -176,6 +187,41 @@ function OnboardingOwnerPage() {
               className="w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md"
               placeholder="123 Main St, Downtown"
             />
+          </div>
+
+          <div>
+            <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
+              How did you hear about us?{" "}
+              <span className="text-label-sm">(optional)</span>
+            </label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {HEARD_ABOUT_SOURCES.map((source) => (
+                <button
+                  key={source.value}
+                  type="button"
+                  onClick={() =>
+                    setHeardAbout((prev) => (prev === source.value ? null : source.value))
+                  }
+                  className={`px-3 py-1.5 rounded-full border text-label-sm transition ${
+                    heardAbout === source.value
+                      ? "bg-primary/10 border-primary text-primary"
+                      : "bg-surface border-border-subtle text-on-surface-variant hover:border-primary"
+                  }`}
+                >
+                  {source.label}
+                </button>
+              ))}
+            </div>
+            {wantsHeardAboutDetail(heardAbout) && (
+              <input
+                type="text"
+                maxLength={120}
+                value={heardAboutDetail}
+                onChange={(e) => setHeardAboutDetail(e.target.value)}
+                className="mt-3 w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md"
+                placeholder="Tell us more — optional"
+              />
+            )}
           </div>
 
           <div>
