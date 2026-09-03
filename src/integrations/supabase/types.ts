@@ -546,6 +546,68 @@ export type Database = {
           },
         ]
       }
+      owner_signups: {
+        Row: {
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          owner_email: string | null
+          owner_id: string
+          owner_name: string | null
+          plan_state: string
+          shop_id: string
+          shop_name: string
+          shop_slug: string
+          signed_up_at: string
+          stripe_subscription_id: string | null
+          trial_ends_at: string | null
+          trial_started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          owner_email?: string | null
+          owner_id: string
+          owner_name?: string | null
+          plan_state?: string
+          shop_id: string
+          shop_name: string
+          shop_slug: string
+          signed_up_at?: string
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          owner_email?: string | null
+          owner_id?: string
+          owner_name?: string | null
+          plan_state?: string
+          shop_id?: string
+          shop_name?: string
+          shop_slug?: string
+          signed_up_at?: string
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_signups_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: true
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_events: {
         Row: {
           attempts: number
