@@ -3,6 +3,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { HEARD_ABOUT_SOURCES, heardAboutLabel } from "@/lib/attribution";
 import { dbError } from "@/lib/db-error";
+import {
+  TRIAL_EVENT_LABEL,
+  TRIAL_SOURCE_LABEL,
+  type TrialEvent,
+  type TrialSource,
+} from "@/lib/trial-events";
 
 export type OwnerSignupRow = {
   shopId: string;
@@ -17,6 +23,9 @@ export type OwnerSignupRow = {
   heardAbout: string | null;
   heardAboutLabel: string;
   heardAboutDetail: string | null;
+  trialSource: TrialSource;
+  trialSourceLabel: string;
+  signupTrialEndsAt: string | null;
 };
 
 export type SourceCount = { value: string; label: string; count: number };
@@ -31,6 +40,8 @@ export type OwnerSignupsResult =
         thisWeek: number;
         thisMonth: number;
         trialsEndingSoon: number;
+        signupTrialsNoCard: number;
+        signupTrialsEndingSoon: number;
       };
       sources: SourceCount[];
     };
@@ -53,7 +64,7 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
     const { data, error } = await supabase
       .from("owner_signups")
       .select(
-        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at, heard_about, heard_about_detail",
+        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at, heard_about, heard_about_detail, trial_source, signup_trial_ends_at",
       )
       .order("signed_up_at", { ascending: false })
       .limit(500);
@@ -61,7 +72,10 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
 
     const now = Date.now();
     const rows: OwnerSignupRow[] = (data ?? []).map((r) => {
-      const ends = r.trial_ends_at ? new Date(r.trial_ends_at).getTime() : null;
+      const source = (r.trial_source ?? "none") as TrialSource;
+      const effectiveEnd =
+        source === "stripe" ? r.trial_ends_at : (r.signup_trial_ends_at ?? r.trial_ends_at);
+      const ends = effectiveEnd ? new Date(effectiveEnd).getTime() : null;
       return {
         shopId: r.shop_id,
         shopName: r.shop_name,
@@ -70,11 +84,14 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
         ownerEmail: r.owner_email,
         signedUpAt: r.signed_up_at,
         planState: r.plan_state,
-        trialEndsAt: r.trial_ends_at,
+        trialEndsAt: effectiveEnd,
         trialDaysLeft: ends === null ? null : Math.ceil((ends - now) / DAY_MS),
         heardAbout: r.heard_about,
         heardAboutLabel: heardAboutLabel(r.heard_about),
         heardAboutDetail: r.heard_about_detail,
+        trialSource: source,
+        trialSourceLabel: TRIAL_SOURCE_LABEL[source] ?? "—",
+        signupTrialEndsAt: r.signup_trial_ends_at,
       };
     });
 
@@ -98,7 +115,66 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
         trialsEndingSoon: rows.filter(
           (r) => r.trialDaysLeft !== null && r.trialDaysLeft >= 0 && r.trialDaysLeft <= 14,
         ).length,
+        signupTrialsNoCard: rows.filter((r) => r.trialSource === "signup").length,
+        signupTrialsEndingSoon: rows.filter(
+          (r) =>
+            r.trialSource === "signup" &&
+            r.trialDaysLeft !== null &&
+            r.trialDaysLeft >= 0 &&
+            r.trialDaysLeft <= 14,
+        ).length,
       },
       sources,
+    };
+  });
+
+export type TrialEventRow = {
+  id: string;
+  event: TrialEvent;
+  eventLabel: string;
+  planState: string | null;
+  source: string | null;
+  occurredAt: string;
+};
+
+export type TrialEventsResult = { access: "denied" } | { access: "granted"; rows: TrialEventRow[] };
+
+/** Admin-only trial history for one shop. */
+export const listOwnerTrialEvents = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { shopId: string }) => {
+    if (!data || typeof data.shopId !== "string" || data.shopId.length < 10) {
+      throw new Error("A shop id is required");
+    }
+    return { shopId: data.shopId };
+  })
+  .handler(async ({ data, context }): Promise<TrialEventsResult> => {
+    const { supabase, userId } = context;
+
+    const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
+      _user_id: userId,
+      _role: "admin",
+    });
+    if (roleError) throw dbError(roleError, "admin");
+    if (!isAdmin) return { access: "denied" };
+
+    const { data: events, error } = await supabase
+      .from("owner_trial_events")
+      .select("id, event, plan_state, source, occurred_at")
+      .eq("shop_id", data.shopId)
+      .order("occurred_at", { ascending: false })
+      .limit(50);
+    if (error) throw dbError(error, "admin");
+
+    return {
+      access: "granted",
+      rows: (events ?? []).map((e) => ({
+        id: e.id,
+        event: e.event as TrialEvent,
+        eventLabel: TRIAL_EVENT_LABEL[e.event as TrialEvent] ?? e.event,
+        planState: e.plan_state,
+        source: e.source,
+        occurredAt: e.occurred_at,
+      })),
     };
   });
