@@ -1,4 +1,4 @@
-import { TRIAL_DAYS } from "@/lib/trial";
+import { TRIAL_DAYS } from "./trial.ts";
 
 export type TrialEvent =
   | "signup_trial_started"
