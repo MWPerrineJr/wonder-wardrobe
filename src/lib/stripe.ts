@@ -30,7 +30,7 @@ export function getStripeEnvironment(): StripeEnv {
   return paymentsEnvironment();
 }
 
-export { TRIAL_DAYS } from "@/lib/trial";
+export { TRIAL_DAYS };
 
 export type PlanTierId = "solo" | "team" | "enterprise";
 export type AnalyticsPriceId =
