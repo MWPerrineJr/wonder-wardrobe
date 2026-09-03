@@ -549,6 +549,8 @@ export type Database = {
       owner_signups: {
         Row: {
           created_at: string
+          heard_about: string | null
+          heard_about_detail: string | null
           id: string
           last_synced_at: string | null
           owner_email: string | null
@@ -566,6 +568,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          heard_about?: string | null
+          heard_about_detail?: string | null
           id?: string
           last_synced_at?: string | null
           owner_email?: string | null
@@ -583,6 +587,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          heard_about?: string | null
+          heard_about_detail?: string | null
           id?: string
           last_synced_at?: string | null
           owner_email?: string | null
