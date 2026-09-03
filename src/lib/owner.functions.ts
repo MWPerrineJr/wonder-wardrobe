@@ -24,6 +24,18 @@ const CreateShopInput = z.object({
   categories: categorySchema.optional().default([]),
   heard_about: z.enum(HEARD_ABOUT_VALUES).optional().nullable(),
   heard_about_detail: z.string().trim().max(120).optional().nullable(),
+  campaign: z
+    .object({
+      utm_source: z.string().trim().max(120).nullable().optional(),
+      utm_medium: z.string().trim().max(120).nullable().optional(),
+      utm_campaign: z.string().trim().max(160).nullable().optional(),
+      utm_content: z.string().trim().max(160).nullable().optional(),
+      utm_term: z.string().trim().max(160).nullable().optional(),
+      landing_referrer: z.string().trim().max(500).nullable().optional(),
+      first_touch_at: z.string().datetime().nullable().optional(),
+    })
+    .optional()
+    .nullable(),
   services: z
     .array(
       z.object({
