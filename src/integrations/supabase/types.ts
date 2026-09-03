@@ -549,9 +549,11 @@ export type Database = {
       owner_signups: {
         Row: {
           created_at: string
+          first_touch_at: string | null
           heard_about: string | null
           heard_about_detail: string | null
           id: string
+          landing_referrer: string | null
           last_synced_at: string | null
           owner_email: string | null
           owner_id: string
@@ -568,12 +570,19 @@ export type Database = {
           trial_source: string
           trial_started_at: string | null
           updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           created_at?: string
+          first_touch_at?: string | null
           heard_about?: string | null
           heard_about_detail?: string | null
           id?: string
+          landing_referrer?: string | null
           last_synced_at?: string | null
           owner_email?: string | null
           owner_id: string
@@ -590,12 +599,19 @@ export type Database = {
           trial_source?: string
           trial_started_at?: string | null
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           created_at?: string
+          first_touch_at?: string | null
           heard_about?: string | null
           heard_about_detail?: string | null
           id?: string
+          landing_referrer?: string | null
           last_synced_at?: string | null
           owner_email?: string | null
           owner_id?: string
@@ -612,6 +628,11 @@ export type Database = {
           trial_source?: string
           trial_started_at?: string | null
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: [
           {
