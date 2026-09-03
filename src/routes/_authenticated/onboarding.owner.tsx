@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -7,6 +7,12 @@ import {
   wantsHeardAboutDetail,
   type HeardAboutSource,
 } from "@/lib/attribution";
+import {
+  campaignSourceToHeardAbout,
+  clearCampaign,
+  getCampaign,
+  type Campaign,
+} from "@/lib/campaign";
 import { createOwnerShop } from "@/lib/owner.functions";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 
