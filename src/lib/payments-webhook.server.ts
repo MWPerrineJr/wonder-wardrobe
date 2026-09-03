@@ -1,6 +1,7 @@
 import type { StripeEnv } from "./stripe.server.ts";
 import { enqueueCalendarSync } from "./booking-calendar-outbox.ts";
 import { configuredPaymentsEnv, PaymentsConfigError } from "./payments-env.ts";
+import { shouldRecordTrialEvent, trialEventForPlanState } from "./trial-events.ts";
 import {
   assertBookingPaymentMatches,
   canReleaseBookingHold,
@@ -211,11 +212,36 @@ async function syncOwnerSignup(
   },
 ) {
   try {
+    const previous = await admin
+      .from("owner_signups")
+      .select("plan_state, owner_id")
+      .eq("shop_id", shopId)
+      .maybeSingle();
+
     const { error } = await admin
       .from("owner_signups")
-      .update({ ...patch, last_synced_at: new Date().toISOString() })
+      .update({
+        ...patch,
+        trial_source: "stripe",
+        last_synced_at: new Date().toISOString(),
+      })
       .eq("shop_id", shopId);
     if (error) console.error("owner_signups sync failed", error.message);
+
+    // Trial history — one row per real state change, never on webhook replays.
+    if (shouldRecordTrialEvent(previous.data?.plan_state, patch.plan_state)) {
+      const event = trialEventForPlanState(patch.plan_state);
+      if (event) {
+        const { error: eventError } = await admin.from("owner_trial_events").insert({
+          shop_id: shopId,
+          owner_id: previous.data?.owner_id ?? null,
+          event,
+          plan_state: patch.plan_state,
+          source: "stripe",
+        });
+        if (eventError) console.error("owner_trial_events insert failed", eventError.message);
+      }
+    }
   } catch (err) {
     console.error("owner_signups sync failed", err);
   }
