@@ -152,6 +152,8 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
         ).length,
       },
       sources,
+      campaignSources: countBy((r) => r.utmSource),
+      campaigns: countBy((r) => r.utmCampaign),
     };
   });
 
