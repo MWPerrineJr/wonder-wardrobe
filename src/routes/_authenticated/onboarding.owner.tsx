@@ -48,7 +48,17 @@ function OnboardingOwnerPage() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [heardAbout, setHeardAbout] = useState<HeardAboutSource | null>(null);
   const [heardAboutDetail, setHeardAboutDetail] = useState("");
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Seed attribution from the campaign link they arrived through (they can still change it).
+  useEffect(() => {
+    const stored = getCampaign();
+    if (!stored) return;
+    setCampaign(stored);
+    const mapped = campaignSourceToHeardAbout(stored.utm_source);
+    if (mapped) setHeardAbout((prev) => prev ?? (mapped as HeardAboutSource));
+  }, []);
   const [services, setServices] = useState<
     Array<{ name: string; duration: string; price: string; category: ServiceCategory }>
   >([
