@@ -117,7 +117,7 @@ export function AnalyticsInsights({ shopId, days }: { shopId: string; days: numb
 
       {data?.state === "ready" && (
         <div className="flex flex-col gap-6">
-          <p className="text-on-surface font-headline-sm text-headline-sm leading-snug">
+          <p className="text-on-surface font-headline text-body-lg font-semibold leading-snug">
             {data.briefing.headline}
           </p>
 
@@ -193,7 +193,7 @@ function DriverCard({ driver }: { driver: InsightDriver }) {
         <span className="text-label-md text-on-surface font-semibold">{driver.metric}</span>
       </div>
       <p className="text-body-md text-on-surface">{driver.movement}</p>
-      <p className="text-body-sm text-on-surface-variant">{driver.cause}</p>
+      <p className="text-body-md text-on-surface-variant">{driver.cause}</p>
     </li>
   );
 }
@@ -214,7 +214,7 @@ function ActionCard({ action, index }: { action: InsightAction; index: number })
           </span>
         </div>
         <p className="text-body-md text-on-surface">{action.detail}</p>
-        <p className="text-body-sm text-on-surface-variant">{action.evidence}</p>
+        <p className="text-body-md text-on-surface-variant">{action.evidence}</p>
       </div>
     </li>
   );
