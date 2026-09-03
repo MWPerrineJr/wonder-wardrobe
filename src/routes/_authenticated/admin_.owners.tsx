@@ -1,6 +1,6 @@
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import { AccountNav } from "@/components/account-nav";
 import {
@@ -214,7 +214,8 @@ function AdminOwnersPage() {
               </tr>
             )}
             {rows.map((r) => (
-              <tr key={r.shopId} className="border-b border-border-subtle last:border-0">
+              <Fragment key={r.shopId}>
+              <tr className="border-b border-border-subtle">
                 <td className="px-4 py-3 text-on-surface whitespace-nowrap">
                   {new Date(r.signedUpAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
                 </td>
@@ -230,6 +231,11 @@ function AdminOwnersPage() {
                 </td>
                 <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">
                   {trialCell(r)}
+                  {r.trialSource !== "none" && (
+                    <span className="ml-2 text-label-sm rounded-full border border-border-subtle px-2 py-0.5">
+                      {r.trialSourceLabel}
+                    </span>
+                  )}
                 </td>
                 <td
                   className="px-4 py-3 text-on-surface-variant whitespace-nowrap"
@@ -238,7 +244,27 @@ function AdminOwnersPage() {
                   {r.heardAboutLabel}
                   {r.heardAboutDetail ? " *" : ""}
                 </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={() => setOpenShopId((prev) => (prev === r.shopId ? null : r.shopId))}
+                    className="text-label-md text-on-surface-variant hover:text-primary"
+                  >
+                    {openShopId === r.shopId ? "Hide history" : "History"}
+                  </button>
+                </td>
               </tr>
+              {openShopId === r.shopId && (
+                <tr className="border-b border-border-subtle bg-surface-container">
+                  <td colSpan={8} className="px-4 py-4">
+                    <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-2">
+                      Trial history
+                    </p>
+                    <TrialHistory shopId={r.shopId} />
+                  </td>
+                </tr>
+              )}
+              </Fragment>
             ))}
           </tbody>
         </table>
