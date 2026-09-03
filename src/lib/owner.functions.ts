@@ -269,24 +269,6 @@ export const updateShop = createServerFn({ method: "POST" })
     return saved;
   });
 
-// ---------- Survey invite delivery log ----------
-
-export const listSurveyInvites = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ shopId: z.string().uuid() }).parse(data))
-  .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase
-      .from("survey_invites")
-      .select(
-        "id, customer_name, customer_email, sent_at, emailed_at, email_status, email_error, email_attempts, email_next_attempt_at, responded_at, expires_at",
-      )
-      .eq("shop_id", data.shopId)
-      .order("sent_at", { ascending: false })
-      .limit(50);
-    if (error) throw dbError(error, "owner");
-    return rows ?? [];
-  });
-
 // ---------- Services CRUD ----------
 
 const ServiceFields = z.object({

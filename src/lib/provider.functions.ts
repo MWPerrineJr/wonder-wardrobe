@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
-import { ProviderSelfPatch } from "@/lib/provider-profile";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -55,48 +54,8 @@ export const getMyProviderProfile = createServerFn({ method: "GET" })
     };
   });
 
-export const getMyProviderDay = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => DayInput.parse(input))
-  .handler(async ({ data, context }): Promise<ProviderDay> => {
-    const { supabase, userId } = context;
-    const { data: provider, error: bErr } = await supabase
-      .from("providers")
-      .select("id, display_name, shop_id, shop:shops(name)")
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (bErr) throw dbError(bErr, "provider");
-    if (!provider) return { provider: null, bookings: [] };
-
-    const [y, m, d] = data.date.split("-").map(Number);
-    const dayStart = new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1) + data.tzOffsetMinutes * 60_000);
-    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
-
-    const { data: bookings, error } = await supabase
-      .from("bookings")
-      .select(
-        `id, starts_at, ends_at, status, price_cents, customer_name, customer_phone, notes,
-         service:services(id, name, duration_minutes)`,
-      )
-      .eq("provider_id", provider.id)
-      .gte("starts_at", dayStart.toISOString())
-      .lt("starts_at", dayEnd.toISOString())
-      .order("starts_at");
-    if (error) throw dbError(error, "provider");
-
-    return {
-      provider: {
-        id: provider.id,
-        display_name: provider.display_name,
-        shop_id: provider.shop_id,
-        shop_name: (provider as unknown as { shop?: { name?: string } }).shop?.name ?? "",
-      },
-      bookings: (bookings ?? []) as unknown as ProviderBooking[],
-    };
-  });
-
 /**
- * Range variant of getMyProviderDay — powers the week and month calendar views.
+ * Range variant of the provider day query — powers the week and month calendar views.
  * startDate/endDate are inclusive local dates (YYYY-MM-DD); range is capped at 62 days.
  */
 export const getMyProviderRange = createServerFn({ method: "POST" })
@@ -155,35 +114,6 @@ export const getMyProviderRange = createServerFn({ method: "POST" })
       },
       bookings: (bookings ?? []) as unknown as ProviderBooking[],
     };
-  });
-
-/** Providers may edit display fields only. Identity and shop assignment stay frozen. */
-export const updateMyProviderProfile = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => ProviderSelfPatch.parse(input))
-  .handler(async ({ data, context }) => {
-    const patch: {
-      display_name?: string;
-      bio?: string | null;
-      avatar_url?: string | null;
-      specialties?: string[];
-    } = {};
-    if (data.displayName !== undefined) patch.display_name = data.displayName;
-    if (data.bio !== undefined) patch.bio = data.bio;
-    if (data.avatarUrl !== undefined) patch.avatar_url = data.avatarUrl ? data.avatarUrl : null;
-    if (data.specialties !== undefined) patch.specialties = data.specialties;
-    if (Object.keys(patch).length === 0) {
-      throw new Error("No profile fields to update");
-    }
-
-    const { data: saved, error } = await context.supabase
-      .from("providers")
-      .update(patch)
-      .eq("user_id", context.userId)
-      .select("id, display_name, bio, avatar_url, specialties")
-      .single();
-    if (error) throw dbError(error, "provider");
-    return saved;
   });
 
 export const setBookingStatus = createServerFn({ method: "POST" })

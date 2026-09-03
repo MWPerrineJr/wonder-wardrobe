@@ -14,7 +14,7 @@ export type { StripeEnv } from "./payments-env.ts";
 
 const GATEWAY_STRIPE_BASE = "https://connector-gateway.lovable.dev/stripe";
 
-export function getConnectionApiKey(env: StripeEnv = configuredPaymentsEnv()): string {
+function getConnectionApiKey(env: StripeEnv = configuredPaymentsEnv()): string {
   const mode = requirePaymentsEnv(env);
   return mode === "sandbox" ? getEnv("STRIPE_SANDBOX_API_KEY") : getEnv("STRIPE_LIVE_API_KEY");
 }

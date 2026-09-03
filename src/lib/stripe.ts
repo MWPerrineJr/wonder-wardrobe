@@ -97,12 +97,3 @@ export function tierForPriceId(priceId: string | null): PlanTierId | null {
   const tier = PLAN_TIERS.find((t) => t.monthlyPriceId === priceId || t.yearlyPriceId === priceId);
   return tier?.id ?? null;
 }
-
-/** Legacy single-plan constant kept for existing copy. */
-export const ANALYTICS_PLAN = {
-  monthlyPriceId: "analytics_monthly",
-  yearlyPriceId: "analytics_yearly",
-  monthlyLabel: "$120 / month",
-  yearlyLabel: "$1,000 / year",
-  trialDays: TRIAL_DAYS,
-} as const;
