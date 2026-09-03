@@ -116,8 +116,10 @@ function OnboardingOwnerPage() {
             ? heardAboutDetail.trim().slice(0, 120) || null
             : null,
           services: cleanedServices,
+          campaign: campaign ?? undefined,
         },
       });
+      clearCampaign();
       toast.success(`${shop.name} is live. Welcome, owner.`);
       navigate({ to: "/owner/subscribe" });
     } catch (err) {
