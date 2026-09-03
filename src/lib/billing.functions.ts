@@ -139,6 +139,15 @@ export const redeemCompCode = createServerFn({ method: "POST" })
         .update({ plan_state: "lifetime", last_synced_at: new Date().toISOString() })
         .eq("shop_id", data.shopId);
       if (signupError) console.error("owner_signups lifetime sync failed", signupError.message);
+
+      const { error: eventError } = await supabaseAdmin.from("owner_trial_events").insert({
+        shop_id: data.shopId,
+        owner_id: userId,
+        event: "lifetime",
+        plan_state: "lifetime",
+        source: "comp_code",
+      });
+      if (eventError) console.error("owner_trial_events insert failed", eventError.message);
       return { ok: true };
     }
     if (outcome === "already_granted")

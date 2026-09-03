@@ -88,8 +88,11 @@ export const createOwnerShop = createServerFn({ method: "POST" })
       .single();
     if (shopError) throw dbError(shopError, "owner");
 
-    // Owner signup registry — tracking must never block shop creation.
+    // Owner signup registry + 90-day signup trial window — tracking must never
+    // block shop creation.
     try {
+      const { signupTrialEndsAt } = await import("@/lib/trial-events");
+      const signedUpAt = new Date().toISOString();
       const { error: signupError } = await supabaseAdmin.from("owner_signups").insert({
         shop_id: shop.id,
         owner_id: context.userId,
@@ -99,8 +102,22 @@ export const createOwnerShop = createServerFn({ method: "POST" })
         shop_slug: shop.slug,
         heard_about: data.heard_about ?? null,
         heard_about_detail: data.heard_about_detail?.trim() || null,
+        signed_up_at: signedUpAt,
+        plan_state: "trialing",
+        trial_source: "signup",
+        signup_trial_ends_at: signupTrialEndsAt(signedUpAt),
       });
       if (signupError) console.error("owner_signups insert failed", signupError.message);
+
+      const { error: eventError } = await supabaseAdmin.from("owner_trial_events").insert({
+        shop_id: shop.id,
+        owner_id: context.userId,
+        event: "signup_trial_started",
+        plan_state: "trialing",
+        source: "signup",
+        occurred_at: signedUpAt,
+      });
+      if (eventError) console.error("owner_trial_events insert failed", eventError.message);
     } catch (err) {
       console.error("owner_signups insert failed", err);
     }
