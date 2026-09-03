@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 import { dbError } from "@/lib/db-error";
 import { requirePaymentsEnv } from "@/lib/payments-env";
 import {
@@ -18,28 +20,42 @@ const insightsInput = z.object({
 
 type Input = z.infer<typeof insightsInput>;
 
-type AuthContext = {
-  supabase: Parameters<typeof unusedTypeAnchor>[0];
-  userId: string;
+type CachedRow = {
+  payload: AnalyticsBriefing;
+  input_fingerprint: string;
+  model: string | null;
+  created_at: string;
+  updated_at: string | null;
 };
 
-// Type anchor only: keeps the helper's supabase parameter tied to the middleware
-// client type without importing server-only modules at module scope.
-declare function unusedTypeAnchor(client: never): void;
+function cachedResult(cached: CachedRow, days: number, stale: boolean): AnalyticsInsightsResult {
+  return {
+    state: "ready",
+    briefing: cached.payload,
+    generatedAt: cached.updated_at ?? cached.created_at,
+    rangeDays: days,
+    stale,
+    model: cached.model,
+  };
+}
 
 async function loadInsights(
-  context: { supabase: AuthContext["supabase"]; userId: string },
+  context: { supabase: SupabaseClient<Database>; userId: string },
   data: Input,
   force: boolean,
 ): Promise<AnalyticsInsightsResult> {
-  const supabase = context.supabase as unknown as {
-    from: (table: string) => any;
-    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
-  };
+  const { supabase, userId } = context;
+  // The insights table is newer than the generated types; use an untyped view of
+  // the same authenticated client (RLS still scopes every read and write).
+  const db = supabase as unknown as SupabaseClient;
 
-  const shopRes = await supabase.from("shops").select("id, owner_id").eq("id", data.shopId).maybeSingle();
+  const shopRes = await supabase
+    .from("shops")
+    .select("id, owner_id")
+    .eq("id", data.shopId)
+    .maybeSingle();
   if (shopRes.error) throw dbError(shopRes.error, "analytics insights");
-  if (!shopRes.data || shopRes.data.owner_id !== context.userId) throw new Error("Not your shop");
+  if (!shopRes.data || shopRes.data.owner_id !== userId) throw new Error("Not your shop");
 
   const environment = requirePaymentsEnv(data.environment);
   const gate = await supabase.rpc("shop_has_active_analytics", {
@@ -51,29 +67,19 @@ async function loadInsights(
 
   const { buildShopAnalytics } = await import("@/lib/analytics.server");
   const { buildInsightFacts, generateBriefing } = await import("@/lib/analytics-insights.server");
+  const { FEEDBACK_MODEL, classifyGatewayError } = await import("@/lib/ai.server");
 
-  const analytics = await buildShopAnalytics(context.supabase as never, {
-    shopId: data.shopId,
-    days: data.days,
-  });
+  const analytics = await buildShopAnalytics(supabase, { shopId: data.shopId, days: data.days });
   const facts = buildInsightFacts(analytics);
 
-  const cachedRes = await supabase
+  const cachedRes = await db
     .from("analytics_insights")
     .select("payload, input_fingerprint, model, created_at, updated_at")
     .eq("shop_id", data.shopId)
     .eq("range_days", data.days)
     .maybeSingle();
   if (cachedRes.error) throw dbError(cachedRes.error, "analytics insights");
-  const cached = cachedRes.data as
-    | {
-        payload: AnalyticsBriefing;
-        input_fingerprint: string;
-        model: string | null;
-        created_at: string;
-        updated_at: string;
-      }
-    | null;
+  const cached = (cachedRes.data as CachedRow | null) ?? null;
 
   if (facts.appointments < INSIGHTS_MIN_APPOINTMENTS && !cached) {
     return {
@@ -82,52 +88,22 @@ async function loadInsights(
     };
   }
 
-  const fresh = cached !== null && cached.input_fingerprint === facts.fingerprint;
-  if (cached && fresh && !force) {
-    return {
-      state: "ready",
-      briefing: cached.payload,
-      generatedAt: cached.updated_at ?? cached.created_at,
-      rangeDays: data.days,
-      stale: false,
-      model: cached.model,
-    };
-  }
+  const upToDate = cached !== null && cached.input_fingerprint === facts.fingerprint;
+  if (cached && upToDate && !force) return cachedResult(cached, data.days, false);
 
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) {
-    if (cached) {
-      return {
-        state: "ready",
-        briefing: cached.payload,
-        generatedAt: cached.updated_at ?? cached.created_at,
-        rangeDays: data.days,
-        stale: true,
-        model: cached.model,
-      };
-    }
+    if (cached) return cachedResult(cached, data.days, true);
     throw new Error("AI insights are not configured for this workspace yet.");
   }
-
-  const { FEEDBACK_MODEL } = await import("@/lib/ai.server");
-  const { classifyGatewayError } = await import("@/lib/ai.server");
 
   let briefing: AnalyticsBriefing;
   try {
     briefing = await generateBriefing(apiKey, facts.lines);
   } catch (error) {
+    // Keep the last good briefing on screen rather than failing the panel.
+    if (cached) return cachedResult(cached, data.days, true);
     const failure = classifyGatewayError(error);
-    if (cached) {
-      // Keep showing the last good briefing rather than failing the panel.
-      return {
-        state: "ready",
-        briefing: cached.payload,
-        generatedAt: cached.updated_at ?? cached.created_at,
-        rangeDays: data.days,
-        stale: true,
-        model: cached.model,
-      };
-    }
     if (failure.kind === "pause") {
       throw new Error(
         "AI insights are unavailable right now because the workspace AI credits are exhausted or blocked.",
@@ -139,7 +115,8 @@ async function loadInsights(
     throw new Error(`Could not write the briefing: ${failure.reason}`);
   }
 
-  const saveRes = await supabase
+  const now = new Date().toISOString();
+  const saveRes = await db
     .from("analytics_insights")
     .upsert(
       {
@@ -150,18 +127,18 @@ async function loadInsights(
         input_fingerprint: facts.fingerprint,
         payload: briefing,
         model: FEEDBACK_MODEL,
-        updated_at: new Date().toISOString(),
+        updated_at: now,
       },
       { onConflict: "shop_id,range_days" },
     )
-    .select("updated_at, created_at")
+    .select("created_at, updated_at")
     .single();
   if (saveRes.error) throw dbError(saveRes.error, "analytics insights");
 
   return {
     state: "ready",
     briefing,
-    generatedAt: saveRes.data?.updated_at ?? new Date().toISOString(),
+    generatedAt: (saveRes.data as { updated_at: string | null } | null)?.updated_at ?? now,
     rangeDays: data.days,
     stale: false,
     model: FEEDBACK_MODEL,
@@ -173,13 +150,12 @@ export const getAnalyticsInsights = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => insightsInput.parse(input))
   .handler(
     async ({ data, context }): Promise<AnalyticsInsightsResult> =>
-      loadInsights(context as never, data, false),
+      loadInsights(context, data, false),
   );
 
 export const refreshAnalyticsInsights = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => insightsInput.parse(input))
   .handler(
-    async ({ data, context }): Promise<AnalyticsInsightsResult> =>
-      loadInsights(context as never, data, true),
+    async ({ data, context }): Promise<AnalyticsInsightsResult> => loadInsights(context, data, true),
   );
