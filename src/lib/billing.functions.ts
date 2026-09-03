@@ -53,7 +53,7 @@ const cancelInput = z.object({
   resume: z.boolean().optional(),
 });
 
-export { TRIAL_DAYS } from "@/lib/stripe";
+export { TRIAL_DAYS };
 
 export type BillingStatus = {
   hasAnalytics: boolean;
