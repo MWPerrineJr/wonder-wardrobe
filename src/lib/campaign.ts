@@ -160,5 +160,5 @@ export const CAMPAIGN_LINKS = [
 ].map(({ source, label }) => ({
   source,
   label,
-  path: `/onboarding/owner?utm_source=${source}&utm_medium=social&utm_campaign=founding-shops&utm_content=week1-launch`,
+  path: `/owners?utm_source=${source}&utm_medium=social&utm_campaign=founding-shops&utm_content=week1-launch`,
 }));
