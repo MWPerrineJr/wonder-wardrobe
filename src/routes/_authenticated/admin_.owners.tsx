@@ -89,6 +89,11 @@ function trialCell(row: OwnerSignupRow): string {
 function AdminOwnersPage() {
   const { data } = useSuspenseQuery(ownerSignupsQuery);
   const [filter, setFilter] = useState<Filter>("all");
+  const allRows = data.access === "granted" ? data.rows : [];
+  const rows = useMemo(
+    () => (filter === "all" ? allRows : allRows.filter((r) => r.planState === filter)),
+    [allRows, filter],
+  );
 
   if (data.access === "denied") {
     return (
@@ -102,11 +107,6 @@ function AdminOwnersPage() {
       </Shell>
     );
   }
-
-  const rows = useMemo(
-    () => (filter === "all" ? data.rows : data.rows.filter((r) => r.planState === filter)),
-    [data.rows, filter],
-  );
 
   return (
     <Shell>
