@@ -1,5 +1,7 @@
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 
+import { TRIAL_DAYS } from "@/lib/trial";
+
 type StripeEnv = "sandbox" | "live";
 
 const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;
