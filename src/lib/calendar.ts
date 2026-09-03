@@ -19,7 +19,7 @@ export type CalendarEvent = {
 };
 
 /** 20260820T140000Z — the only timestamp form both Google and Apple accept everywhere. */
-export function toUtcStamp(iso: string): string {
+function toUtcStamp(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) throw new Error("Invalid appointment time");
   return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, "0")}${String(

@@ -6,7 +6,7 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
 );
 
-export const DEMO_STEPS = [
+const DEMO_STEPS = [
   {
     icon: "storefront",
     title: "Publish your shop page",

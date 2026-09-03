@@ -39,7 +39,7 @@ export function occupyingBookings(
   return rows.filter((row) => occupiesSlot(row.status, row.holdExpiresAt, nowMs));
 }
 
-export function providerHasConflict(
+function providerHasConflict(
   existing: OccupyingBooking[],
   providerId: string,
   start: number,
@@ -51,7 +51,7 @@ export function providerHasConflict(
   );
 }
 
-export function shopHasCapacity(
+function shopHasCapacity(
   existing: OccupyingBooking[],
   activeProviderCount: number,
   start: number,

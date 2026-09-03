@@ -92,7 +92,7 @@ type GmailMessage = {
 };
 type GmailThread = { id: string; snippet?: string; messages?: GmailMessage[] };
 
-export function headerValue(msg: GmailMessage | undefined, name: string): string {
+function headerValue(msg: GmailMessage | undefined, name: string): string {
   const headers = msg?.payload?.headers ?? [];
   return headers.find((h) => h.name.toLowerCase() === name.toLowerCase())?.value ?? "";
 }
@@ -103,7 +103,7 @@ function decodeBase64Url(data: string): string {
 }
 
 /** Pull the best readable body out of a Gmail message payload. */
-export function extractBody(msg: GmailMessage): { text: string; html: string | null } {
+function extractBody(msg: GmailMessage): { text: string; html: string | null } {
   let text = "";
   let html: string | null = null;
 

@@ -202,7 +202,7 @@ function LifetimeAccessPanel({ status, shopId }: { status: BillingStatus; shopId
   );
 }
 
-export function CompCodeForm({ shopId }: { shopId: string }) {
+function CompCodeForm({ shopId }: { shopId: string }) {
   const [code, setCode] = useState("");
   const queryClient = useQueryClient();
 
@@ -282,7 +282,7 @@ function FeatureList({ items }: { items: readonly string[] }) {
   );
 }
 
-export function CheckoutForm({ shopId, priceId }: { shopId: string; priceId: AnalyticsPriceId }) {
+function CheckoutForm({ shopId, priceId }: { shopId: string; priceId: AnalyticsPriceId }) {
   const fetchClientSecret = useCallback(async () => {
     const result = await createCheckoutSession({
       data: {

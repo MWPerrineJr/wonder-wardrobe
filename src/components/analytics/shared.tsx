@@ -37,7 +37,7 @@ export function pct(value: number, digits = 0): string {
   return `${value.toFixed(digits)}%`;
 }
 
-export function changePct(trend: TrendValue): number | null {
+function changePct(trend: TrendValue): number | null {
   if (trend.previous === 0) return trend.current === 0 ? 0 : null;
   return ((trend.current - trend.previous) / Math.abs(trend.previous)) * 100;
 }

@@ -81,7 +81,7 @@ export async function runScheduledJob(
  * A job paused by a 402/403 is allowed exactly one probe item per run so it can
  * detect out-of-band recovery.
  */
-export async function acquireLease(admin: Admin, job: JobName): Promise<JobLease> {
+async function acquireLease(admin: Admin, job: JobName): Promise<JobLease> {
   const now = new Date();
   const leaseUntil = new Date(now.getTime() + LEASE_MINUTES * 60_000).toISOString();
 
@@ -122,7 +122,7 @@ export async function acquireLease(admin: Admin, job: JobName): Promise<JobLease
   return { ok: true, paused: false, probeOnly: false };
 }
 
-export async function releaseLease(admin: Admin, job: JobName) {
+async function releaseLease(admin: Admin, job: JobName) {
   await admin
     .from("ai_job_state")
     .update({ lease_until: null, updated_at: new Date().toISOString() })

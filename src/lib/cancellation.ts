@@ -23,7 +23,7 @@ function hoursLabel(hours: number): string {
   return hours === 1 ? "1 hour" : `${hours} hours`;
 }
 
-export function hoursUntil(startsAt: string | Date, now: number = Date.now()): number {
+function hoursUntil(startsAt: string | Date, now: number = Date.now()): number {
   const start = typeof startsAt === "string" ? new Date(startsAt).getTime() : startsAt.getTime();
   return (start - now) / 3_600_000;
 }

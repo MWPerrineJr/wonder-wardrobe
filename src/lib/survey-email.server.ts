@@ -21,7 +21,7 @@ export type SurveyEmailInput = {
   idempotencyKey?: string;
 };
 
-export function surveyUrl(appUrl: string, token: string, rating?: number) {
+function surveyUrl(appUrl: string, token: string, rating?: number) {
   const base = `${appUrl.replace(/\/$/, "")}/survey/${token}`;
   return rating ? `${base}?r=${rating}` : base;
 }
