@@ -84,7 +84,7 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
         </h2>
         <p className="text-on-surface-variant text-body-md max-w-xl">
           Listing your services and taking bookings is free, forever. Survey automation, AI feedback
-          analysis and business analytics are part of the Analytics plan — start with a 1-month free
+          analysis and business analytics are part of the Analytics plan — start with a 90-day free
           trial. Pricing scales with the number of providers in your shop
           {providerCount > 0 ? ` (you have ${providerCount}).` : "."}
         </p>
@@ -149,7 +149,7 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
                   setCheckoutPriceId(priceId);
                 }}
               >
-                Start 1-month free trial
+                Start 90-day free trial
               </Button>
             </div>
           );

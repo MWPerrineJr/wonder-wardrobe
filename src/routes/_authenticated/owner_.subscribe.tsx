@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/owner_/subscribe")({
       {
         name: "description",
         content:
-          "Pick the Analytics plan that matches your team size and start a 1-month free trial.",
+          "Pick the Analytics plan that matches your team size and start a 90-day free trial.",
       },
       { property: "og:title", content: "Choose your Analytics plan — The Standing Chair" },
       {

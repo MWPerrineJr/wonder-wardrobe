@@ -21,7 +21,7 @@ const formatDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString(undefined, { dateStyle: "long" }) : null;
 
 const STATUS_COPY: Record<string, string> = {
-  trialing: "Free trial",
+  trialing: "Free trial (90 days)",
   active: "Active",
   past_due: "Payment failed — retrying",
   canceled: "Canceled",

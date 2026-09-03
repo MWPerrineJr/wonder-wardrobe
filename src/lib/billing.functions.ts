@@ -11,7 +11,7 @@ import { TRIAL_DAYS } from "@/lib/trial";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import type Stripe from "stripe";
 
-// Per-shop analytics subscription ($120/month or $1,000/year, 30-day trial).
+// Per-shop analytics subscription ($120/month or $1,000/year, 90-day trial).
 // Free tier: shop listing, public page, services, hours, calendar, bookings.
 // Paid tier gates ALL analytics — Feedback Intelligence and surveys today,
 // the business-analysis tool next.
