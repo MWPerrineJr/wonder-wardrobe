@@ -1,9 +1,13 @@
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
 import { AccountNav } from "@/components/account-nav";
-import { listOwnerSignups, type OwnerSignupRow } from "@/lib/admin.functions";
+import {
+  listOwnerSignups,
+  listOwnerTrialEvents,
+  type OwnerSignupRow,
+} from "@/lib/admin.functions";
 
 const ownerSignupsQuery = queryOptions({
   queryKey: ["admin", "owner-signups"],
@@ -86,9 +90,35 @@ function trialCell(row: OwnerSignupRow): string {
   return `${row.trialDaysLeft} day${row.trialDaysLeft === 1 ? "" : "s"} left`;
 }
 
+function TrialHistory({ shopId }: { shopId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "trial-events", shopId],
+    queryFn: () => listOwnerTrialEvents({ data: { shopId } }),
+  });
+
+  if (isLoading) return <p className="text-body-sm text-on-surface-variant">Loading history…</p>;
+  if (!data || data.access === "denied" || data.rows.length === 0)
+    return <p className="text-body-sm text-on-surface-variant">No trial history recorded yet.</p>;
+
+  return (
+    <ol className="flex flex-col gap-1">
+      {data.rows.map((e) => (
+        <li key={e.id} className="text-body-md text-on-surface-variant">
+          <span className="text-on-surface">{e.eventLabel}</span>{" "}
+          <span className="text-body-sm">
+            — {new Date(e.occurredAt).toLocaleString(undefined, { dateStyle: "medium" })}
+            {e.source ? ` · ${e.source}` : ""}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function AdminOwnersPage() {
   const { data } = useSuspenseQuery(ownerSignupsQuery);
   const [filter, setFilter] = useState<Filter>("all");
+  const [openShopId, setOpenShopId] = useState<string | null>(null);
   const allRows = data.access === "granted" ? data.rows : [];
   const rows = useMemo(
     () => (filter === "all" ? allRows : allRows.filter((r) => r.planState === filter)),
@@ -124,6 +154,8 @@ function AdminOwnersPage() {
         <Stat label="This week" value={data.totals.thisWeek} />
         <Stat label="Last 30 days" value={data.totals.thisMonth} />
         <Stat label="Trials ending ≤14d" value={data.totals.trialsEndingSoon} />
+        <Stat label="Signup trials (no card)" value={data.totals.signupTrialsNoCard} />
+        <Stat label="Signup trials ending ≤14d" value={data.totals.signupTrialsEndingSoon} />
       </div>
 
       {data.sources.length > 0 && (
@@ -163,9 +195,9 @@ function AdminOwnersPage() {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-border-subtle">
-              {["Signed up", "Shop", "Owner", "Email", "Plan", "Trial", "Source"].map((h) => (
+              {["Signed up", "Shop", "Owner", "Email", "Plan", "Trial", "Source", ""].map((h, i) => (
                 <th
-                  key={h}
+                  key={h || `col-${i}`}
                   className="text-label-md text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap"
                 >
                   {h}
@@ -176,7 +208,7 @@ function AdminOwnersPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-on-surface-variant text-body-md">
+                <td colSpan={8} className="px-4 py-8 text-on-surface-variant text-body-md">
                   No signups to show yet.
                 </td>
               </tr>
