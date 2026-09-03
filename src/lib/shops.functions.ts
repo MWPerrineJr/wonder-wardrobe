@@ -128,25 +128,3 @@ export const getShopDetail = createServerFn({ method: "GET" })
     return { shop, services: services ?? [] };
   });
 
-export const updateShopCategories = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        shopId: z.string().uuid(),
-        categories: categorySchema,
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: updated, error } = await supabase
-      .from("shops")
-      .update({ categories: data.categories })
-      .eq("id", data.shopId)
-      .eq("owner_id", context.userId)
-      .select("id, categories")
-      .single();
-    if (error) throw dbError(error, "shops");
-    return updated;
-  });

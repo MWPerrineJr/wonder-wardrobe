@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { dbError } from "@/lib/db-error";
-import { ProviderSelfPatch } from "@/lib/provider-profile";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
