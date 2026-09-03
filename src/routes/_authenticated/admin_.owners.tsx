@@ -3,11 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment, useMemo, useState } from "react";
 
 import { AccountNav } from "@/components/account-nav";
-import {
-  listOwnerSignups,
-  listOwnerTrialEvents,
-  type OwnerSignupRow,
-} from "@/lib/admin.functions";
+import { listOwnerSignups, listOwnerTrialEvents, type OwnerSignupRow } from "@/lib/admin.functions";
 
 const ownerSignupsQuery = queryOptions({
   queryKey: ["admin", "owner-signups"],
@@ -230,8 +226,17 @@ function AdminOwnersPage() {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-border-subtle">
-              {["Signed up", "Shop", "Owner", "Email", "Plan", "Trial", "Source", "Campaign", ""].map(
-                (h, i) => (
+              {[
+                "Signed up",
+                "Shop",
+                "Owner",
+                "Email",
+                "Plan",
+                "Trial",
+                "Source",
+                "Campaign",
+                "",
+              ].map((h, i) => (
                 <th
                   key={h || `col-${i}`}
                   className="text-label-md text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap"
@@ -251,63 +256,65 @@ function AdminOwnersPage() {
             )}
             {rows.map((r) => (
               <Fragment key={r.shopId}>
-              <tr className="border-b border-border-subtle">
-                <td className="px-4 py-3 text-on-surface whitespace-nowrap">
-                  {new Date(r.signedUpAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
-                </td>
-                <td className="px-4 py-3 text-on-surface">
-                  <Link to="/shop/$slug" params={{ slug: r.shopSlug }} className="hover:text-primary">
-                    {r.shopName}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-on-surface-variant">{r.ownerName ?? "—"}</td>
-                <td className="px-4 py-3 text-on-surface-variant">{r.ownerEmail ?? "—"}</td>
-                <td className="px-4 py-3 text-on-surface whitespace-nowrap">
-                  {STATE_LABEL[r.planState] ?? r.planState}
-                </td>
-                <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">
-                  {trialCell(r)}
-                  {r.trialSource !== "none" && (
-                    <span className="ml-2 text-label-sm rounded-full border border-border-subtle px-2 py-0.5">
-                      {r.trialSourceLabel}
-                    </span>
-                  )}
-                </td>
-                <td
-                  className="px-4 py-3 text-on-surface-variant whitespace-nowrap"
-                  title={r.heardAboutDetail ?? undefined}
-                >
-                  {r.heardAboutLabel}
-                  {r.heardAboutDetail ? " *" : ""}
-                </td>
-                <td
-                  className="px-4 py-3 text-on-surface-variant whitespace-nowrap"
-                  title={
-                    [r.utmCampaign, r.utmContent].filter(Boolean).join(" · ") || undefined
-                  }
-                >
-                  {r.utmSource ? `${r.utmSource}${r.utmMedium ? ` · ${r.utmMedium}` : ""}` : "—"}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <button
-                    type="button"
-                    onClick={() => setOpenShopId((prev) => (prev === r.shopId ? null : r.shopId))}
-                    className="text-label-md text-on-surface-variant hover:text-primary"
+                <tr className="border-b border-border-subtle">
+                  <td className="px-4 py-3 text-on-surface whitespace-nowrap">
+                    {new Date(r.signedUpAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
+                  </td>
+                  <td className="px-4 py-3 text-on-surface">
+                    <Link
+                      to="/shop/$slug"
+                      params={{ slug: r.shopSlug }}
+                      className="hover:text-primary"
+                    >
+                      {r.shopName}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-on-surface-variant">{r.ownerName ?? "—"}</td>
+                  <td className="px-4 py-3 text-on-surface-variant">{r.ownerEmail ?? "—"}</td>
+                  <td className="px-4 py-3 text-on-surface whitespace-nowrap">
+                    {STATE_LABEL[r.planState] ?? r.planState}
+                  </td>
+                  <td className="px-4 py-3 text-on-surface-variant whitespace-nowrap">
+                    {trialCell(r)}
+                    {r.trialSource !== "none" && (
+                      <span className="ml-2 text-label-sm rounded-full border border-border-subtle px-2 py-0.5">
+                        {r.trialSourceLabel}
+                      </span>
+                    )}
+                  </td>
+                  <td
+                    className="px-4 py-3 text-on-surface-variant whitespace-nowrap"
+                    title={r.heardAboutDetail ?? undefined}
                   >
-                    {openShopId === r.shopId ? "Hide history" : "History"}
-                  </button>
-                </td>
-              </tr>
-              {openShopId === r.shopId && (
-                <tr className="border-b border-border-subtle bg-surface-container">
-                  <td colSpan={9} className="px-4 py-4">
-                    <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-2">
-                      Trial history
-                    </p>
-                    <TrialHistory shopId={r.shopId} />
+                    {r.heardAboutLabel}
+                    {r.heardAboutDetail ? " *" : ""}
+                  </td>
+                  <td
+                    className="px-4 py-3 text-on-surface-variant whitespace-nowrap"
+                    title={[r.utmCampaign, r.utmContent].filter(Boolean).join(" · ") || undefined}
+                  >
+                    {r.utmSource ? `${r.utmSource}${r.utmMedium ? ` · ${r.utmMedium}` : ""}` : "—"}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => setOpenShopId((prev) => (prev === r.shopId ? null : r.shopId))}
+                      className="text-label-md text-on-surface-variant hover:text-primary"
+                    >
+                      {openShopId === r.shopId ? "Hide history" : "History"}
+                    </button>
                   </td>
                 </tr>
-              )}
+                {openShopId === r.shopId && (
+                  <tr className="border-b border-border-subtle bg-surface-container">
+                    <td colSpan={9} className="px-4 py-4">
+                      <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-2">
+                        Trial history
+                      </p>
+                      <TrialHistory shopId={r.shopId} />
+                    </td>
+                  </tr>
+                )}
               </Fragment>
             ))}
           </tbody>
