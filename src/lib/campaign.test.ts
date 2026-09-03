@@ -52,7 +52,7 @@ describe("CAMPAIGN_LINKS", () => {
       ["linkedin", "instagram", "facebook"],
     );
     for (const link of CAMPAIGN_LINKS) {
-      assert.ok(link.path.startsWith("/onboarding/owner?utm_source="));
+      assert.ok(link.path.startsWith("/owners?utm_source="));
       assert.ok(link.path.includes("utm_campaign=founding-shops"));
     }
   });
