@@ -56,6 +56,53 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_insights: {
+        Row: {
+          created_at: string
+          id: string
+          input_fingerprint: string
+          model: string | null
+          payload: Json
+          range_days: number
+          shop_id: string
+          updated_at: string
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_fingerprint: string
+          model?: string | null
+          payload: Json
+          range_days: number
+          shop_id: string
+          updated_at?: string
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_fingerprint?: string
+          model?: string | null
+          payload?: Json
+          range_days?: number
+          shop_id?: string
+          updated_at?: string
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_insights_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_runtime_settings: {
         Row: {
           key: string

@@ -14,6 +14,7 @@ import {
   SurveyPanel,
   UtilizationHeatmap,
 } from "@/components/analytics/charts";
+import { AnalyticsInsights } from "@/components/analytics/insights";
 import { KpiCard, money, pct } from "@/components/analytics/shared";
 import { PaymentTestModeBanner } from "@/components/payment-test-banner";
 import { getShopAnalytics } from "@/lib/analytics.functions";
@@ -183,6 +184,8 @@ function AnalyticsContent({ shopId, days }: { shopId: string; days: number }) {
 
   return (
     <>
+      <AnalyticsInsights shopId={shopId} days={days} />
+
       <section className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <KpiCard
           label="Booked revenue"

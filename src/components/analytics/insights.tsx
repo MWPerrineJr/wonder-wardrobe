@@ -1,0 +1,235 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { Panel } from "@/components/analytics/shared";
+import {
+  IMPACT_LABEL,
+  type AnalyticsInsightsResult,
+  type DriverTone,
+  type InsightAction,
+  type InsightDriver,
+} from "@/lib/analytics-insights-types";
+import {
+  getAnalyticsInsights,
+  refreshAnalyticsInsights,
+} from "@/lib/analytics-insights.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
+
+const TONE_STYLES: Record<DriverTone, { chip: string; icon: string; label: string }> = {
+  positive: {
+    chip: "bg-positive/10 text-positive border-positive/30",
+    icon: "trending_up",
+    label: "Tailwind",
+  },
+  negative: {
+    chip: "bg-negative/10 text-negative border-negative/30",
+    icon: "trending_down",
+    label: "Headwind",
+  },
+  watch: {
+    chip: "bg-primary/10 text-primary border-primary/30",
+    icon: "visibility",
+    label: "Watch",
+  },
+};
+
+const IMPACT_STYLES: Record<InsightAction["impact"], string> = {
+  high: "bg-primary text-on-primary",
+  medium: "bg-primary/15 text-primary",
+  low: "bg-surface-variant text-on-surface-variant",
+};
+
+const Icon = ({ name, className = "" }: { name: string; className?: string }) => (
+  <span aria-hidden className={`material-symbols-outlined ${className}`}>
+    {name}
+  </span>
+);
+
+function formatWhen(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+export function AnalyticsInsights({ shopId, days }: { shopId: string; days: number }) {
+  const queryClient = useQueryClient();
+  const queryKey = ["owner", "analytics", "insights", shopId, days];
+
+  const { data, isPending, isError, error } = useQuery<AnalyticsInsightsResult>({
+    queryKey,
+    queryFn: () =>
+      getAnalyticsInsights({ data: { shopId, days, environment: getStripeEnvironment() } }),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  const refresh = useMutation({
+    mutationFn: () =>
+      refreshAnalyticsInsights({ data: { shopId, days, environment: getStripeEnvironment() } }),
+    onSuccess: (result) => {
+      queryClient.setQueryData(queryKey, result);
+      toast.success("Insights rewritten from your latest numbers.");
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const busy = isPending || refresh.isPending;
+
+  const action = (
+    <button
+      type="button"
+      onClick={() => refresh.mutate()}
+      disabled={busy}
+      className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-surface px-3 py-2 text-label-sm text-on-surface-variant hover:text-on-surface hover:border-primary/50 disabled:opacity-60 transition-colors"
+    >
+      <Icon name="autorenew" className={`text-[18px] ${refresh.isPending ? "animate-spin" : ""}`} />
+      {refresh.isPending ? "Writing…" : "Refresh insights"}
+    </button>
+  );
+
+  return (
+    <Panel
+      title="What's driving your numbers"
+      subtitle="An analysis of this range, written from your bookings, services, providers and survey results."
+      action={action}
+    >
+      {isPending && <SkeletonBriefing />}
+
+      {isError && (
+        <p className="text-body-md text-on-surface-variant">
+          {(error as Error)?.message ?? "Insights are unavailable right now."}
+        </p>
+      )}
+
+      {data?.state === "locked" && (
+        <p className="text-body-md text-on-surface-variant">
+          AI insights are part of the Analytics plan.
+        </p>
+      )}
+
+      {data?.state === "insufficient_data" && (
+        <p className="text-body-md text-on-surface-variant">{data.message}</p>
+      )}
+
+      {data?.state === "ready" && (
+        <div className="flex flex-col gap-6">
+          <p className="text-on-surface font-headline text-body-lg font-semibold leading-snug">
+            {data.briefing.headline}
+          </p>
+
+          {data.stale && (
+            <p className="flex items-center gap-2 text-label-sm text-on-surface-variant">
+              <Icon name="info" className="text-[18px]" />
+              Your numbers changed since this was written — refresh for an updated read.
+            </p>
+          )}
+
+          {data.briefing.drivers.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <h3 className="text-label-sm uppercase tracking-wide text-on-surface-variant">
+                Key drivers
+              </h3>
+              <ul className="grid gap-3 md:grid-cols-2">
+                {data.briefing.drivers.map((d, i) => (
+                  <DriverCard key={`${d.metric}-${i}`} driver={d} />
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {data.briefing.actions.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <h3 className="text-label-sm uppercase tracking-wide text-on-surface-variant">
+                What to do next
+              </h3>
+              <ol className="flex flex-col gap-3">
+                {data.briefing.actions.map((a, i) => (
+                  <ActionCard key={`${a.title}-${i}`} action={a} index={i + 1} />
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {data.briefing.risks.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h3 className="text-label-sm uppercase tracking-wide text-on-surface-variant">
+                Watch-outs
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {data.briefing.risks.map((r, i) => (
+                  <li key={`${r}-${i}`} className="flex items-start gap-2 text-body-md text-on-surface">
+                    <Icon name="warning" className="text-[18px] text-negative mt-0.5 shrink-0" />
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <p className="text-label-sm text-on-surface-variant border-t border-border-subtle pt-3">
+            Written for the last {data.rangeDays} days · {formatWhen(data.generatedAt)}
+          </p>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+function DriverCard({ driver }: { driver: InsightDriver }) {
+  const tone = TONE_STYLES[driver.tone];
+  return (
+    <li className="rounded-lg border border-border-subtle bg-background/40 p-4 flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-label-sm ${tone.chip}`}
+        >
+          <Icon name={tone.icon} className="text-[16px]" />
+          {tone.label}
+        </span>
+        <span className="text-label-md text-on-surface font-semibold">{driver.metric}</span>
+      </div>
+      <p className="text-body-md text-on-surface">{driver.movement}</p>
+      <p className="text-body-md text-on-surface-variant">{driver.cause}</p>
+    </li>
+  );
+}
+
+function ActionCard({ action, index }: { action: InsightAction; index: number }) {
+  return (
+    <li className="rounded-lg border border-border-subtle bg-background/40 p-4 flex gap-3">
+      <span className="shrink-0 w-7 h-7 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center text-label-sm font-semibold">
+        {index}
+      </span>
+      <div className="flex flex-col gap-1.5 min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-label-md text-on-surface font-semibold">{action.title}</span>
+          <span
+            className={`rounded-full px-2 py-0.5 text-label-sm ${IMPACT_STYLES[action.impact]}`}
+          >
+            {IMPACT_LABEL[action.impact]}
+          </span>
+        </div>
+        <p className="text-body-md text-on-surface">{action.detail}</p>
+        <p className="text-body-md text-on-surface-variant">{action.evidence}</p>
+      </div>
+    </li>
+  );
+}
+
+function SkeletonBriefing() {
+  return (
+    <div className="flex flex-col gap-4 animate-pulse" aria-busy>
+      <div className="h-6 w-3/4 rounded bg-surface-variant" />
+      <div className="grid gap-3 md:grid-cols-2">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-24 rounded-lg bg-surface-variant" />
+        ))}
+      </div>
+      <div className="h-20 rounded-lg bg-surface-variant" />
+    </div>
+  );
+}
