@@ -230,7 +230,8 @@ function AdminOwnersPage() {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-border-subtle">
-              {["Signed up", "Shop", "Owner", "Email", "Plan", "Trial", "Source", ""].map((h, i) => (
+              {["Signed up", "Shop", "Owner", "Email", "Plan", "Trial", "Source", "Campaign", ""].map(
+                (h, i) => (
                 <th
                   key={h || `col-${i}`}
                   className="text-label-md text-on-surface-variant uppercase tracking-wide px-4 py-3 whitespace-nowrap"
@@ -243,7 +244,7 @@ function AdminOwnersPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-on-surface-variant text-body-md">
+                <td colSpan={9} className="px-4 py-8 text-on-surface-variant text-body-md">
                   No signups to show yet.
                 </td>
               </tr>
@@ -279,6 +280,14 @@ function AdminOwnersPage() {
                   {r.heardAboutLabel}
                   {r.heardAboutDetail ? " *" : ""}
                 </td>
+                <td
+                  className="px-4 py-3 text-on-surface-variant whitespace-nowrap"
+                  title={
+                    [r.utmCampaign, r.utmContent].filter(Boolean).join(" · ") || undefined
+                  }
+                >
+                  {r.utmSource ? `${r.utmSource}${r.utmMedium ? ` · ${r.utmMedium}` : ""}` : "—"}
+                </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <button
                     type="button"
@@ -291,7 +300,7 @@ function AdminOwnersPage() {
               </tr>
               {openShopId === r.shopId && (
                 <tr className="border-b border-border-subtle bg-surface-container">
-                  <td colSpan={8} className="px-4 py-4">
+                  <td colSpan={9} className="px-4 py-4">
                     <p className="text-label-md text-on-surface-variant uppercase tracking-wide mb-2">
                       Trial history
                     </p>
