@@ -3,6 +3,7 @@ import { z } from "zod";
 import { dbError } from "@/lib/db-error";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { HEARD_ABOUT_VALUES } from "@/lib/attribution";
 import { categorySchema, type ServiceCategory } from "@/lib/categories";
 import {
   normalizeCustomLinks,
@@ -21,6 +22,8 @@ const CreateShopInput = z.object({
   description: z.string().max(500).optional().nullable(),
   address: z.string().max(200).optional().nullable(),
   categories: categorySchema.optional().default([]),
+  heard_about: z.enum(HEARD_ABOUT_VALUES).optional().nullable(),
+  heard_about_detail: z.string().trim().max(120).optional().nullable(),
   services: z
     .array(
       z.object({
@@ -94,6 +97,8 @@ export const createOwnerShop = createServerFn({ method: "POST" })
         owner_name: (context.claims?.["name"] as string | undefined) ?? null,
         shop_name: shop.name,
         shop_slug: shop.slug,
+        heard_about: data.heard_about ?? null,
+        heard_about_detail: data.heard_about_detail?.trim() || null,
       });
       if (signupError) console.error("owner_signups insert failed", signupError.message);
     } catch (err) {

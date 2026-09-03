@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { HEARD_ABOUT_SOURCES, heardAboutLabel } from "@/lib/attribution";
 import { dbError } from "@/lib/db-error";
 
 export type OwnerSignupRow = {
@@ -13,7 +14,12 @@ export type OwnerSignupRow = {
   planState: string;
   trialEndsAt: string | null;
   trialDaysLeft: number | null;
+  heardAbout: string | null;
+  heardAboutLabel: string;
+  heardAboutDetail: string | null;
 };
+
+export type SourceCount = { value: string; label: string; count: number };
 
 export type OwnerSignupsResult =
   | { access: "denied" }
@@ -26,6 +32,7 @@ export type OwnerSignupsResult =
         thisMonth: number;
         trialsEndingSoon: number;
       };
+      sources: SourceCount[];
     };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -46,7 +53,7 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
     const { data, error } = await supabase
       .from("owner_signups")
       .select(
-        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at",
+        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at, heard_about, heard_about_detail",
       )
       .order("signed_up_at", { ascending: false })
       .limit(500);
@@ -65,8 +72,21 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
         planState: r.plan_state,
         trialEndsAt: r.trial_ends_at,
         trialDaysLeft: ends === null ? null : Math.ceil((ends - now) / DAY_MS),
+        heardAbout: r.heard_about,
+        heardAboutLabel: heardAboutLabel(r.heard_about),
+        heardAboutDetail: r.heard_about_detail,
       };
     });
+
+    const sources: SourceCount[] = HEARD_ABOUT_SOURCES.map((s) => ({
+      value: s.value as string,
+      label: s.label as string,
+      count: rows.filter((r) => r.heardAbout === s.value).length,
+    }))
+      .filter((s) => s.count > 0)
+      .sort((a, b) => b.count - a.count);
+    const unknown = rows.filter((r) => !r.heardAbout).length;
+    if (unknown > 0) sources.push({ value: "unknown", label: "Not answered", count: unknown });
 
     return {
       access: "granted",
@@ -79,5 +99,6 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
           (r) => r.trialDaysLeft !== null && r.trialDaysLeft >= 0 && r.trialDaysLeft <= 14,
         ).length,
       },
+      sources,
     };
   });
