@@ -71,7 +71,7 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
     const { data, error } = await supabase
       .from("owner_signups")
       .select(
-        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at, heard_about, heard_about_detail, trial_source, signup_trial_ends_at",
+        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at, heard_about, heard_about_detail, trial_source, signup_trial_ends_at, utm_source, utm_medium, utm_campaign, utm_content, first_touch_at",
       )
       .order("signed_up_at", { ascending: false })
       .limit(500);
