@@ -30,7 +30,7 @@ export function getStripeEnvironment(): StripeEnv {
   return paymentsEnvironment();
 }
 
-export const TRIAL_DAYS = 30;
+export const TRIAL_DAYS = 90;
 
 export type PlanTierId = "solo" | "team" | "enterprise";
 export type AnalyticsPriceId =
