@@ -133,7 +133,14 @@ export const redeemCompCode = createServerFn({ method: "POST" })
     });
     if (error) throw dbError(error, "billing");
 
-    if (outcome === "ok") return { ok: true };
+    if (outcome === "ok") {
+      const { error: signupError } = await supabaseAdmin
+        .from("owner_signups")
+        .update({ plan_state: "lifetime", last_synced_at: new Date().toISOString() })
+        .eq("shop_id", data.shopId);
+      if (signupError) console.error("owner_signups lifetime sync failed", signupError.message);
+      return { ok: true };
+    }
     if (outcome === "already_granted")
       return { error: "This shop already has lifetime complimentary access." };
     if (outcome === "not_owner") return { error: "You don't own this shop." };
