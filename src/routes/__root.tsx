@@ -140,6 +140,13 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Capture sign-up campaign links (?utm_source=…) on any entry point, before the
+  // auth gate redirect drops the query string.
+  useEffect(() => {
+    captureCampaign(window.location.search, document.referrer);
+  }, [pathname]);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
