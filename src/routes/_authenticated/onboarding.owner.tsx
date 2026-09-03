@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -7,6 +7,12 @@ import {
   wantsHeardAboutDetail,
   type HeardAboutSource,
 } from "@/lib/attribution";
+import {
+  campaignSourceToHeardAbout,
+  clearCampaign,
+  getCampaign,
+  type Campaign,
+} from "@/lib/campaign";
 import { createOwnerShop } from "@/lib/owner.functions";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 
@@ -42,7 +48,17 @@ function OnboardingOwnerPage() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [heardAbout, setHeardAbout] = useState<HeardAboutSource | null>(null);
   const [heardAboutDetail, setHeardAboutDetail] = useState("");
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Seed attribution from the campaign link they arrived through (they can still change it).
+  useEffect(() => {
+    const stored = getCampaign();
+    if (!stored) return;
+    setCampaign(stored);
+    const mapped = campaignSourceToHeardAbout(stored.utm_source);
+    if (mapped) setHeardAbout((prev) => prev ?? (mapped as HeardAboutSource));
+  }, []);
   const [services, setServices] = useState<
     Array<{ name: string; duration: string; price: string; category: ServiceCategory }>
   >([
@@ -100,8 +116,10 @@ function OnboardingOwnerPage() {
             ? heardAboutDetail.trim().slice(0, 120) || null
             : null,
           services: cleanedServices,
+          campaign: campaign ?? undefined,
         },
       });
+      clearCampaign();
       toast.success(`${shop.name} is live. Welcome, owner.`);
       navigate({ to: "/owner/subscribe" });
     } catch (err) {

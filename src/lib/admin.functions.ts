@@ -26,6 +26,11 @@ export type OwnerSignupRow = {
   trialSource: TrialSource;
   trialSourceLabel: string;
   signupTrialEndsAt: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  firstTouchAt: string | null;
 };
 
 export type SourceCount = { value: string; label: string; count: number };
@@ -44,6 +49,8 @@ export type OwnerSignupsResult =
         signupTrialsEndingSoon: number;
       };
       sources: SourceCount[];
+      campaignSources: SourceCount[];
+      campaigns: SourceCount[];
     };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -64,7 +71,7 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
     const { data, error } = await supabase
       .from("owner_signups")
       .select(
-        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at, heard_about, heard_about_detail, trial_source, signup_trial_ends_at",
+        "shop_id, shop_name, shop_slug, owner_name, owner_email, signed_up_at, plan_state, trial_ends_at, heard_about, heard_about_detail, trial_source, signup_trial_ends_at, utm_source, utm_medium, utm_campaign, utm_content, first_touch_at",
       )
       .order("signed_up_at", { ascending: false })
       .limit(500);
@@ -92,8 +99,28 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
         trialSource: source,
         trialSourceLabel: TRIAL_SOURCE_LABEL[source] ?? "—",
         signupTrialEndsAt: r.signup_trial_ends_at,
+        utmSource: r.utm_source,
+        utmMedium: r.utm_medium,
+        utmCampaign: r.utm_campaign,
+        utmContent: r.utm_content,
+        firstTouchAt: r.first_touch_at,
       };
     });
+
+    function countBy(pick: (row: OwnerSignupRow) => string | null): SourceCount[] {
+      const counts = new Map<string, number>();
+      let unknown = 0;
+      for (const row of rows) {
+        const value = pick(row);
+        if (!value) unknown += 1;
+        else counts.set(value, (counts.get(value) ?? 0) + 1);
+      }
+      const out: SourceCount[] = [...counts.entries()]
+        .map(([value, count]) => ({ value, label: value, count }))
+        .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+      if (unknown > 0) out.push({ value: "unknown", label: "Direct / none", count: unknown });
+      return out;
+    }
 
     const sources: SourceCount[] = HEARD_ABOUT_SOURCES.map((s) => ({
       value: s.value as string,
@@ -125,6 +152,8 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
         ).length,
       },
       sources,
+      campaignSources: countBy((r) => r.utmSource),
+      campaigns: countBy((r) => r.utmCampaign),
     };
   });
 

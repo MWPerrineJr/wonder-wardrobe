@@ -24,6 +24,18 @@ const CreateShopInput = z.object({
   categories: categorySchema.optional().default([]),
   heard_about: z.enum(HEARD_ABOUT_VALUES).optional().nullable(),
   heard_about_detail: z.string().trim().max(120).optional().nullable(),
+  campaign: z
+    .object({
+      utm_source: z.string().trim().max(120).nullable().optional(),
+      utm_medium: z.string().trim().max(120).nullable().optional(),
+      utm_campaign: z.string().trim().max(160).nullable().optional(),
+      utm_content: z.string().trim().max(160).nullable().optional(),
+      utm_term: z.string().trim().max(160).nullable().optional(),
+      landing_referrer: z.string().trim().max(500).nullable().optional(),
+      first_touch_at: z.string().datetime().nullable().optional(),
+    })
+    .optional()
+    .nullable(),
   services: z
     .array(
       z.object({
@@ -102,6 +114,13 @@ export const createOwnerShop = createServerFn({ method: "POST" })
         shop_slug: shop.slug,
         heard_about: data.heard_about ?? null,
         heard_about_detail: data.heard_about_detail?.trim() || null,
+        utm_source: data.campaign?.utm_source || null,
+        utm_medium: data.campaign?.utm_medium || null,
+        utm_campaign: data.campaign?.utm_campaign || null,
+        utm_content: data.campaign?.utm_content || null,
+        utm_term: data.campaign?.utm_term || null,
+        landing_referrer: data.campaign?.landing_referrer || null,
+        first_touch_at: data.campaign?.first_touch_at || null,
         signed_up_at: signedUpAt,
         plan_state: "trialing",
         trial_source: "signup",
