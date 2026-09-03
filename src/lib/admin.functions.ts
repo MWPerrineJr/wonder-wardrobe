@@ -99,8 +99,28 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
         trialSource: source,
         trialSourceLabel: TRIAL_SOURCE_LABEL[source] ?? "—",
         signupTrialEndsAt: r.signup_trial_ends_at,
+        utmSource: r.utm_source,
+        utmMedium: r.utm_medium,
+        utmCampaign: r.utm_campaign,
+        utmContent: r.utm_content,
+        firstTouchAt: r.first_touch_at,
       };
     });
+
+    function countBy(pick: (row: OwnerSignupRow) => string | null): SourceCount[] {
+      const counts = new Map<string, number>();
+      let unknown = 0;
+      for (const row of rows) {
+        const value = pick(row);
+        if (!value) unknown += 1;
+        else counts.set(value, (counts.get(value) ?? 0) + 1);
+      }
+      const out: SourceCount[] = [...counts.entries()]
+        .map(([value, count]) => ({ value, label: value, count }))
+        .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+      if (unknown > 0) out.push({ value: "unknown", label: "Direct / none", count: unknown });
+      return out;
+    }
 
     const sources: SourceCount[] = HEARD_ABOUT_SOURCES.map((s) => ({
       value: s.value as string,
