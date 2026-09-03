@@ -561,8 +561,11 @@ export type Database = {
           shop_name: string
           shop_slug: string
           signed_up_at: string
+          signup_trial_ends_at: string | null
           stripe_subscription_id: string | null
           trial_ends_at: string | null
+          trial_expires_notified_at: string | null
+          trial_source: string
           trial_started_at: string | null
           updated_at: string
         }
@@ -580,8 +583,11 @@ export type Database = {
           shop_name: string
           shop_slug: string
           signed_up_at?: string
+          signup_trial_ends_at?: string | null
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
+          trial_expires_notified_at?: string | null
+          trial_source?: string
           trial_started_at?: string | null
           updated_at?: string
         }
@@ -599,8 +605,11 @@ export type Database = {
           shop_name?: string
           shop_slug?: string
           signed_up_at?: string
+          signup_trial_ends_at?: string | null
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
+          trial_expires_notified_at?: string | null
+          trial_source?: string
           trial_started_at?: string | null
           updated_at?: string
         }
@@ -609,6 +618,47 @@ export type Database = {
             foreignKeyName: "owner_signups_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: true
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      owner_trial_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          occurred_at: string
+          owner_id: string | null
+          plan_state: string | null
+          shop_id: string
+          source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          occurred_at?: string
+          owner_id?: string | null
+          plan_state?: string | null
+          shop_id: string
+          source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          occurred_at?: string
+          owner_id?: string | null
+          plan_state?: string | null
+          shop_id?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_trial_events_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
