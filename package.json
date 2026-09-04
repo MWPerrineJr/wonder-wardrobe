@@ -19,7 +19,7 @@
     "test": "node --experimental-strip-types --test src/lib/*.test.ts",
     "test:db": "node scripts/run-db-tests.mjs",
     "test:e2e": "playwright test",
-    "audit": "npm audit --audit-level=high",
+    "audit": "bun audit --audit-level=high",
     "migrations:check": "node scripts/check-migrations.mjs"
   },
   "dependencies": {
