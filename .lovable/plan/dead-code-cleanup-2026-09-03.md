@@ -32,7 +32,7 @@ Remove code and files that nothing in the app uses, without changing any behavio
 - `src/components/demo-tour.tsx`: `DEMO_STEPS`
 - `src/components/analytics-upgrade-panel.tsx`: `CompCodeForm`, `CheckoutForm` stay but lose their `export` (used only inside the file)
 
-Unused exported *types* stay as they are — they cost nothing and removing them churns public shapes.
+Unused exported _types_ stay as they are — they cost nothing and removing them churns public shapes.
 
 ## 4. Unused UI kit files
 

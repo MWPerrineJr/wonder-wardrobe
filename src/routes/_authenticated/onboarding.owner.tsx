@@ -209,8 +209,7 @@ function OnboardingOwnerPage() {
 
           <div>
             <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
-              How did you hear about us?{" "}
-              <span className="text-label-sm">(optional)</span>
+              How did you hear about us? <span className="text-label-sm">(optional)</span>
             </label>
             <div className="flex flex-wrap gap-2 mt-1">
               {HEARD_ABOUT_SOURCES.map((source) => (

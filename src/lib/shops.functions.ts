@@ -127,4 +127,3 @@ export const getShopDetail = createServerFn({ method: "GET" })
 
     return { shop, services: services ?? [] };
   });
-

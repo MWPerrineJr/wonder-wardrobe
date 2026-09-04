@@ -3,7 +3,11 @@ import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-que
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { getSurveyInvite, submitSurveyFeedback, type SurveyInviteView } from "@/lib/survey.functions";
+import {
+  getSurveyInvite,
+  submitSurveyFeedback,
+  type SurveyInviteView,
+} from "@/lib/survey.functions";
 
 const inputClass =
   "w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md";
@@ -18,7 +22,6 @@ const inviteQuery = (token: string) =>
     queryFn: async (): Promise<SurveyInviteView> =>
       UUID_RE.test(token) ? getSurveyInvite({ data: { token } }) : { status: "invalid" },
   });
-
 
 export const Route = createFileRoute("/survey/$token")({
   head: () => ({
