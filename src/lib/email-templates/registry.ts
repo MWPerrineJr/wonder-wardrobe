@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 import { template as ownerWelcomeTemplate } from "./owner-welcome";
+import { template as surveyInviteTemplate } from "./survey-invite";
 
 export interface TemplateEntry {
   component: ComponentType<Record<string, unknown>>;
