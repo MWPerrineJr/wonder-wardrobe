@@ -15,13 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: "22"
-          cache: npm
-      - run: npm install --global npm@11.17.0
-      - run: npm ci
-      - run: git diff --exit-code package-lock.json
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: git diff --exit-code bun.lock
 
   quality:
     name: Format, lint, typecheck, test, audit
@@ -32,14 +30,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-      - run: npm install --global npm@11.17.0
-      - run: npm ci
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run audit
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run format:check
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run test
+      - run: bun run audit
 
   migrations:
     name: Migration replay
@@ -50,16 +49,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-      - run: npm install --global npm@11.17.0
-      - run: npm ci
-      - run: npm run migrations:check
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run migrations:check
       - uses: supabase/setup-cli@v1
         with:
           version: latest
       - run: supabase db start
       - run: supabase db reset --yes
-      - run: npm run test:db
+      - run: bun run test:db
 
   build:
     name: Production build
@@ -84,10 +84,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-      - run: npm install --global npm@11.17.0
-      - run: npm ci
-      - run: npm run build
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run build
 
   smoke:
     name: Browser smoke
@@ -112,8 +113,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-      - run: npm install --global npm@11.17.0
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test:e2e
