@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  CAMPAIGN_LINKS,
-  campaignSourceToHeardAbout,
-  readCampaignFromSearch,
-} from "./campaign.ts";
+import { CAMPAIGN_LINKS, campaignSourceToHeardAbout, readCampaignFromSearch } from "./campaign.ts";
 
 describe("readCampaignFromSearch", () => {
   it("parses a campaign link", () => {

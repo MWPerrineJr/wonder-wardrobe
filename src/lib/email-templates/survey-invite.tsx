@@ -105,8 +105,7 @@ export const template = {
     serviceName: "Skin fade",
     surveyUrl: "https://thestandingchair.com/survey/2f1c9e4a-0d3b-4f7a-9c11-6b2e8a5d4c33",
     starUrls: [1, 2, 3, 4, 5].map(
-      (r) =>
-        `https://thestandingchair.com/survey/2f1c9e4a-0d3b-4f7a-9c11-6b2e8a5d4c33?r=${r}`,
+      (r) => `https://thestandingchair.com/survey/2f1c9e4a-0d3b-4f7a-9c11-6b2e8a5d4c33?r=${r}`,
     ),
   },
 } satisfies TemplateEntry;

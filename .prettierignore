@@ -14,3 +14,7 @@ test-results
 playwright-report
 blob-report
 coverage
+.lovable
+src/routes/mcp.ts
+src/routes/[.mcp]
+src/routes/[.well-known]

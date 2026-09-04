@@ -3,10 +3,8 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
-  "packageManager": "npm@11.17.0",
   "engines": {
-    "node": ">=22.16.5",
-    "npm": ">=11.0.0"
+    "node": ">=22.16.5"
   },
   "scripts": {
     "dev": "vite dev",
@@ -20,7 +18,7 @@
     "test": "node --experimental-strip-types --test src/lib/*.test.ts",
     "test:db": "node scripts/run-db-tests.mjs",
     "test:e2e": "playwright test",
-    "audit": "npm audit --audit-level=high",
+    "audit": "bun audit --audit-level=high",
     "migrations:check": "node scripts/check-migrations.mjs"
   },
   "dependencies": {

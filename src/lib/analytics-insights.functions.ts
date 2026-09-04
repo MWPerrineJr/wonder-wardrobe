@@ -148,14 +148,13 @@ async function loadInsights(
 export const getAnalyticsInsights = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => insightsInput.parse(input))
-  .handler(
-    async ({ data, context }): Promise<AnalyticsInsightsResult> =>
-      loadInsights(context, data, false),
+  .handler(async ({ data, context }): Promise<AnalyticsInsightsResult> =>
+    loadInsights(context, data, false),
   );
 
 export const refreshAnalyticsInsights = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => insightsInput.parse(input))
-  .handler(
-    async ({ data, context }): Promise<AnalyticsInsightsResult> => loadInsights(context, data, true),
+  .handler(async ({ data, context }): Promise<AnalyticsInsightsResult> =>
+    loadInsights(context, data, true),
   );
