@@ -121,7 +121,6 @@ function AdminOwnersPage() {
     [allRows, filter],
   );
 
-
   if (data.access === "denied") {
     return (
       <Shell>
