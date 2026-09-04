@@ -3,16 +3,22 @@ import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-que
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { getSurveyInvite, submitSurveyFeedback } from "@/lib/survey.functions";
+import { getSurveyInvite, submitSurveyFeedback, type SurveyInviteView } from "@/lib/survey.functions";
 
 const inputClass =
   "w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md";
 
+// Survey tokens are uuids. A malformed token is just a bad link, so treat it as
+// an invalid invite instead of letting server-side validation throw a 500.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const inviteQuery = (token: string) =>
   queryOptions({
     queryKey: ["survey", "invite", token],
-    queryFn: () => getSurveyInvite({ data: { token } }),
+    queryFn: async (): Promise<SurveyInviteView> =>
+      UUID_RE.test(token) ? getSurveyInvite({ data: { token } }) : { status: "invalid" },
   });
+
 
 export const Route = createFileRoute("/survey/$token")({
   head: () => ({
@@ -22,13 +28,29 @@ export const Route = createFileRoute("/survey/$token")({
     ],
   }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(inviteQuery(params.token)),
-  errorComponent: ({ error }) => (
+  errorComponent: () => (
     <Shell>
+      <h1 className="font-headline-md text-headline-md text-on-surface">
+        We couldn&apos;t open this survey
+      </h1>
       <p className="text-on-surface-variant text-body-md">
-        Couldn't load this survey: {error.message}
+        The link may have expired. If you still want to share how your visit went, reply to the
+        email we sent you and we&apos;ll pass it along.
       </p>
+      <Link to="/" className="self-start text-primary font-bold text-label-md">
+        Browse shops
+      </Link>
     </Shell>
   ),
+  notFoundComponent: () => (
+    <Shell>
+      <p className="text-on-surface-variant text-body-md">This survey link isn&apos;t valid.</p>
+      <Link to="/" className="self-start text-primary font-bold text-label-md">
+        Browse shops
+      </Link>
+    </Shell>
+  ),
+
   component: SurveyPage,
 });
 
