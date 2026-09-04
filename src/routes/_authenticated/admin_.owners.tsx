@@ -115,11 +115,12 @@ function AdminOwnersPage() {
   const { data } = useSuspenseQuery(ownerSignupsQuery);
   const [filter, setFilter] = useState<Filter>("all");
   const [openShopId, setOpenShopId] = useState<string | null>(null);
-  const allRows = data.access === "granted" ? data.rows : [];
+  const allRows = useMemo(() => (data.access === "granted" ? data.rows : []), [data]);
   const rows = useMemo(
     () => (filter === "all" ? allRows : allRows.filter((r) => r.planState === filter)),
     [allRows, filter],
   );
+
 
   if (data.access === "denied") {
     return (
