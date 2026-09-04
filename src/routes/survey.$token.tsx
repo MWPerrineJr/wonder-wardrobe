@@ -3,16 +3,22 @@ import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-que
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { getSurveyInvite, submitSurveyFeedback } from "@/lib/survey.functions";
+import { getSurveyInvite, submitSurveyFeedback, type SurveyInviteView } from "@/lib/survey.functions";
 
 const inputClass =
   "w-full bg-surface-container border border-border-subtle rounded p-3 text-on-surface focus:border-primary focus:outline-none font-body-md text-body-md";
 
+// Survey tokens are uuids. A malformed token is just a bad link, so treat it as
+// an invalid invite instead of letting server-side validation throw a 500.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const inviteQuery = (token: string) =>
   queryOptions({
     queryKey: ["survey", "invite", token],
-    queryFn: () => getSurveyInvite({ data: { token } }),
+    queryFn: async (): Promise<SurveyInviteView> =>
+      UUID_RE.test(token) ? getSurveyInvite({ data: { token } }) : { status: "invalid" },
   });
+
 
 export const Route = createFileRoute("/survey/$token")({
   head: () => ({
