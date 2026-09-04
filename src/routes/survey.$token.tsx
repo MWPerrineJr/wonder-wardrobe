@@ -28,13 +28,29 @@ export const Route = createFileRoute("/survey/$token")({
     ],
   }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(inviteQuery(params.token)),
-  errorComponent: ({ error }) => (
+  errorComponent: () => (
     <Shell>
+      <h1 className="font-headline-md text-headline-md text-on-surface">
+        We couldn&apos;t open this survey
+      </h1>
       <p className="text-on-surface-variant text-body-md">
-        Couldn't load this survey: {error.message}
+        The link may have expired. If you still want to share how your visit went, reply to the
+        email we sent you and we&apos;ll pass it along.
       </p>
+      <Link to="/" className="self-start text-primary font-bold text-label-md">
+        Browse shops
+      </Link>
     </Shell>
   ),
+  notFoundComponent: () => (
+    <Shell>
+      <p className="text-on-surface-variant text-body-md">This survey link isn&apos;t valid.</p>
+      <Link to="/" className="self-start text-primary font-bold text-label-md">
+        Browse shops
+      </Link>
+    </Shell>
+  ),
+
   component: SurveyPage,
 });
 
