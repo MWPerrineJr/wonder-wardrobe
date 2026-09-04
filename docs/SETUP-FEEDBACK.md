@@ -70,7 +70,12 @@ Owner dashboard → Shop details → **Google review link**: paste the Google
 
 ## Email
 
-Survey emails require an email domain configured for the project. Until then
-`/api/public/emails/survey-invite` answers 501 and each invite is stored with
-`email_status = 'blocked'` and retried with backoff until email is live or the
-invite is dead-lettered.
+Delivery path: the job calls `/api/public/emails/survey-invite` (job bearer),
+which posts to `/lovable/email/transactional/send` on `APP_URL`. That route
+renders the registered `survey-invite` template and sends it through the
+project's verified sender domain.
+
+If either route is missing on the deployment at `APP_URL`, the send answers 501
+and the invite is stored with `email_status = 'blocked'`, then retried with
+backoff until email is live or the invite is dead-lettered. Publish after
+changing these routes — `APP_URL` points at the published site.
