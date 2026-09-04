@@ -22,4 +22,5 @@ export interface TemplateEntry {
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
   "owner-welcome": ownerWelcomeTemplate,
+  "survey-invite": surveyInviteTemplate,
 };
