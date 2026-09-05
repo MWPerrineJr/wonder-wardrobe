@@ -24,6 +24,11 @@ const inviteQuery = (token: string) =>
   });
 
 export const Route = createFileRoute("/survey/$token")({
+  validateSearch: (search: Record<string, unknown>) => {
+    const raw = Number(search["r"]);
+    const r = Number.isInteger(raw) && raw >= 1 && raw <= 5 ? raw : undefined;
+    return r ? { r } : {};
+  },
   head: () => ({
     meta: [
       { title: "How was your visit? — The Standing Chair" },
@@ -31,6 +36,7 @@ export const Route = createFileRoute("/survey/$token")({
     ],
   }),
   loader: ({ params, context }) => context.queryClient.ensureQueryData(inviteQuery(params.token)),
+
   errorComponent: () => (
     <Shell>
       <h1 className="font-headline-md text-headline-md text-on-surface">
