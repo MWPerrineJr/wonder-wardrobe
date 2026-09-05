@@ -75,9 +75,11 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function SurveyPage() {
   const { token } = Route.useParams();
+  const { r } = Route.useSearch();
   const { data: invite } = useSuspenseQuery(inviteQuery(token));
 
-  const [rating, setRating] = useState(invite.ratingHint ?? 0);
+  const [rating, setRating] = useState(r ?? invite.ratingHint ?? 0);
+
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [googleAsk, setGoogleAsk] = useState<{ url: string } | null>(null);
