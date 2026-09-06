@@ -22,12 +22,14 @@ async function assertOwner(context: { supabase: SupabaseClient<Database>; userId
 
 
 export type SupportInboxStatus =
-  { connected: false; reason: "not_connected" } | { connected: true; email: string };
+  | { connected: false; reason: "not_connected" | "forbidden" }
+  | { connected: true; email: string };
 
 export const getSupportInboxStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<SupportInboxStatus> => {
-    await assertOwner(context);
+    const { data: isAdmin } = await context.supabase.rpc("is_admin");
+    if (isAdmin !== true) return { connected: false, reason: "forbidden" };
     const mod = await import("@/lib/support-inbox.server");
     if (!mod.isSupportInboxConfigured()) return { connected: false, reason: "not_connected" };
     try {
