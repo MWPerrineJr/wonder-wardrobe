@@ -108,6 +108,17 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
   const tour = useSetupTour(selected?.id ?? "none");
   const steps = buildTourSteps(selected);
   const qc = useQueryClient();
+  // Support inbox and diagnostics are platform-staff tools; hide them from shop owners.
+  const staffQuery = useQuery({
+    queryKey: ["is-platform-staff"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("is_admin");
+      if (error) return false;
+      return data === true;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+  const isStaff = staffQuery.data === true;
 
   const deleteShopMutation = useMutation({
     mutationFn: (shopId: string) => deleteShop({ data: { shopId } }),
@@ -142,21 +153,28 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
               <Link to="/owner/feedback" className="text-on-surface-variant hover:text-on-surface">
                 Feedback
               </Link>
-              <Link to="/owner/support" className="text-on-surface-variant hover:text-on-surface">
-                Support
-              </Link>
+              {isStaff && (
+                <Link
+                  to="/owner/support"
+                  className="text-on-surface-variant hover:text-on-surface"
+                >
+                  Support
+                </Link>
+              )}
               <Link to="/owner/subscribe" className="text-on-surface-variant hover:text-on-surface">
                 Plans
               </Link>
               <Link to="/owner/contact" className="text-on-surface-variant hover:text-on-surface">
                 Contact
               </Link>
-              <Link
-                to="/owner/diagnostics"
-                className="text-on-surface-variant hover:text-on-surface"
-              >
-                Diagnostics
-              </Link>
+              {isStaff && (
+                <Link
+                  to="/owner/diagnostics"
+                  className="text-on-surface-variant hover:text-on-surface"
+                >
+                  Diagnostics
+                </Link>
+              )}
             </nav>
           </div>
           <AccountNav />

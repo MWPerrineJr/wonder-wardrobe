@@ -162,7 +162,7 @@ export function PaymentsPanel({
             Connect your own payment account so client prepayments land directly in your bank — The
             Standing Chair never holds your money.
           </p>
-          {diagnosticsQuery.data && (
+          {diagnosticsQuery.data?.access === "granted" && (
             <p className="text-on-surface-variant font-label-sm text-label-sm">
               This deployment is in{" "}
               <span className="font-bold text-on-surface">
