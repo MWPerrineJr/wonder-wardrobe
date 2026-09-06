@@ -314,9 +314,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         managed_payments: { enabled: true },
         metadata: { userId, shop_id: shop.id, managed_payments: "true" },
         subscription_data: {
-          ...(trialAnchor.trialEndUnix === null
-            ? {}
-            : { trial_end: trialAnchor.trialEndUnix }),
+          ...(trialAnchor.trialEndUnix === null ? {} : { trial_end: trialAnchor.trialEndUnix }),
           metadata: { userId, shop_id: shop.id },
         },
       } as Stripe.Checkout.SessionCreateParams);

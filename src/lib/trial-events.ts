@@ -37,8 +37,7 @@ export function signupTrialEndsAt(signedUpAt: string | Date): string {
 const MIN_TRIAL_LEAD_MS = 48 * 60 * 60 * 1000;
 
 export type StripeTrialAnchor =
-  | { trialEndUnix: number; daysLeft: number }
-  | { trialEndUnix: null; reason: "elapsed" };
+  { trialEndUnix: number; daysLeft: number } | { trialEndUnix: null; reason: "elapsed" };
 
 /**
  * Anchor the paid trial to the day the shop signed up, so the 90-day promotion

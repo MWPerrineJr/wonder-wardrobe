@@ -154,7 +154,9 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
                   setCheckoutPriceId(priceId);
                 }}
               >
-                {trialDaysLeft > 0 ? `Start free trial (${trialDaysLeft} days left)` : "Subscribe now"}
+                {trialDaysLeft > 0
+                  ? `Start free trial (${trialDaysLeft} days left)`
+                  : "Subscribe now"}
               </Button>
             </div>
           );
