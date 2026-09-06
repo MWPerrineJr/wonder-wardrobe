@@ -35,13 +35,12 @@ export const getPaymentsDiagnostics = createServerFn({ method: "GET" })
       calendarOutboxPending: 0,
     };
 
-    const { data: roles, error: roleErr } = await context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId);
-    if (roleErr || !roles?.some((row) => row.role === "owner")) {
+    // Platform-wide diagnostics are operator-only: require the admin role.
+    const { data: isAdmin, error: roleErr } = await context.supabase.rpc("is_admin");
+    if (roleErr || isAdmin !== true) {
       return base;
     }
+
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();

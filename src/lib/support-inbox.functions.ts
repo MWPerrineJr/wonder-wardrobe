@@ -11,18 +11,15 @@ import type {
   SupportThreadSummary,
 } from "@/lib/support-inbox.server";
 
-/** Only shop owners may touch the shared support mailbox. */
+/** Only platform admins may touch the shared support mailbox. */
 async function assertOwner(context: { supabase: SupabaseClient<Database>; userId: string }) {
-  const { data, error } = await context.supabase
-    .from("shops")
-    .select("id")
-    .eq("owner_id", context.userId)
-    .limit(1);
+  const { data: isAdmin, error } = await context.supabase.rpc("is_admin");
   if (error) throw new Error(error.message);
-  if (!data || data.length === 0) {
-    throw new Error("Only shop owners can use the support inbox.");
+  if (isAdmin !== true) {
+    throw new Error("Only platform administrators can use the support inbox.");
   }
 }
+
 
 export type SupportInboxStatus =
   { connected: false; reason: "not_connected" } | { connected: true; email: string };
