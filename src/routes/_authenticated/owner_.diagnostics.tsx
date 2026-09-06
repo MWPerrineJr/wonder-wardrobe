@@ -50,6 +50,35 @@ function DiagnosticsPage() {
   const { data } = useSuspenseQuery(diagnosticsQuery);
   const mode = data.environment ?? "not set";
 
+  if (data.access === "denied") {
+    return (
+      <div className="bg-background text-on-background font-body-md min-h-screen">
+        <header className="border-b border-border-subtle bg-surface">
+          <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-4 flex items-center justify-between gap-4">
+            <Link to="/" className="font-headline-md text-headline-md text-primary tracking-tight">
+              The Standing Chair
+            </Link>
+            <AccountNav />
+          </div>
+        </header>
+        <main className="max-w-xl mx-auto p-margin-mobile md:p-margin-desktop flex flex-col gap-4">
+          <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
+            Platform status
+          </h1>
+          <p className="text-on-surface-variant text-body-md">
+            These technical checks are kept for The Standing Chair team, so there's nothing here for
+            your shop. Payments and email are monitored on our side — if something looks wrong with
+            your bookings or payouts, contact us and we'll look into it.
+          </p>
+          <Link to="/owner" className="text-label-md text-primary underline self-start">
+            Back to dashboard
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
+
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen">
       <header className="border-b border-border-subtle bg-surface">
