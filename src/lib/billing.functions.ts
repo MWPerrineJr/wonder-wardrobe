@@ -8,6 +8,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requirePaymentsEnv } from "@/lib/payments-env";
 import { TRIAL_DAYS } from "@/lib/trial";
+import { signupTrialEndsAt, stripeTrialEndFromSignup } from "@/lib/trial-events";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 import type Stripe from "stripe";
 
@@ -65,6 +66,10 @@ export type BillingStatus = {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   providerCount: number;
+  /** End of the 90-day promotion, counted from the day the shop was created. */
+  signupTrialEndsAt: string | null;
+  /** Whole days left in that window; 0 once it has elapsed. */
+  signupTrialDaysLeft: number;
 };
 
 export const getBillingStatus = createServerFn({ method: "GET" })
@@ -79,6 +84,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
       { data: sub, error: subErr },
       { count: providerCount, error: provErr },
       { data: grant, error: grantErr },
+      signedUpAt,
     ] = await Promise.all([
       supabase.rpc("shop_has_active_analytics", {
         _shop_id: data.shopId,
@@ -98,6 +104,7 @@ export const getBillingStatus = createServerFn({ method: "GET" })
         .eq("shop_id", data.shopId)
         .eq("is_active", true),
       supabase.from("comp_grants").select("redeemed_at").eq("shop_id", data.shopId).maybeSingle(),
+      shopSignupDate(supabase, data.shopId),
     ]);
     if (fnErr) throw dbError(fnErr, "billing");
     if (subErr) throw dbError(subErr, "billing");
@@ -113,8 +120,35 @@ export const getBillingStatus = createServerFn({ method: "GET" })
       currentPeriodEnd: sub?.current_period_end ?? null,
       cancelAtPeriodEnd: sub?.cancel_at_period_end ?? false,
       providerCount: providerCount ?? 0,
+      signupTrialEndsAt: signedUpAt ? signupTrialEndsAt(signedUpAt) : null,
+      signupTrialDaysLeft: (() => {
+        const anchor = stripeTrialEndFromSignup(signedUpAt);
+        return anchor.trialEndUnix === null ? 0 : anchor.daysLeft;
+      })(),
     };
   });
+
+/**
+ * The day the shop signed up — the anchor for the 90-day promotion. Falls back
+ * to the shop row's creation date for shops with no signup registry entry.
+ */
+async function shopSignupDate(
+  supabase: SupabaseClient<Database>,
+  shopId: string,
+): Promise<string | null> {
+  const { data: signup } = await supabase
+    .from("owner_signups")
+    .select("signed_up_at")
+    .eq("shop_id", shopId)
+    .maybeSingle();
+  if (signup?.signed_up_at) return signup.signed_up_at;
+  const { data: shop } = await supabase
+    .from("shops")
+    .select("created_at")
+    .eq("id", shopId)
+    .maybeSingle();
+  return shop?.created_at ?? null;
+}
 
 /** Redeem a complimentary lifetime-access code for a shop the caller owns. */
 export const redeemCompCode = createServerFn({ method: "POST" })
@@ -252,6 +286,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
     }
 
+    const trialAnchor = stripeTrialEndFromSignup(await shopSignupDate(supabase, shop.id));
+
     try {
       const stripe = createStripeClient(environment);
       const {
@@ -278,7 +314,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         managed_payments: { enabled: true },
         metadata: { userId, shop_id: shop.id, managed_payments: "true" },
         subscription_data: {
-          trial_period_days: TRIAL_DAYS,
+          ...(trialAnchor.trialEndUnix === null ? {} : { trial_end: trialAnchor.trialEndUnix }),
           metadata: { userId, shop_id: shop.id },
         },
       } as Stripe.Checkout.SessionCreateParams);

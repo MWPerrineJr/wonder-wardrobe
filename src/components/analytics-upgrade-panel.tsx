@@ -52,6 +52,7 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
   });
 
   const providerCount = status?.providerCount ?? 0;
+  const trialDaysLeft = status?.signupTrialDaysLeft ?? 0;
   const recommended = tierForProviderCount(providerCount);
   const selectedTier = PLAN_TIERS.find((t) => t.id === (tierId ?? recommended)) ?? PLAN_TIERS[0];
 
@@ -84,8 +85,12 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
         </h2>
         <p className="text-on-surface-variant text-body-md max-w-xl">
           Listing your services and taking bookings is free, forever. Survey automation, AI feedback
-          analysis and business analytics are part of the Analytics plan — start with a 90-day free
-          trial. Pricing scales with the number of providers in your shop
+          analysis and business analytics are part of the Analytics plan — free for 90 days from the
+          day you created your shop
+          {trialDaysLeft > 0
+            ? `, so you have ${trialDaysLeft} free ${trialDaysLeft === 1 ? "day" : "days"} left.`
+            : ". Your 90 free days have passed, so billing starts as soon as you subscribe."}{" "}
+          Pricing scales with the number of providers in your shop
           {providerCount > 0 ? ` (you have ${providerCount}).` : "."}
         </p>
       </div>
@@ -149,7 +154,9 @@ export function AnalyticsUpgradePanel({ shopId }: { shopId: string }) {
                   setCheckoutPriceId(priceId);
                 }}
               >
-                Start 90-day free trial
+                {trialDaysLeft > 0
+                  ? `Start free trial (${trialDaysLeft} days left)`
+                  : "Subscribe now"}
               </Button>
             </div>
           );

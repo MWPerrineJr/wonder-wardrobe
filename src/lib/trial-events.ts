@@ -33,6 +33,32 @@ export function signupTrialEndsAt(signedUpAt: string | Date): string {
   return new Date(start.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString();
 }
 
+/** Stripe rejects a trial that ends less than 48 hours from now. */
+const MIN_TRIAL_LEAD_MS = 48 * 60 * 60 * 1000;
+
+export type StripeTrialAnchor =
+  { trialEndUnix: number; daysLeft: number } | { trialEndUnix: null; reason: "elapsed" };
+
+/**
+ * Anchor the paid trial to the day the shop signed up, so the 90-day promotion
+ * cannot be extended by delaying checkout. Returns no trial when the window is
+ * already gone (or ends within Stripe's 48-hour minimum).
+ */
+export function stripeTrialEndFromSignup(
+  signedUpAt: string | Date | null | undefined,
+  now: Date = new Date(),
+): StripeTrialAnchor {
+  if (!signedUpAt) return { trialEndUnix: null, reason: "elapsed" };
+  const endMs = new Date(signupTrialEndsAt(signedUpAt)).getTime();
+  if (!Number.isFinite(endMs)) return { trialEndUnix: null, reason: "elapsed" };
+  const remaining = endMs - now.getTime();
+  if (remaining < MIN_TRIAL_LEAD_MS) return { trialEndUnix: null, reason: "elapsed" };
+  return {
+    trialEndUnix: Math.floor(endMs / 1000),
+    daysLeft: Math.ceil(remaining / (24 * 60 * 60 * 1000)),
+  };
+}
+
 /** Map a billing plan state onto the trial-history event it should record. */
 export function trialEventForPlanState(planState: string): TrialEvent | null {
   switch (planState) {
