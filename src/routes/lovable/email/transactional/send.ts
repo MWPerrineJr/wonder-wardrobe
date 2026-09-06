@@ -2,11 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { sendTemplateEmail } from "@/lib/email-templates/send-email";
+import { authorizeJobCall, jobAuthResponse } from "@/lib/jobs.auth";
 
-// Internal app-email dispatch. Only called by this app's own server routes
-// (e.g. /api/public/emails/survey-invite), which authenticate their callers
-// first. Not reachable from the browser in any meaningful way: an unknown
-// template name is rejected and the payload shape is fixed.
+// Internal app-email dispatch. Callers must present the JOB_SECRET bearer
+// token; unauthenticated internet traffic can never trigger a send.
 
 const payloadSchema = z.object({
   templateName: z.string().min(1),
@@ -21,6 +20,9 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const auth = authorizeJobCall(request);
+        if (!auth.ok) return jobAuthResponse(auth);
+
         let body: unknown;
         try {
           body = await request.json();
@@ -33,6 +35,7 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
         if (!ALLOWED.has(parsed.data.templateName)) {
           return new Response("Unknown template", { status: 400 });
         }
+
 
         try {
           const result = await sendTemplateEmail(

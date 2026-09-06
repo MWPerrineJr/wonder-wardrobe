@@ -208,9 +208,14 @@ function ShopPage() {
               ...(shop.contact_phone ? { telephone: shop.contact_phone } : {}),
               ...(shop.website_url ? { url: shop.website_url } : {}),
               sameAs: sameAsUrls(shop),
-            }),
+            })
+              // Prevent owner-supplied text from closing this script tag.
+              .replace(/</g, "\\u003c")
+              .replace(/>/g, "\\u003e")
+              .replace(/&/g, "\\u0026"),
           }}
         />
+
 
         {shop.address && (
           <section className="flex flex-col gap-3">
