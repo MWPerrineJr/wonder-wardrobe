@@ -1321,14 +1321,8 @@ export type Database = {
           status: string
         }[]
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
       invoke_feedback_job: { Args: { job_slug: string }; Returns: number }
+      is_admin: { Args: never; Returns: boolean }
       pending_survey_retries: {
         Args: never
         Returns: {
