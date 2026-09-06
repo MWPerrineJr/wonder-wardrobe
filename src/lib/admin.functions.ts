@@ -61,10 +61,7 @@ export const listOwnerSignups = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<OwnerSignupsResult> => {
     const { supabase, userId } = context;
 
-    const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
+    const { data: isAdmin, error: roleError } = await supabase.rpc("is_admin");
     if (roleError) throw dbError(roleError, "admin");
     if (!isAdmin) return { access: "denied" };
 
@@ -180,10 +177,7 @@ export const listOwnerTrialEvents = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<TrialEventsResult> => {
     const { supabase, userId } = context;
 
-    const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
+    const { data: isAdmin, error: roleError } = await supabase.rpc("is_admin");
     if (roleError) throw dbError(roleError, "admin");
     if (!isAdmin) return { access: "denied" };
 
