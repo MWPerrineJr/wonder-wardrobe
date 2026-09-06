@@ -362,8 +362,6 @@ export const cancelSubscription = createServerFn({ method: "POST" })
 
     const resume = data.resume === true;
 
-    const trialAnchor = stripeTrialEndFromSignup(await shopSignupDate(supabase, shop.id));
-
     try {
       const stripe = createStripeClient(environment);
       const updated = await stripe.subscriptions.update(sub.stripe_subscription_id, {
@@ -416,8 +414,6 @@ export const createPortalSession = createServerFn({ method: "POST" })
     } catch (error) {
       return { error: error instanceof Error ? error.message : "Return URL is not allowed" };
     }
-
-    const trialAnchor = stripeTrialEndFromSignup(await shopSignupDate(supabase, shop.id));
 
     try {
       const stripe = createStripeClient(environment);
