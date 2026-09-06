@@ -13,6 +13,8 @@ export type JobOpsRow = {
 };
 
 export type OpsDiagnosticsView = PaymentsDiagnostic & {
+  /** "denied" means the signed-in user is not platform staff, so the numbers below are placeholders. */
+  access: "granted" | "denied";
   appUrlConfigured: boolean;
   jobs: JobOpsRow[];
   webhook: {
@@ -29,6 +31,7 @@ export const getPaymentsDiagnostics = createServerFn({ method: "GET" })
     const diagnostic = inspectPaymentsConfig();
     const base: OpsDiagnosticsView = {
       ...diagnostic,
+      access: "denied",
       appUrlConfigured: Boolean(process.env["APP_URL"]?.trim()),
       jobs: [],
       webhook: { processing: 0, failed: 0, completedLastDay: 0 },
@@ -71,6 +74,7 @@ export const getPaymentsDiagnostics = createServerFn({ method: "GET" })
 
     return {
       ...base,
+      access: "granted",
       jobs: (jobsRes.data ?? []).map((row) => ({
         jobName: row.job_name,
         status: row.status,
