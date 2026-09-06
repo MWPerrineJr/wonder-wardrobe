@@ -94,6 +94,7 @@ function SupportInboxPage() {
   const [reply, setReply] = useState("");
 
   const connected = status.connected;
+  const forbidden = !status.connected && status.reason === "forbidden";
 
   const threads = useQuery({ ...threadsQuery(filter, search), enabled: connected });
   const thread = useQuery({
@@ -182,11 +183,30 @@ function SupportInboxPage() {
           <p className="text-on-surface-variant text-body-md mt-1">
             {connected
               ? `Connected mailbox: ${status.email}`
-              : `Messages sent to ${SUPPORT_EMAIL} will appear here once the mailbox is connected.`}
+              : forbidden
+                ? `This shared mailbox is handled by our team. Email ${SUPPORT_EMAIL} and we'll get back to you.`
+                : `Messages sent to ${SUPPORT_EMAIL} will appear here once the mailbox is connected.`}
           </p>
         </div>
 
-        {notConnected ? (
+        {forbidden ? (
+          <div className="bg-surface border border-border-subtle rounded-2xl p-8 flex flex-col gap-3 shadow-sm max-w-2xl">
+            <h2 className="font-headline-md text-[20px] text-on-surface">
+              Our team handles this inbox
+            </h2>
+            <p className="text-on-surface-variant text-body-md">
+              The shared support mailbox is only available to The Standing Chair staff. To reach us,
+              send a message to{" "}
+              <a className="text-primary underline" href={`mailto:${SUPPORT_EMAIL}`}>
+                {SUPPORT_EMAIL}
+              </a>{" "}
+              and we'll reply by email.
+            </p>
+            <Link to="/owner" className="text-label-md text-primary underline self-start">
+              Back to dashboard
+            </Link>
+          </div>
+        ) : notConnected ? (
           <div className="bg-surface border border-border-subtle rounded-2xl p-8 flex flex-col gap-4 shadow-sm max-w-2xl">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
