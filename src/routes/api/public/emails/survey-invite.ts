@@ -44,9 +44,13 @@ export const Route = createFileRoute("/api/public/emails/survey-invite")({
 
         const probe = await fetch(sendUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env["JOB_SECRET"] ?? ""}`,
+          },
           body: JSON.stringify(parsed.data),
         });
+
 
         // No transactional endpoint yet => email domain not configured.
         if (probe.status === 404) {
