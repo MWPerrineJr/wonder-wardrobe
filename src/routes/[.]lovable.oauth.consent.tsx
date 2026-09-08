@@ -31,6 +31,17 @@ function oauth() {
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Authorize access | The Standing Chair" },
+      {
+        name: "description",
+        content:
+          "Review and approve an application requesting access to your The Standing Chair account.",
+      },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   validateSearch: (s: Record<string, unknown>) => ({
     authorization_id: typeof s.authorization_id === "string" ? s.authorization_id : "",
   }),

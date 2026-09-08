@@ -109,11 +109,13 @@ export const getShopDetail = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ shopId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
+    // Owner-scoped: never return a shop the caller does not own.
     const { data: shop, error: shopError } = await supabase
       .from("shops")
       .select("id, slug, name, description, address, cover_image_url, categories")
       .eq("id", data.shopId)
+      .eq("owner_id", userId)
       .maybeSingle();
     if (shopError) throw dbError(shopError, "shops");
     if (!shop) throw new Error("Shop not found");

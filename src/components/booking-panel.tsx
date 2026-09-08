@@ -38,6 +38,12 @@ const inputClass =
 export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string }) {
   const { user, loading } = useAuth();
   const tzOffsetMinutes = useMemo(() => new Date().getTimezoneOffset(), []);
+  // Computed once, after mount, so the server-rendered markup and the browser agree
+  // even when a request straddles local midnight.
+  const [minDate, setMinDate] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    setMinDate(isoDate(new Date()));
+  }, []);
 
   const [providerId, setProviderId] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(ctx.services[0]?.id ?? null);
@@ -272,7 +278,7 @@ export function BookingPanel({ ctx, slug }: { ctx: BookingContext; slug: string 
           <input
             type="date"
             required
-            min={isoDate(new Date())}
+            min={minDate}
             value={date}
             onChange={(e) => setDate(e.target.value)}
             className={inputClass}
