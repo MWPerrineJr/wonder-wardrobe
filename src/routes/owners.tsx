@@ -163,7 +163,7 @@ function OwnersLandingPage() {
       <footer className="w-full border-t border-border-subtle py-8">
         <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 text-on-surface-variant text-body-md">
           <SiteBrand />
-          <span>© {new Date().getFullYear()} The Standing Chair</span>
+          <span>© {footerYear} The Standing Chair</span>
         </div>
       </footer>
     </div>
