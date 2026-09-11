@@ -31,6 +31,7 @@ const myShopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/owner_/feedback")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Feedback Intelligence — The Standing Chair" },

@@ -17,6 +17,7 @@ const payloadSchema = z.object({
 const ALLOWED = new Set(["survey-invite"]);
 
 export const Route = createFileRoute("/lovable/email/transactional/send")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

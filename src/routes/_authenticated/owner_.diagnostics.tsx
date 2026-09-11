@@ -10,6 +10,7 @@ const diagnosticsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/owner_/diagnostics")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Payment diagnostics — The Standing Chair" },

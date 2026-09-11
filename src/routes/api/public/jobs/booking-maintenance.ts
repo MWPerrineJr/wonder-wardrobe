@@ -8,6 +8,7 @@ import { noteJobItemFailure, noteJobSuccess, runScheduledJob } from "@/lib/jobs.
  * Calendar outbox for confirmed bookings.
  */
 export const Route = createFileRoute("/api/public/jobs/booking-maintenance")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) =>

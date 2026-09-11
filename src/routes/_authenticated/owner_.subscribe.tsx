@@ -14,6 +14,7 @@ const myShopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/owner_/subscribe")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Choose your Analytics plan — The Standing Chair" },

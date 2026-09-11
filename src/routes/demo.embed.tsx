@@ -10,6 +10,7 @@ const shopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/demo/embed")({
+  staticData: { sitemap: false },
   loader: ({ context }) => context.queryClient.ensureQueryData(shopsQuery),
   head: () => ({
     meta: [

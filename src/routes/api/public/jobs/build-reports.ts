@@ -21,6 +21,7 @@ const MAX_SHOPS = 5;
  * report row is the progress marker.
  */
 export const Route = createFileRoute("/api/public/jobs/build-reports")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) =>

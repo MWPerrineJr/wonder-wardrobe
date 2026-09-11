@@ -40,6 +40,7 @@ const bookingsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/account")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "My account — The Standing Chair" },

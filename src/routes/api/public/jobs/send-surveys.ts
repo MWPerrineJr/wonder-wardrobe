@@ -34,6 +34,7 @@ type Target = {
  * delivery with backoff. One stable idempotency key per invite token.
  */
 export const Route = createFileRoute("/api/public/jobs/send-surveys")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) =>

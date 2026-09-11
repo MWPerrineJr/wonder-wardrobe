@@ -22,6 +22,7 @@ const bookingContextQuery = (slug: string) =>
   });
 
 export const Route = createFileRoute("/shop/$slug")({
+  staticData: { sitemap: true },
   loader: async ({ params, context }) => {
     const [detail] = await Promise.all([
       context.queryClient.ensureQueryData(shopBySlugQuery(params.slug)),

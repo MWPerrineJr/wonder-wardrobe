@@ -21,6 +21,7 @@ const payloadSchema = z.object({
  * records the invite as blocked with that reason instead of losing it.
  */
 export const Route = createFileRoute("/api/public/emails/survey-invite")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {
