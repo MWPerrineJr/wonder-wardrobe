@@ -5,6 +5,7 @@ import { AccountNav } from "@/components/account-nav";
 import { SiteBrand } from "@/components/site-brand";
 
 export const Route = createFileRoute("/owners")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Become a shop owner — The Standing Chair" },

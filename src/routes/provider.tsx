@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { getMyProviderProfile } from "@/lib/provider.functions";
 
 export const Route = createFileRoute("/provider")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "My Schedule — The Standing Chair" },

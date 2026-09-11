@@ -24,6 +24,7 @@ const inviteQuery = (token: string) =>
   });
 
 export const Route = createFileRoute("/survey/$token")({
+  staticData: { sitemap: false },
   validateSearch: (search: Record<string, unknown>) => {
     const raw = Number(search["r"]);
     const r = Number.isInteger(raw) && raw >= 1 && raw <= 5 ? raw : undefined;

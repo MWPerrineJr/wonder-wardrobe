@@ -4,6 +4,7 @@ import { healthResponse, readinessReport } from "@/lib/health";
 import { inspectPaymentsConfig } from "@/lib/payments-env";
 
 export const Route = createFileRoute("/api/public/ready")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async () => {

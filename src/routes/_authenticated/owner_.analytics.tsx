@@ -28,6 +28,7 @@ const myShopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/owner_/analytics")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Business Analytics — The Standing Chair" },

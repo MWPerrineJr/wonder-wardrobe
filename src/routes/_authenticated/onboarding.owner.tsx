@@ -17,6 +17,7 @@ import { createOwnerShop } from "@/lib/owner.functions";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 
 export const Route = createFileRoute("/_authenticated/onboarding/owner")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Become a shop owner — The Standing Chair" },

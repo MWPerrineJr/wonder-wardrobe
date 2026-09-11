@@ -20,6 +20,7 @@ const shopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "The Standing Chair — Book beauty & wellness services" },

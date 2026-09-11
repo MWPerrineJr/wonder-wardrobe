@@ -16,6 +16,7 @@ const Query = z.object({
 });
 
 export const Route = createFileRoute("/api/public/calendar-event")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async ({ request }) => {

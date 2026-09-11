@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { ConfirmSignOutDialog } from "@/components/confirm-sign-out";
 
 export const Route = createFileRoute("/auth/google-test")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Google sign-in test — The Standing Chair" },

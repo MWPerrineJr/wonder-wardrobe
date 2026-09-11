@@ -23,6 +23,7 @@ const FILTERS = ["all", "trialing", "active", "none", "canceled", "lifetime"] as
 type Filter = (typeof FILTERS)[number];
 
 export const Route = createFileRoute("/_authenticated/admin_/owners")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Shop owner signups — The Standing Chair" },

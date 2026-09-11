@@ -16,6 +16,7 @@ const DESCRIPTION =
   "See how The Standing Chair works: a bookable shop page, prepayments, automated post-visit surveys, AI feedback analysis and business analytics.";
 
 export const Route = createFileRoute("/demo/")({
+  staticData: { sitemap: true },
   loader: ({ context }) => context.queryClient.ensureQueryData(shopsQuery),
   head: () => ({
     meta: [

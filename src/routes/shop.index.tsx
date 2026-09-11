@@ -16,6 +16,7 @@ const shopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/shop/")({
+  staticData: { sitemap: true },
   validateSearch: zodValidator(searchSchema),
   beforeLoad: ({ search }) => {
     if (search.slug) {

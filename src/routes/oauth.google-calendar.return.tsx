@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/oauth/google-calendar/return")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Finishing Google Calendar connection — The Standing Chair" },

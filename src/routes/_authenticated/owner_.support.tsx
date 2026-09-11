@@ -33,6 +33,7 @@ const threadsQuery = (filter: Filter, search: string) =>
   });
 
 export const Route = createFileRoute("/_authenticated/owner_/support")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Support Inbox — Shop Owner Dashboard — The Standing Chair" },

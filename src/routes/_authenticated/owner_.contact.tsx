@@ -12,6 +12,7 @@ const myShopsQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/owner_/contact")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Contact — Shop Owner Dashboard — The Standing Chair" },

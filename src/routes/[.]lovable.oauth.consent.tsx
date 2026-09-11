@@ -30,6 +30,7 @@ function oauth() {
 }
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
+  staticData: { sitemap: false },
   ssr: false,
   head: () => ({
     meta: [

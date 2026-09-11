@@ -26,6 +26,7 @@ const BATCH = 10;
  * Per-row status, backoff, dead-letter, and a daily invocation cap.
  */
 export const Route = createFileRoute("/api/public/jobs/enrich-feedback")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) =>
