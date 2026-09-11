@@ -91,6 +91,8 @@ export function DemoTour({
         </div>
       </section>
 
+      <h2 className="font-headline-md text-headline-md text-on-surface">How the demo works</h2>
+
       <ol className="grid md:grid-cols-2 gap-gutter">
         {DEMO_STEPS.map((step, index) => (
           <li

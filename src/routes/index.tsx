@@ -218,6 +218,7 @@ function MarketplacePage() {
                   <Icon name="search" className="text-text-muted mr-3" />
                   <input
                     className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
+                    aria-label="Shop name or style"
                     placeholder="Shop name or style..."
                     type="text"
                     autoComplete="off"
@@ -231,6 +232,7 @@ function MarketplacePage() {
                   <Icon name="location_on" className="text-text-muted mr-3" />
                   <input
                     className="bg-transparent border-none outline-none text-on-surface w-full font-body-md text-body-md placeholder:text-text-muted"
+                    aria-label="Location"
                     placeholder="Location..."
                     type="text"
                     autoComplete="off"
