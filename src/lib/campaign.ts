@@ -155,11 +155,19 @@ export function campaignSourceToHeardAbout(source: string | null | undefined): s
 
 /** Canonical sign-up campaign links, one per channel. */
 export const CAMPAIGN_LINKS = [
-  { source: "linkedin", label: "LinkedIn" },
-  { source: "instagram", label: "Instagram" },
-  { source: "facebook", label: "Facebook" },
-].map(({ source, label }) => ({
+  { source: "linkedin", label: "LinkedIn", medium: "social", campaign: "founding-shops" },
+  { source: "instagram", label: "Instagram", medium: "social", campaign: "founding-shops" },
+  { source: "facebook", label: "Facebook", medium: "social", campaign: "founding-shops" },
+  {
+    source: "zeely",
+    label: "Zeely ad",
+    medium: "paid_social",
+    campaign: "zeely-90day-trial",
+    content: "zeely-ad-1",
+  },
+].map(({ source, label, medium, campaign, content }) => ({
   source,
   label,
-  path: `/owners?utm_source=${source}&utm_medium=social&utm_campaign=founding-shops&utm_content=week1-launch`,
+  path: `/owners?utm_source=${source}&utm_medium=${medium}&utm_campaign=${campaign}&utm_content=${content ?? "week1-launch"}`,
 }));
+

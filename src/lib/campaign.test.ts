@@ -42,14 +42,22 @@ describe("campaignSourceToHeardAbout", () => {
 });
 
 describe("CAMPAIGN_LINKS", () => {
-  it("covers the three launch channels", () => {
+  it("covers the launch channels plus the Zeely ad", () => {
     assert.deepEqual(
       CAMPAIGN_LINKS.map((l) => l.source),
-      ["linkedin", "instagram", "facebook"],
+      ["linkedin", "instagram", "facebook", "zeely"],
     );
     for (const link of CAMPAIGN_LINKS) {
       assert.ok(link.path.startsWith("/owners?utm_source="));
-      assert.ok(link.path.includes("utm_campaign=founding-shops"));
+      assert.ok(link.path.includes("utm_campaign="));
     }
   });
+
+  it("tags the Zeely link as paid social with its own campaign", () => {
+    const zeely = CAMPAIGN_LINKS.find((l) => l.source === "zeely");
+    assert.ok(zeely);
+    assert.ok(zeely.path.includes("utm_medium=paid_social"));
+    assert.ok(zeely.path.includes("utm_campaign=zeely-90day-trial"));
+  });
 });
+
