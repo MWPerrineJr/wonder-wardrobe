@@ -8,13 +8,26 @@ import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { ConfirmSignOutDialog } from "@/components/confirm-sign-out";
 
+/** Only allow same-site relative paths; rejects //, /\, backslashes and control chars. */
+function safeNextPath(raw: unknown): string | undefined {
+  if (typeof raw !== "string" || raw.length > 2048) return undefined;
+  // eslint-disable-next-line no-control-regex
+  if (!raw.startsWith("/") || /[\\\u0000-\u001F\u007F]/.test(raw)) return undefined;
+  if (raw.startsWith("//")) return undefined;
+  try {
+    const base = "https://app.invalid";
+    const url = new URL(raw, base);
+    if (url.origin !== base) return undefined;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return undefined;
+  }
+}
+
 export const Route = createFileRoute("/auth")({
   staticData: { sitemap: false },
   validateSearch: (s: Record<string, unknown>): { next?: string; mode?: "sign_up" } => ({
-    next:
-      typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")
-        ? s.next
-        : undefined,
+    next: safeNextPath(s.next),
     mode: s.mode === "sign_up" ? ("sign_up" as const) : undefined,
   }),
   head: () => ({
