@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(shopsQuery),
   errorComponent: ({ error }) => (
     <div className="p-8 text-on-surface bg-background min-h-screen">
-      Couldn't load shops: {error.message}
+      Couldn't load shops: {(error as Error).message}
     </div>
   ),
   notFoundComponent: () => <div className="p-8">Not found.</div>,

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/demo/")({
   }),
   errorComponent: ({ error }) => (
     <div className="min-h-screen flex items-center justify-center p-8 bg-background text-on-surface-variant">
-      {error.message}
+      {(error as Error).message}
     </div>
   ),
   notFoundComponent: () => <div className="p-8 text-on-surface">Not found.</div>,
