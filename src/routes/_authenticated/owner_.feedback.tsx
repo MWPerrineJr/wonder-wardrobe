@@ -46,7 +46,7 @@ export const Route = createFileRoute("/_authenticated/owner_/feedback")({
     <div className="min-h-screen flex items-center justify-center p-8 text-on-surface bg-background">
       <div>
         <h1 className="font-headline-md text-headline-md mb-2">Something went wrong</h1>
-        <p className="text-on-surface-variant">{error.message}</p>
+        <p className="text-on-surface-variant">{(error as Error).message}</p>
       </div>
     </div>
   ),

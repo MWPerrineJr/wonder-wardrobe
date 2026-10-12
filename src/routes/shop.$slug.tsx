@@ -72,7 +72,7 @@ export const Route = createFileRoute("/shop/$slug")({
   },
   errorComponent: ({ error }) => (
     <div className="p-8 text-on-surface bg-background min-h-screen">
-      Couldn't load shop: {error.message}
+      Couldn't load shop: {(error as Error).message}
     </div>
   ),
   notFoundComponent: () => (

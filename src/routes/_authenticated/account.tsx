@@ -55,7 +55,7 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
   errorComponent: ({ error }) => (
     <div className="min-h-screen flex items-center justify-center text-on-surface-variant p-8">
-      {error.message}
+      {(error as Error).message}
     </div>
   ),
 });
