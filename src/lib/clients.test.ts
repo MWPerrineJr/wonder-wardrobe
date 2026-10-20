@@ -14,7 +14,10 @@ const row = (o: Partial<any>) => ({
 
 describe("summarizeClients", () => {
   it("counts only completed visits toward spend", () => {
-    const [c] = summarizeClients([row({}), row({ status: "confirmed", starts_at: "2026-09-01T10:00:00Z" })], now);
+    const [c] = summarizeClients(
+      [row({}), row({ status: "confirmed", starts_at: "2026-09-01T10:00:00Z" })],
+      now,
+    );
     expect(c.visits).toBe(2);
     expect(c.total_spent_cents).toBe(5000);
   });
@@ -31,7 +34,10 @@ describe("summarizeClients", () => {
 
   it("does not flag lapsed when a future booking exists", () => {
     const [c] = summarizeClients(
-      [row({ starts_at: "2026-08-01T12:00:00Z" }), row({ status: "confirmed", starts_at: "2026-11-01T12:00:00Z" })],
+      [
+        row({ starts_at: "2026-08-01T12:00:00Z" }),
+        row({ status: "confirmed", starts_at: "2026-11-01T12:00:00Z" }),
+      ],
       now,
     );
     expect(c.lapsed).toBe(false);

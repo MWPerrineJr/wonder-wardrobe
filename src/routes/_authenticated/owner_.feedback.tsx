@@ -2,6 +2,8 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { setFeedbackQuarantine } from "@/lib/clients.functions";
 
 import { AccountNav } from "@/components/account-nav";
 import { Badge } from "@/components/ui/badge";
@@ -496,9 +498,7 @@ function FeedbackCard({
         <StatusBadge status={row.status} />
       </div>
 
-      {row.fraud_flags.length > 0 && (
-        <FraudNotice row={row} />
-      )}
+      {row.fraud_flags.length > 0 && <FraudNotice row={row} />}
 
       <div className="flex flex-wrap gap-2">
         {row.sentiment_label && (
@@ -690,7 +690,7 @@ function FraudNotice({ row }: { row: FeedbackRow }) {
     mutationFn: () => toggle({ data: { id: row.id, quarantined: !row.is_quarantined } }),
     onSuccess: () => {
       toast.success(row.is_quarantined ? "Review released into your scores." : "Review held back.");
-      qc.invalidateQueries({ queryKey: ["feedback"] });
+      qc.invalidateQueries({ queryKey: ["owner", "feedback"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -701,8 +701,11 @@ function FraudNotice({ row }: { row: FeedbackRow }) {
       }`}
     >
       <div className="flex flex-col gap-1">
-        <span className={`font-label-md font-semibold ${row.is_quarantined ? "text-error" : "text-on-surface"}`}>
-          {row.is_quarantined ? "Held back as possibly fake" : "Authenticity check"} · risk {row.fraud_score}/100
+        <span
+          className={`font-label-md font-semibold ${row.is_quarantined ? "text-error" : "text-on-surface"}`}
+        >
+          {row.is_quarantined ? "Held back as possibly fake" : "Authenticity check"} · risk{" "}
+          {row.fraud_score}/100
         </span>
         <ul className="text-label-sm text-on-surface-variant list-disc pl-4">
           {row.fraud_flags.map((f) => (
