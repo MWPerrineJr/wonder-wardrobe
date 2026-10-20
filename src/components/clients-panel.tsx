@@ -247,6 +247,12 @@ function ClientDetail({
       </div>
       <RecallButtons client={client} shopName={shopName} bookUrl={bookUrl} />
 
+      {client.walk_in ? (
+        <p className="text-label-sm text-text-muted">
+          Walk-in client (signed in at the front desk). Private notes are available for clients
+          with an account.
+        </p>
+      ) : (
       <section className="flex flex-col gap-2">
         <h3 className="font-label-md text-on-surface font-semibold">Private notes</h3>
         <textarea
