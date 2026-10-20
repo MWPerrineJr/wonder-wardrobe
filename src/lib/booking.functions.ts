@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { amountDueCents } from "@/lib/booking-money";
-import { canReserveSlot, DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
+import { DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
 import { toInstant } from "@/lib/booking-time";
 import { dbError } from "@/lib/db-error";
 import { configuredPaymentsEnv } from "@/lib/payments-env";
