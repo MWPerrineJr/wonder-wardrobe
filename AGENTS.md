@@ -10,3 +10,5 @@
 > the editor, so keep the branch in a working state.
 
 <!-- LOVABLE:END -->
+- Fake-review scoring runs in the `score_feedback_fraud` insert trigger on customer_feedback; quarantined rows are excluded from feedback KPIs. Why: every feedback source is checked the same way, server-side.
+- Client recall uses owner-sent mailto/sms links, not app emails. Why: re-engagement mail is marketing and is not allowed on the app email channel.
