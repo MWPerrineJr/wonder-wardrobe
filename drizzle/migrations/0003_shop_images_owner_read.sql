@@ -1,0 +1,2 @@
+CREATE POLICY "Shop owners read shop images" ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id = 'shop-images' AND EXISTS (SELECT 1 FROM public.shops s WHERE s.id::text = (storage.foldername(name))[1] AND s.owner_id = auth.uid()));
