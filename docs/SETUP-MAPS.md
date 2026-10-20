@@ -18,9 +18,17 @@ embed (the request comes back `403`). Two settings on the key cause this:
    app is served from. Add each of these to the key's website list:
 
    ```text
-   https://*.lovable.app/*
-   https://your-custom-domain.com/*   (once you publish to a custom domain)
+   https://*.lovable.app/*           (published site: cheerful-code-cottage.lovable.app)
+   https://*.lovableproject.com/*    (preview builder)
+   https://thestandingchair.com/*    (custom domain)
+   https://www.thestandingchair.com/*
    ```
+
+   Verified against the current key (2026-10-20): `*.lovable.app` is allowed and
+   the embed returns 200, but `*.lovableproject.com` and `thestandingchair.com`
+   are NOT in the list yet — Google rejects them with 403, so the map shows the
+   "View on Google Maps" card on the preview builder and the custom domain until
+   they are added.
 
    If any served domain is missing, Google rejects the embed with:
 
