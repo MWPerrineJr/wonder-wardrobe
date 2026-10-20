@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { amountDueCents } from "@/lib/booking-money";
-import { canReserveSlot, DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
+import { DEFAULT_HOLD_MINUTES, holdExpiryIso } from "@/lib/booking-hold";
 import { toInstant } from "@/lib/booking-time";
 import { dbError } from "@/lib/db-error";
 import { configuredPaymentsEnv } from "@/lib/payments-env";
@@ -123,109 +123,13 @@ const SlotsInput = z.object({
   tzOffsetMinutes: z.number().int().min(-900).max(900),
 });
 
-const SLOT_STEP_MINUTES = 15;
-const DEFAULT_OPEN = "09:00";
-const DEFAULT_CLOSE = "18:00";
 
 export const getAvailableSlots = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => SlotsInput.parse(input))
   .handler(async ({ data }): Promise<{ slots: string[]; closed: boolean }> => {
-    const pub = publicClient();
-
-    const { data: service, error: svcErr } = await pub
-      .from("services")
-      .select("id, duration_minutes, shop_id")
-      .eq("id", data.serviceId)
-      .maybeSingle();
-    if (svcErr) throw dbError(svcErr, "booking");
-    if (!service || service.shop_id !== data.shopId)
-      throw new Error("Service not found for this shop");
-
-    const [y, m, d] = data.date.split("-").map(Number);
-    const weekday = new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1)).getUTCDay();
-
-    const { data: hours, error: hoursErr } = await pub
-      .from("shop_hours")
-      .select("weekday, open_time, close_time, is_closed")
-      .eq("shop_id", data.shopId)
-      .eq("weekday", weekday)
-      .maybeSingle();
-    if (hoursErr) throw dbError(hoursErr, "booking");
-    if (hours?.is_closed) return { slots: [], closed: true };
-
-    const open = (hours?.open_time ?? DEFAULT_OPEN).slice(0, 5);
-    const close = (hours?.close_time ?? DEFAULT_CLOSE).slice(0, 5);
-    const toMinutes = (t: string) => {
-      const [hh, mm] = t.split(":").map(Number);
-      return (hh ?? 0) * 60 + (mm ?? 0);
-    };
-    const openM = toMinutes(open);
-    const closeM = toMinutes(close);
-
-    const { data: providerRows, error: provErr } = await pub
-      .from("providers")
-      .select("id")
-      .eq("shop_id", data.shopId)
-      .eq("is_active", true);
-    if (provErr) throw dbError(provErr, "booking");
-    const activeProviderCount = (providerRows ?? []).length;
-
-    const dayStart = toInstant(data.date, "00:00", data.tzOffsetMinutes);
-    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60_000);
-
-    // Occupying bookings for any customer require the privileged client.
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
-      .from("bookings")
-      .select("starts_at, ends_at, provider_id, status, hold_expires_at")
-      .eq("shop_id", data.shopId)
-      .in("status", ["pending", "confirmed"])
-      .gte("starts_at", dayStart.toISOString())
-      .lt("starts_at", dayEnd.toISOString());
-    if (error) throw dbError(error, "booking");
-    const occupying = (rows ?? []).map((row) => ({
-      providerId: row.provider_id,
-      start: new Date(row.starts_at).getTime(),
-      end: new Date(row.ends_at).getTime(),
-      status: row.status,
-      holdExpiresAt: row.hold_expires_at,
-    }));
-
-    let googleBusy: Array<{ start: number; end: number }> = [];
-    if (data.providerId) {
-      // Personal commitments already on the provider's own Google Calendar also
-      // block slots. Returns [] when Google is unreachable or not connected.
-      const { listGoogleBusy } = await import("@/server/googleCalendar.server");
-      googleBusy = await listGoogleBusy(
-        data.providerId,
-        dayStart.toISOString(),
-        dayEnd.toISOString(),
-      );
-    }
-
-    const now = Date.now();
-    const slots: string[] = [];
-    for (let mins = openM; mins + service.duration_minutes <= closeM; mins += SLOT_STEP_MINUTES) {
-      const hh = String(Math.floor(mins / 60)).padStart(2, "0");
-      const mm = String(mins % 60).padStart(2, "0");
-      const time = `${hh}:${mm}`;
-      const start = toInstant(data.date, time, data.tzOffsetMinutes).getTime();
-      const end = start + service.duration_minutes * 60_000;
-      if (start <= now) continue;
-      const reservation = canReserveSlot({
-        existing: occupying,
-        activeProviderCount,
-        providerId: data.providerId ?? null,
-        start,
-        end,
-        nowMs: now,
-      });
-      if (!reservation.ok) continue;
-      if (googleBusy.some((b) => start < b.end && end > b.start)) continue;
-      slots.push(time);
-    }
-    return { slots, closed: false };
+    const { computeSlots } = await import("@/lib/slots.server");
+    return computeSlots(data);
   });
 
 const CreateBookingInput = z.object({

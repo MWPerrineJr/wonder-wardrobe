@@ -43,6 +43,7 @@ import { Route as ApiPublicCalendarEventRouteImport } from './routes/api/public/
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicReadyRouteImport } from './routes/api/public/ready'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth.google-calendar.return'
+import { Route as ShopSlugWalkInRouteImport } from './routes/shop.$slug_.walk-in'
 import { Route as ApiPublicEmailsSurveyInviteRouteImport } from './routes/api/public/emails/survey-invite'
 import { Route as ApiPublicJobsBookingMaintenanceRouteImport } from './routes/api/public/jobs/booking-maintenance'
 import { Route as ApiPublicJobsBuildReportsRouteImport } from './routes/api/public/jobs/build-reports'
@@ -235,6 +236,11 @@ const OauthGoogleCalendarReturnRoute =
     path: '/oauth/google-calendar/return',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ShopSlugWalkInRoute = ShopSlugWalkInRouteImport.update({
+  id: '/$slug_/walk-in',
+  path: '/$slug/walk-in',
+  getParentRoute: () => ShopRoute,
+} as any)
 const ApiPublicEmailsSurveyInviteRoute =
   ApiPublicEmailsSurveyInviteRouteImport.update({
     id: '/api/public/emails/survey-invite',
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
+  '/shop/$slug/walk-in': typeof ShopSlugWalkInRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -372,6 +379,7 @@ export interface FileRoutesByTo {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
+  '/shop/$slug/walk-in': typeof ShopSlugWalkInRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -419,6 +427,7 @@ export interface FileRoutesById {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/ready': typeof ApiPublicReadyRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
+  '/shop/$slug_/walk-in': typeof ShopSlugWalkInRoute
   '/api/public/emails/survey-invite': typeof ApiPublicEmailsSurveyInviteRoute
   '/api/public/jobs/booking-maintenance': typeof ApiPublicJobsBookingMaintenanceRoute
   '/api/public/jobs/build-reports': typeof ApiPublicJobsBuildReportsRoute
@@ -466,6 +475,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/api/public/ready'
     | '/oauth/google-calendar/return'
+    | '/shop/$slug/walk-in'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
@@ -510,6 +520,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/api/public/ready'
     | '/oauth/google-calendar/return'
+    | '/shop/$slug/walk-in'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
@@ -556,6 +567,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/api/public/ready'
     | '/oauth/google-calendar/return'
+    | '/shop/$slug_/walk-in'
     | '/api/public/emails/survey-invite'
     | '/api/public/jobs/booking-maintenance'
     | '/api/public/jobs/build-reports'
@@ -842,6 +854,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/$slug_/walk-in': {
+      id: '/shop/$slug_/walk-in'
+      path: '/$slug/walk-in'
+      fullPath: '/shop/$slug/walk-in'
+      preLoaderRoute: typeof ShopSlugWalkInRouteImport
+      parentRoute: typeof ShopRoute
+    }
     '/api/public/emails/survey-invite': {
       id: '/api/public/emails/survey-invite'
       path: '/api/public/emails/survey-invite'
@@ -957,11 +976,13 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 interface ShopRouteChildren {
   ShopSlugRoute: typeof ShopSlugRoute
   ShopIndexRoute: typeof ShopIndexRoute
+  ShopSlugWalkInRoute: typeof ShopSlugWalkInRoute
 }
 
 const ShopRouteChildren: ShopRouteChildren = {
   ShopSlugRoute: ShopSlugRoute,
   ShopIndexRoute: ShopIndexRoute,
+  ShopSlugWalkInRoute: ShopSlugWalkInRoute,
 }
 
 const ShopRouteWithChildren = ShopRoute._addFileChildren(ShopRouteChildren)

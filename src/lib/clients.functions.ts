@@ -30,7 +30,7 @@ export const listClients = createServerFn({ method: "GET" })
     await assertShopOwner(context.supabase, data.shopId, context.userId);
     const { data: rows, error } = await context.supabase
       .from("bookings")
-      .select("customer_id, customer_name, customer_phone, starts_at, status, price_cents")
+      .select("customer_id, customer_name, customer_phone, starts_at, status, price_cents, source")
       .eq("shop_id", data.shopId)
       .order("starts_at", { ascending: false })
       .limit(5000);

@@ -256,6 +256,15 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
             </section>
             <div data-tour="public-link">
               <PublicLinkCard slug={selected.slug} shopName={selected.name} />
+              <PublicLinkCard
+                slug={selected.slug}
+                shopName={selected.name}
+                path={`/shop/${selected.slug}/walk-in`}
+                icon="how_to_reg"
+                title="Walk-in sign-in page"
+                description="Open this on a tablet at your front desk. Walk-in clients pick a provider and see only open times from your calendar."
+                scanLabel="Scan to sign in"
+              />
             </div>
             <div
               data-tour="growth"

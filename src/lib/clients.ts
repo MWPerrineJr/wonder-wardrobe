@@ -24,12 +24,16 @@ type BookingRow = {
   starts_at: string;
   status: string;
   price_cents: number;
+  source?: string | null;
 };
 
 export function summarizeClients(rows: BookingRow[], now: Date): ClientSummary[] {
   const map = new Map<string, ClientSummary>();
   for (const r of rows) {
-    let c = map.get(r.customer_id);
+    // Walk-ins have no account of their own; group them by phone.
+    const key =
+      r.source === "walk_in" && r.customer_phone ? `walkin:${r.customer_phone}` : r.customer_id;
+    let c = map.get(key);
     if (!c) {
       c = {
         customer_id: r.customer_id,
@@ -45,7 +49,7 @@ export function summarizeClients(rows: BookingRow[], now: Date): ClientSummary[]
         days_since_last_visit: null,
         lapsed: false,
       };
-      map.set(r.customer_id, c);
+      map.set(key, c);
     }
     if (!c.phone && r.customer_phone) c.phone = r.customer_phone;
     const t = new Date(r.starts_at);

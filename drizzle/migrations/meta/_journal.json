@@ -36,6 +36,13 @@
       "when": 1792460948094,
       "tag": "0004_fix_shop_image_policies_and_portfolio",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792508302285,
+      "tag": "0005_booking_source_walk_in",
+      "breakpoints": true
     }
   ]
 }
