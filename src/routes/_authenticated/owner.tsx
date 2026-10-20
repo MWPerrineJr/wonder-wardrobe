@@ -498,6 +498,7 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
   const [description, setDescription] = useState(shop.description ?? "");
   const [coverUrl, setCoverUrl] = useState(shop.cover_image_url ?? "");
   const [reviewUrl, setReviewUrl] = useState(shop.google_review_url ?? "");
+  const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<ServiceCategory[]>(shop.categories ?? []);
 
   // Reset local state when the selected shop changes
@@ -610,21 +611,69 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
             ))}
           </div>
         </Field>
-        <Field label="Cover image URL">
-          <input
-            value={coverUrl}
-            placeholder="https://…"
-            onChange={(e) => setCoverUrl(e.target.value)}
-            className={inputCls}
-          />
+        <Field label="Shop profile image">
           {coverUrl && (
             <img
               src={coverUrl}
-              alt="Cover preview"
-              className="mt-2 h-32 w-full object-cover rounded border border-border-subtle"
+              alt="Shop profile preview"
+              className="mb-2 h-32 w-full object-cover rounded border border-border-subtle"
               onError={(e) => (e.currentTarget.style.display = "none")}
             />
           )}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="cursor-pointer px-4 py-2 rounded-md border border-border-subtle bg-surface text-label-sm text-on-surface hover:border-primary">
+              {uploading ? "Uploading…" : coverUrl ? "Replace image" : "Upload image"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={uploading}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file) return;
+                  if (file.size > 5 * 1024 * 1024) {
+                    toast.error("Image must be under 5 MB.");
+                    return;
+                  }
+                  setUploading(true);
+                  try {
+                    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+                    const path = `${shop.id}/profile-${Date.now()}.${ext}`;
+                    const bucket = supabase.storage.from("shop-images");
+                    const { error } = await bucket.upload(path, file, {
+                      contentType: file.type,
+                      upsert: true,
+                    });
+                    if (error) throw error;
+                    const { data, error: signErr } = await bucket.createSignedUrl(
+                      path,
+                      60 * 60 * 24 * 365 * 10,
+                    );
+                    if (signErr || !data) throw signErr ?? new Error("Could not get image link");
+                    setCoverUrl(data.signedUrl);
+                    toast.success("Image uploaded — press Save to publish it.");
+                  } catch (err) {
+                    toast.error((err as Error).message || "Upload failed");
+                  } finally {
+                    setUploading(false);
+                  }
+                }}
+              />
+            </label>
+            {coverUrl && (
+              <button
+                type="button"
+                onClick={() => setCoverUrl("")}
+                className="px-3 py-2 text-label-sm text-on-surface-variant hover:text-error"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          <p className="text-on-surface-variant text-body-sm mt-1">
+            JPG, PNG or WebP, up to 5 MB. Shown on your shop page and in search results.
+          </p>
         </Field>
         <Field label="Google review link">
           <input
