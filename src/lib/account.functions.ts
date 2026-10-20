@@ -199,6 +199,7 @@ export const listMyBookings = createServerFn({ method: "GET" })
          provider:providers(id, display_name)`,
       )
       .eq("customer_id", userId)
+      .eq("source", "online")
       .order("starts_at", { ascending: false });
     if (error) throw error;
     return (data ?? []).map((row) => {

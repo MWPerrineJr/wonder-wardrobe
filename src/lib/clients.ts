@@ -3,7 +3,11 @@
 export const LAPSED_DAYS = 45;
 
 export type ClientSummary = {
+  /** Unique row key: the account id, or `walkin:<phone>` for walk-ins. */
+  key: string;
   customer_id: string;
+  /** Walk-ins have no account of their own; they are identified by phone. */
+  walk_in: boolean;
   name: string;
   phone: string | null;
   email: string | null;
@@ -36,7 +40,9 @@ export function summarizeClients(rows: BookingRow[], now: Date): ClientSummary[]
     let c = map.get(key);
     if (!c) {
       c = {
+        key,
         customer_id: r.customer_id,
+        walk_in: key !== r.customer_id,
         name: r.customer_name?.trim() || "Client",
         phone: r.customer_phone,
         email: null,

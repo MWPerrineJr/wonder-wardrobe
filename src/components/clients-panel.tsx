@@ -110,7 +110,7 @@ export function ClientsPanel({
             </thead>
             <tbody>
               {rows.map((c) => (
-                <tr key={c.customer_id} className="border-b last:border-b-0 border-border-subtle">
+                <tr key={c.key} className="border-b last:border-b-0 border-border-subtle">
                   <td className="p-3">
                     <button
                       type="button"
@@ -205,10 +205,16 @@ function ClientDetail({
   const fetchDetail = useServerFn(getClientDetail);
   const add = useServerFn(addClientNote);
   const del = useServerFn(deleteClientNote);
-  const key = ["client-detail", shopId, client.customer_id];
+  const key = ["client-detail", shopId, client.key];
   const q = useQuery({
     queryKey: key,
-    queryFn: () => fetchDetail({ data: { shopId, customerId: client.customer_id } }),
+    queryFn: () => fetchDetail({
+        data: {
+          shopId,
+          customerId: client.customer_id,
+          walkInPhone: client.walk_in ? client.phone : null,
+        },
+      }),
   });
   const [note, setNote] = useState("");
   const addM = useMutation({
@@ -241,6 +247,12 @@ function ClientDetail({
       </div>
       <RecallButtons client={client} shopName={shopName} bookUrl={bookUrl} />
 
+      {client.walk_in ? (
+        <p className="text-label-sm text-text-muted">
+          Walk-in client (signed in at the front desk). Private notes are available for clients
+          with an account.
+        </p>
+      ) : (
       <section className="flex flex-col gap-2">
         <h3 className="font-label-md text-on-surface font-semibold">Private notes</h3>
         <textarea
@@ -279,6 +291,7 @@ function ClientDetail({
           </div>
         ))}
       </section>
+      )}
 
       <section className="flex flex-col gap-2">
         <h3 className="font-label-md text-on-surface font-semibold">Appointment history</h3>
