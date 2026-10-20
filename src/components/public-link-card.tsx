@@ -4,13 +4,30 @@ import { toast } from "sonner";
 
 import { getPublicOrigin } from "@/lib/site-origin";
 
-export function PublicLinkCard({ slug, shopName }: { slug: string; shopName: string }) {
+export function PublicLinkCard({
+  slug,
+  shopName,
+  path,
+  title = "Your public link",
+  description,
+  scanLabel = "Scan to book",
+  icon = "link",
+}: {
+  slug: string;
+  shopName: string;
+  path?: string;
+  title?: string;
+  description?: string;
+  scanLabel?: string;
+  icon?: string;
+}) {
+  const pagePath = path ?? `/shop/${slug}`;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [url, setUrl] = useState("");
 
   useEffect(() => {
-    setUrl(`${getPublicOrigin()}/shop/${slug}`);
-  }, [slug]);
+    setUrl(`${getPublicOrigin()}${pagePath}`);
+  }, [pagePath]);
 
   useEffect(() => {
     if (!url || !canvasRef.current) return;
@@ -34,7 +51,7 @@ export function PublicLinkCard({ slug, shopName }: { slug: string; shopName: str
     const canvas = canvasRef.current;
     if (!canvas) return;
     const link = document.createElement("a");
-    link.download = `${slug}-qr.png`;
+    link.download = `${pagePath.split("/").filter(Boolean).join("-")}-qr.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   };
@@ -43,14 +60,15 @@ export function PublicLinkCard({ slug, shopName }: { slug: string; shopName: str
     <section className="bg-surface border border-border-subtle rounded-xl p-6 flex flex-col md:flex-row gap-6 shadow-sm">
       <div className="flex flex-col gap-3 flex-grow">
         <div className="flex items-center gap-2 text-on-surface-variant">
-          <span className="material-symbols-outlined text-primary">link</span>
-          <span className="font-label-md text-label-md">Your public link</span>
+          <span className="material-symbols-outlined text-primary">{icon}</span>
+          <span className="font-label-md text-label-md">{title}</span>
         </div>
         <p className="text-on-surface-variant text-body-md">
-          Share this page with clients — it shows {shopName}'s services and lets them book online.
+          {description ??
+            `Share this page with clients — it shows ${shopName}'s services and lets them book online.`}
         </p>
         <code className="bg-surface-container border border-border-subtle rounded-lg px-3 py-2 text-on-surface text-body-md break-all">
-          {url || `/shop/${slug}`}
+          {url || pagePath}
         </code>
         <div className="flex flex-wrap gap-3">
           <button
@@ -61,7 +79,7 @@ export function PublicLinkCard({ slug, shopName }: { slug: string; shopName: str
             Copy link
           </button>
           <a
-            href={url || `/shop/${slug}`}
+            href={url || pagePath}
             target="_blank"
             rel="noreferrer"
             className="bg-surface border border-border-subtle text-on-surface rounded-lg px-4 py-2 hover:border-primary transition-colors font-label-md"
@@ -81,7 +99,7 @@ export function PublicLinkCard({ slug, shopName }: { slug: string; shopName: str
         <div className="bg-white p-3 rounded-lg border border-border-subtle">
           <canvas ref={canvasRef} className="block" />
         </div>
-        <span className="text-label-sm text-on-surface-variant">Scan to book</span>
+        <span className="text-label-sm text-on-surface-variant">{scanLabel}</span>
       </div>
     </section>
   );
