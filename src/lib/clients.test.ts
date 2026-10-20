@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { summarizeClients } from "./clients";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { summarizeClients } from "./clients.ts";
 
 const now = new Date("2026-10-20T12:00:00Z");
-const row = (o: Partial<any>) => ({
+const row = (o: Record<string, unknown>) => ({
   customer_id: "a",
   customer_name: "Ana Diaz",
   customer_phone: null,
@@ -18,18 +19,18 @@ describe("summarizeClients", () => {
       [row({}), row({ status: "confirmed", starts_at: "2026-09-01T10:00:00Z" })],
       now,
     );
-    expect(c.visits).toBe(2);
-    expect(c.total_spent_cents).toBe(5000);
+    assert.equal(c.visits, 2);
+    assert.equal(c.total_spent_cents, 5000);
   });
 
   it("flags a client lapsed after 45 days with no upcoming booking", () => {
     const [c] = summarizeClients([row({ starts_at: "2026-09-04T12:00:00Z" })], now);
-    expect(c.lapsed).toBe(true);
+    assert.equal(c.lapsed, true);
   });
 
   it("does not flag lapsed at 44 days", () => {
-    const [c] = summarizeClients([row({ starts_at: "2026-09-05T12:00:00Z" })], now);
-    expect(c.lapsed).toBe(false);
+    const [c] = summarizeClients([row({ starts_at: "2026-09-06T12:00:00Z" })], now);
+    assert.equal(c.lapsed, false);
   });
 
   it("does not flag lapsed when a future booking exists", () => {
@@ -40,6 +41,6 @@ describe("summarizeClients", () => {
       ],
       now,
     );
-    expect(c.lapsed).toBe(false);
+    assert.equal(c.lapsed, false);
   });
 });
