@@ -14,6 +14,7 @@ import { AccountNav } from "@/components/account-nav";
 import { PublicLinkCard } from "@/components/public-link-card";
 import { PaymentsPanel } from "@/components/payments-panel";
 import { CalendarPanel } from "@/components/calendar-panel";
+import { ClientsPanel } from "@/components/clients-panel";
 
 import { ShopLinksPanel, type ShopLinkValues } from "@/components/shop-links-panel";
 import { SetupTour, useSetupTour, type TourStep } from "@/components/setup-tour";
@@ -229,6 +230,7 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="bg-surface border border-border-subtle">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="clients">Clients</TabsTrigger>
             <TabsTrigger value="details">Shop details</TabsTrigger>
             <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="hours">Hours</TabsTrigger>
@@ -358,6 +360,9 @@ function OwnerDashboard({ shops }: { shops: Awaited<ReturnType<typeof getMyShops
 
           <TabsContent value="calendar" className="mt-6">
             <CalendarPanel />
+          </TabsContent>
+          <TabsContent value="clients" className="mt-6">
+            <ClientsPanel shopId={selected.id} shopName={selected.name} shopSlug={selected.slug} />
           </TabsContent>
         </Tabs>
       </main>

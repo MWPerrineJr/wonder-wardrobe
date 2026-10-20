@@ -320,6 +320,41 @@ export type Database = {
           },
         ]
       }
+      client_notes: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          customer_id: string
+          id: string
+          shop_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          shop_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comp_codes: {
         Row: {
           code: string
@@ -411,7 +446,10 @@ export type Database = {
           enrichment_raw: Json | null
           enrichment_status: string
           explanation: string | null
+          fraud_flags: string[]
+          fraud_score: number
           id: string
+          is_quarantined: boolean
           key_phrases: string[]
           message: string | null
           rating: number | null
@@ -440,7 +478,10 @@ export type Database = {
           enrichment_raw?: Json | null
           enrichment_status?: string
           explanation?: string | null
+          fraud_flags?: string[]
+          fraud_score?: number
           id?: string
+          is_quarantined?: boolean
           key_phrases?: string[]
           message?: string | null
           rating?: number | null
@@ -469,7 +510,10 @@ export type Database = {
           enrichment_raw?: Json | null
           enrichment_status?: string
           explanation?: string | null
+          fraud_flags?: string[]
+          fraud_score?: number
           id?: string
+          is_quarantined?: boolean
           key_phrases?: string[]
           message?: string | null
           rating?: number | null
