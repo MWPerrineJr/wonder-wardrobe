@@ -123,9 +123,6 @@ const SlotsInput = z.object({
   tzOffsetMinutes: z.number().int().min(-900).max(900),
 });
 
-const SLOT_STEP_MINUTES = 15;
-const DEFAULT_OPEN = "09:00";
-const DEFAULT_CLOSE = "18:00";
 
 export const getAvailableSlots = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
