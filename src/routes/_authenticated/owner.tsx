@@ -31,6 +31,7 @@ import {
 } from "@/lib/owner.functions";
 import { categoryLabel, SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/categories";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PortfolioManager } from "@/components/shop-portfolio";
 import {
   Dialog,
   DialogContent,
@@ -695,6 +696,8 @@ function DetailsPanel({ shop }: { shop: ShopSummary }) {
           {mutation.isPending ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      <PortfolioManager shopId={shop.id} />
 
       <div className="mt-8 border-t border-border-subtle pt-6">
         <h3 className="font-label-md text-label-md font-semibold text-error mb-1">Danger zone</h3>
