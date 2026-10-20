@@ -974,6 +974,41 @@ export type Database = {
           },
         ]
       }
+      shop_portfolio: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          shop_id: string
+          storage_path: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          shop_id: string
+          storage_path: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          shop_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_portfolio_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shops: {
         Row: {
           address: string | null
