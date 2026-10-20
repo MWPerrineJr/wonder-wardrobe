@@ -236,6 +236,7 @@ export type Database = {
           refunded_cents: number
           service_id: string
           shop_id: string
+          source: string
           starts_at: string
           status: Database["public"]["Enums"]["booking_status"]
           stripe_checkout_session_id: string | null
@@ -263,6 +264,7 @@ export type Database = {
           refunded_cents?: number
           service_id: string
           shop_id: string
+          source?: string
           starts_at: string
           status?: Database["public"]["Enums"]["booking_status"]
           stripe_checkout_session_id?: string | null
@@ -290,6 +292,7 @@ export type Database = {
           refunded_cents?: number
           service_id?: string
           shop_id?: string
+          source?: string
           starts_at?: string
           status?: Database["public"]["Enums"]["booking_status"]
           stripe_checkout_session_id?: string | null
