@@ -496,6 +496,10 @@ function FeedbackCard({
         <StatusBadge status={row.status} />
       </div>
 
+      {row.fraud_flags.length > 0 && (
+        <FraudNotice row={row} />
+      )}
+
       <div className="flex flex-wrap gap-2">
         {row.sentiment_label && (
           <Badge className={sentimentBadgeCls(row.sentiment_label)}>
@@ -667,4 +671,48 @@ function formatDate(iso: string) {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+const FRAUD_LABELS: Record<string, string> = {
+  unverified_customer: "Not linked to a verified client",
+  no_completed_visit: "No completed visit found",
+  duplicate_text: "Same text as another review",
+  review_burst: "Many reviews from one client this week",
+  contains_link: "Contains a link",
+  all_caps: "Written in all caps",
+  low_effort_negative: "Low rating with almost no detail",
+};
+
+function FraudNotice({ row }: { row: FeedbackRow }) {
+  const qc = useQueryClient();
+  const toggle = useServerFn(setFeedbackQuarantine);
+  const m = useMutation({
+    mutationFn: () => toggle({ data: { id: row.id, quarantined: !row.is_quarantined } }),
+    onSuccess: () => {
+      toast.success(row.is_quarantined ? "Review released into your scores." : "Review held back.");
+      qc.invalidateQueries({ queryKey: ["feedback"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <div
+      className={`rounded-lg border p-3 flex flex-wrap items-start justify-between gap-3 ${
+        row.is_quarantined ? "border-error bg-error/5" : "border-border-subtle bg-surface-container"
+      }`}
+    >
+      <div className="flex flex-col gap-1">
+        <span className={`font-label-md font-semibold ${row.is_quarantined ? "text-error" : "text-on-surface"}`}>
+          {row.is_quarantined ? "Held back as possibly fake" : "Authenticity check"} · risk {row.fraud_score}/100
+        </span>
+        <ul className="text-label-sm text-on-surface-variant list-disc pl-4">
+          {row.fraud_flags.map((f) => (
+            <li key={f}>{FRAUD_LABELS[f] ?? f}</li>
+          ))}
+        </ul>
+      </div>
+      <Button size="sm" variant="outline" disabled={m.isPending} onClick={() => m.mutate()}>
+        {row.is_quarantined ? "Looks genuine — release" : "Hold back"}
+      </Button>
+    </div>
+  );
 }

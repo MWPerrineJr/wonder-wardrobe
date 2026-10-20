@@ -33,6 +33,9 @@ export type FeedbackRow = {
   key_phrases: string[];
   recommended_response: string | null;
   status: string;
+  fraud_score: number;
+  fraud_flags: string[];
+  is_quarantined: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -85,7 +88,9 @@ export const listFeedback = createServerFn({ method: "GET" })
     const { data: allRows, error: aggErr } = await supabase
       .from("customer_feedback")
       .select("sentiment_label, sentiment_score, urgency")
-      .eq("shop_id", data.shopId);
+      .eq("shop_id", data.shopId)
+      // Suspected fake reviews stay out of the shop's scores until the owner releases them.
+      .eq("is_quarantined", false);
     if (aggErr) throw dbError(aggErr, "feedback");
 
     const total = allRows?.length ?? 0;
