@@ -1,5 +1,5 @@
-import { canReserveSlot, type OccupyingBooking } from "@/lib/booking-hold";
-import { toInstant } from "@/lib/booking-time";
+import { canReserveSlot, type OccupyingBooking } from "./booking-hold.ts";
+import { toInstant } from "./booking-time.ts";
 
 export const SLOT_STEP_MINUTES = 15;
 
