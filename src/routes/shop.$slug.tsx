@@ -8,6 +8,7 @@ import { SocialLinks } from "@/components/social-links";
 import { sameAsUrls } from "@/lib/social-links";
 import { BookingPanel } from "@/components/booking-panel";
 import { getBookingContext } from "@/lib/booking.functions";
+import { PortfolioGallery } from "@/components/shop-portfolio";
 
 const shopBySlugQuery = (slug: string) =>
   queryOptions({
@@ -254,6 +255,7 @@ function ShopPage() {
             </div>
           </div>
         </div>
+        <PortfolioGallery shopId={shop.id} />
       </main>
 
       <nav className="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-border-subtle flex justify-around items-center h-16 px-margin-mobile shadow-lg">
