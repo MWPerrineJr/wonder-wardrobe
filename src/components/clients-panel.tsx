@@ -291,6 +291,7 @@ function ClientDetail({
           </div>
         ))}
       </section>
+      )}
 
       <section className="flex flex-col gap-2">
         <h3 className="font-label-md text-on-surface font-semibold">Appointment history</h3>
