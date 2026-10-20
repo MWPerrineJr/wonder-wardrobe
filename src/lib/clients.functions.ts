@@ -40,7 +40,7 @@ export const listClients = createServerFn({ method: "GET" })
     // Emails live on the sign-in account; fetched only after ownership is verified.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await Promise.all(
-      clients.slice(0, 500).map(async (c) => {
+      clients.slice(0, 500).filter((c) => !c.walk_in).map(async (c) => {
         const { data: u } = await supabaseAdmin.auth.admin.getUserById(c.customer_id);
         c.email = u?.user?.email ?? null;
       }),
@@ -51,21 +51,32 @@ export const listClients = createServerFn({ method: "GET" })
 export const getClientDetail = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ shopId: z.string().uuid(), customerId: z.string().uuid() }).parse(d),
+    z
+      .object({
+        shopId: z.string().uuid(),
+        customerId: z.string().uuid(),
+        walkInPhone: z.string().max(30).nullable().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertShopOwner(context.supabase, data.shopId, context.userId);
+    let bq = context.supabase
+      .from("bookings")
+      .select(
+        "id, starts_at, status, price_cents, notes, service:services(name), provider:providers(display_name)",
+      )
+      .eq("shop_id", data.shopId)
+      .eq("customer_id", data.customerId);
+    // Walk-ins are stored under the shop account; isolate them by phone.
+    bq = data.walkInPhone
+      ? bq.eq("source", "walk_in").eq("customer_phone", data.walkInPhone)
+      : bq.eq("source", "online");
     const [bookings, notes] = await Promise.all([
-      context.supabase
-        .from("bookings")
-        .select(
-          "id, starts_at, status, price_cents, notes, service:services(name), provider:providers(display_name)",
-        )
-        .eq("shop_id", data.shopId)
-        .eq("customer_id", data.customerId)
-        .order("starts_at", { ascending: false })
-        .limit(200),
-      context.supabase
+      bq.order("starts_at", { ascending: false }).limit(200),
+      data.walkInPhone
+        ? Promise.resolve({ data: [] as { id: string; body: string; created_at: string }[], error: null })
+        : context.supabase
         .from("client_notes")
         .select("id, body, created_at")
         .eq("shop_id", data.shopId)

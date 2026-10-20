@@ -110,7 +110,7 @@ export function ClientsPanel({
             </thead>
             <tbody>
               {rows.map((c) => (
-                <tr key={c.customer_id} className="border-b last:border-b-0 border-border-subtle">
+                <tr key={c.key} className="border-b last:border-b-0 border-border-subtle">
                   <td className="p-3">
                     <button
                       type="button"
@@ -205,10 +205,16 @@ function ClientDetail({
   const fetchDetail = useServerFn(getClientDetail);
   const add = useServerFn(addClientNote);
   const del = useServerFn(deleteClientNote);
-  const key = ["client-detail", shopId, client.customer_id];
+  const key = ["client-detail", shopId, client.key];
   const q = useQuery({
     queryKey: key,
-    queryFn: () => fetchDetail({ data: { shopId, customerId: client.customer_id } }),
+    queryFn: () => fetchDetail({
+        data: {
+          shopId,
+          customerId: client.customer_id,
+          walkInPhone: client.walk_in ? client.phone : null,
+        },
+      }),
   });
   const [note, setNote] = useState("");
   const addM = useMutation({
